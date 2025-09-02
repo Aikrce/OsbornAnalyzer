@@ -1,0 +1,20 @@
+{
+  "path": "/Users/niqian/HuiTu",
+  "desc": "奥斯本创新九问智能分析工具 - 基于AI和77+创新案例数据库的创新思维分析平台，支持智能分析、九宫格编辑和高清图片导出功能",
+  "id": "719bdc2ddf1b49bba66398efe277f9d6",
+  "data": {
+    "spaceKey": "719bdc2ddf1b49bba66398efe277f9d6",
+    "connections": {
+      "webIDE": "https://719bdc2ddf1b49bba66398efe277f9d6.ap-singapore.cloudstudio.club",
+      "preview": "https://719bdc2ddf1b49bba66398efe277f9d6--{port}.ap-singapore.cloudstudio.club",
+      "api": "https://719bdc2ddf1b49bba66398efe277f9d6--api.ap-singapore.cloudstudio.club",
+      "pty": "https://719bdc2ddf1b49bba66398efe277f9d6--pty.ap-singapore.cloudstudio.club"
+    }
+  },
+  "config": {
+    "api": "https://719bdc2ddf1b49bba66398efe277f9d6--api.ap-singapore.cloudstudio.club",
+    "pty": "https://719bdc2ddf1b49bba66398efe277f9d6--pty.ap-singapore.cloudstudio.club",
+    "region": "ap-shanghai",
+    "spaceKey": "719bdc2ddf1b49bba66398efe277f9d6"
+  }
+}

@@ -13,8 +13,8 @@
 
   // 奥斯本检核表法完整案例数据库（基于您提供的75+案例）
   const osbornCaseDatabase = {
-    he: { // 能否他用
-      title: "能否他用",
+    he: { // 他用
+      title: "他用",
       description: "探索其他用途和应用场景",
       cases: [
         "花生用途扩展：德国有人想出了300种利用花生的方法，仅用于烹调就有100多种",
@@ -36,8 +36,8 @@
         "是否可以跨界应用到意想不到的领域？"
       ]
     },
-    jie: { // 能否借用
-      title: "能否借用",
+    jie: { // 借用
+      title: "借用",
       description: "借鉴其他领域的做法和原理",
       cases: [
         "微爆破技术医疗应用：医生引入微爆破技术消除肾结石",
@@ -59,8 +59,8 @@
         "哪些跨领域的技术可以移植过来？"
       ]
     },
-    gai: { // 能否改变
-      title: "能否改变",
+    gai: { // 改变
+      title: "改变",
       description: "改变形态、流程、规则或属性",
       cases: [
         "平面镜变曲面镜：制成哈哈镜",
@@ -75,15 +75,15 @@
         "音响设备造型：从方正的设计改为流线型现代设计"
       ],
       prompts: [
-        "能否改变产品的外观或结构？",
+        "改变产品的外观或结构？",
         "是否可以调整服务流程？",
         "能否修改使用规则或标准？",
         "是否可以改变交互方式？",
-        "能否改变材质、颜色、形状等属性？"
+        "改变材质、颜色、形状等属性？"
       ]
     },
-    da: { // 能否扩大
-      title: "能否扩大",
+    da: { // 扩大
+      title: "扩大",
       description: "扩大规模、功能、影响范围",
       cases: [
         "药物牙膏开发：在牙膏中加入某种配料，制成具有防酸、脱敏、止血等功能的药物牙膏",
@@ -105,8 +105,8 @@
         "能否增强性能或效果？"
       ]
     },
-    xiao: { // 能否缩小
-      title: "能否缩小",
+    xiao: { // 缩小
+      title: "缩小",
       description: "简化、专注核心功能、便携化",
       cases: [
         "袖珍电子产品：袖珍式收音机、微型计算机等",
@@ -128,8 +128,8 @@
         "能否压缩体积或重量？"
       ]
     },
-    ti: { // 能否替代
-      title: "能否替代",
+    ti: { // 替代
+      title: "替代",
       description: "替代材料、方法、技术或流程",
       cases: [
         "纸质铅笔：用纸代替木料做铅笔",
@@ -151,8 +151,8 @@
         "能否用更经济的方案替代？"
       ]
     },
-    tiao: { // 能否调整
-      title: "能否调整",
+    tiao: { // 调整
+      title: "调整",
       description: "调整顺序、结构、流程或时间",
       cases: [
         "飞机螺旋桨位置调整：从头部移到顶部成为直升机，再移到尾部成为喷气式飞机",
@@ -167,15 +167,15 @@
         "物流配送路线：重新规划配送路线降低运输成本"
       ],
       prompts: [
-        "能否调整操作顺序？",
+        "调整操作顺序？",
         "是否可以重新安排时间？",
         "能否优化空间布局？",
         "是否可以调整优先级？",
         "能否重新配置资源分配？"
       ]
     },
-    dian: { // 能否颠倒
-      title: "能否颠倒",
+    dian: { // 颠倒
+      title: "颠倒",
       description: "颠倒关系、反转思维、逆向操作",
       cases: [
         "电动机发明：将发电机原理颠倒",
@@ -190,15 +190,15 @@
         "逆向物流：产品从消费者返回生产者的流程"
       ],
       prompts: [
-        "能否颠倒操作顺序？",
+        "颠倒操作顺序？",
         "是否可以反转服务模式？",
         "能否逆向思考问题？",
         "是否可以颠倒角色关系？",
         "能否将因果关系颠倒？"
       ]
     },
-    hebing: { // 能否合并
-      title: "能否合并",
+    hebing: { // 合并
+      title: "合并",
       description: "合并、组合、联动、集成",
       cases: [
         "带橡皮铅笔：把铅笔和橡皮组合在一起",
@@ -222,11 +222,92 @@
     }
   };
 
-  // 本地存储管理
+  // 本地存储管理 - 扩展支持案例数据库
   const storage = {
     getApiKey: () => localStorage.getItem('deepseek_api_key') || '',
     setApiKey: (key) => localStorage.setItem('deepseek_api_key', key),
-    clearApiKey: () => localStorage.removeItem('deepseek_api_key')
+    clearApiKey: () => localStorage.removeItem('deepseek_api_key'),
+    
+    // 案例数据库管理
+    getUserCases: () => {
+      try {
+        const cases = localStorage.getItem('user_cases_database');
+        return cases ? JSON.parse(cases) : {};
+      } catch (e) {
+        console.warn('读取用户案例数据库失败:', e);
+        return {};
+      }
+    },
+    
+    saveUserCases: (cases) => {
+      try {
+        localStorage.setItem('user_cases_database', JSON.stringify(cases));
+        return true;
+      } catch (e) {
+        console.warn('保存用户案例数据库失败:', e);
+        return false;
+      }
+    },
+    
+    addNewCase: (topic, dimension, suggestion) => {
+      const userCases = storage.getUserCases();
+      
+      // 初始化维度数组
+      if (!userCases[dimension]) {
+        userCases[dimension] = [];
+      }
+      
+      // 创建新案例
+      const newCase = {
+        topic: topic,
+        suggestion: suggestion,
+        timestamp: new Date().toISOString(),
+        source: 'user_analysis'
+      };
+      
+      // 避免重复案例
+      const exists = userCases[dimension].some(existingCase => 
+        existingCase.topic === topic && existingCase.suggestion === suggestion
+      );
+      
+      if (!exists) {
+        userCases[dimension].push(newCase);
+        
+        // 限制每个维度最多保存50个用户案例，保持性能
+        if (userCases[dimension].length > 50) {
+          userCases[dimension] = userCases[dimension].slice(-50);
+        }
+        
+        storage.saveUserCases(userCases);
+        return true;
+      }
+      
+      return false;
+    },
+    
+    getCaseStats: () => {
+      const userCases = storage.getUserCases();
+      const stats = {
+        totalCases: 0,
+        dimensionCounts: {},
+        lastUpdated: null
+      };
+      
+      Object.keys(userCases).forEach(dimension => {
+        const count = userCases[dimension].length;
+        stats.dimensionCounts[dimension] = count;
+        stats.totalCases += count;
+        
+        // 找到最新更新时间
+        userCases[dimension].forEach(caseItem => {
+          if (!stats.lastUpdated || new Date(caseItem.timestamp) > new Date(stats.lastUpdated)) {
+            stats.lastUpdated = caseItem.timestamp;
+          }
+        });
+      });
+      
+      return stats;
+    }
   };
 
   // 初始化
@@ -235,6 +316,12 @@
   setupPageTabs();
   setupApiKeyToggle();
   loadSavedApiKey();
+  
+  // 初始化时显示案例数据库统计
+  const stats = storage.getCaseStats();
+  if (stats.totalCases > 0) {
+    updateCaseStatsDisplay(stats);
+  }
 
   // 加载保存的API密钥
   function loadSavedApiKey() {
@@ -349,26 +436,89 @@
     return results;
   }
 
-  // 基于案例生成建议 - 高质量快速版本
+  // 基于案例生成建议 - 融合用户案例的增强版本
   function generateSuggestionsFromCases(topic, keywordAnalysis, caseInfo) {
     const suggestions = [];
     
-    // 智能选择最相关的案例（提高质量）
-    const relevantCases = selectRelevantCases(topic, caseInfo.cases);
+    // 1. 获取用户历史案例
+    const userCases = storage.getUserCases();
+    const userCasesForDimension = userCases[caseInfo.title.replace('能否', '')] || [];
     
-    // 生成高质量建议
+    // 2. 合并内置案例和用户案例
+    const allCases = [...caseInfo.cases];
+    
+    // 添加用户案例（转换格式）
+    userCasesForDimension.forEach(userCase => {
+      const caseText = `${userCase.topic}创新应用：${userCase.suggestion}`;
+      allCases.push(caseText);
+    });
+    
+    // 3. 智能选择最相关的案例（优先用户案例）
+    const relevantCases = selectRelevantCasesEnhanced(topic, allCases, userCasesForDimension);
+    
+    // 4. 生成高质量建议
     relevantCases.forEach(caseExample => {
       const suggestion = adaptCaseToTopic(caseExample, topic, caseInfo.title);
       suggestions.push(suggestion);
     });
     
-    // 确保至少有3个建议
+    // 5. 确保至少有3个建议
     while (suggestions.length < 3) {
       const genericSuggestion = generateContextualSuggestion(topic, caseInfo, suggestions.length);
       suggestions.push(genericSuggestion);
     }
     
     return suggestions.slice(0, 4); // 限制为4个高质量建议
+  }
+
+  // 增强的案例选择算法 - 优先考虑用户案例
+  function selectRelevantCasesEnhanced(topic, allCases, userCases) {
+    const topicLower = topic.toLowerCase();
+    const scoredCases = allCases.map(caseExample => {
+      let score = 0;
+      const caseText = caseExample.toLowerCase();
+      
+      // 用户案例加权（优先级更高）
+      const isUserCase = userCases.some(uc => 
+        caseExample.includes(uc.topic) || caseExample.includes(uc.suggestion)
+      );
+      if (isUserCase) score += 5;
+      
+      // 关键词匹配评分
+      const topicWords = topicLower.split(/[\s，。！？；：、]+/).filter(w => w.length > 1);
+      topicWords.forEach(word => {
+        if (caseText.includes(word)) score += 2;
+      });
+      
+      // 行业相关性评分
+      const industryKeywords = getIndustryKeywords(topicLower);
+      industryKeywords.forEach(keyword => {
+        if (caseText.includes(keyword)) score += 3;
+      });
+      
+      // 时间新鲜度评分（用户案例）
+      if (isUserCase) {
+        const userCase = userCases.find(uc => 
+          caseExample.includes(uc.topic) || caseExample.includes(uc.suggestion)
+        );
+        if (userCase) {
+          const daysSinceCreated = (Date.now() - new Date(userCase.timestamp)) / (1000 * 60 * 60 * 24);
+          if (daysSinceCreated < 30) score += 2; // 30天内的案例加分
+        }
+      }
+      
+      return { case: caseExample, score, isUserCase };
+    });
+    
+    // 返回评分最高的案例，优先用户案例
+    return scoredCases
+      .sort((a, b) => {
+        if (a.isUserCase && !b.isUserCase) return -1;
+        if (!a.isUserCase && b.isUserCase) return 1;
+        return b.score - a.score;
+      })
+      .slice(0, 3)
+      .map(item => item.case);
   }
 
   // 智能选择相关案例
@@ -427,47 +577,47 @@
     const caseInnovation = extractInnovation(caseExample);
     
     const templates = {
-      '能否他用': [
+      '他用': [
         `参考${caseKey}的跨界应用，${topic}可以拓展到${getAlternativeField(topic)}领域`,
         `借鉴${caseKey}的多元化策略，为${topic}开发新的应用场景`,
         `学习${caseKey}的成功经验，${topic}也可以${caseInnovation}`
       ],
-      '能否借用': [
+      '借用': [
         `引入${caseKey}的核心技术，提升${topic}的功能性能`,
         `借鉴${caseKey}的创新模式，为${topic}注入新的活力`,
         `学习${caseKey}的解决方案，优化${topic}的实现方式`
       ],
-      '能否改变': [
+      '改变': [
         `参考${caseKey}的变革思路，改变${topic}的${getChangeableAspect(topic)}`,
         `借鉴${caseKey}的创新设计，为${topic}带来形态上的突破`,
         `学习${caseKey}的改进策略，优化${topic}的用户体验`
       ],
-      '能否扩大': [
+      '扩大': [
         `参考${caseKey}的扩展策略，增强${topic}的${getExpandableFeature(topic)}`,
         `借鉴${caseKey}的成功模式，扩大${topic}的影响范围`,
         `学习${caseKey}的发展思路，提升${topic}的综合能力`
       ],
-      '能否缩小': [
+      '缩小': [
         `参考${caseKey}的精简理念，专注${topic}的核心价值`,
         `借鉴${caseKey}的便携化设计，提高${topic}的易用性`,
         `学习${caseKey}的优化方案，简化${topic}的操作流程`
       ],
-      '能否替代': [
+      '替代': [
         `参考${caseKey}的替代方案，为${topic}寻找更优的${getReplaceableComponent(topic)}`,
         `借鉴${caseKey}的创新材料，提升${topic}的性能表现`,
         `学习${caseKey}的技术革新，实现${topic}的升级换代`
       ],
-      '能否调整': [
+      '调整': [
         `参考${caseKey}的优化布局，重新设计${topic}的${getAdjustableStructure(topic)}`,
         `借鉴${caseKey}的流程改进，提升${topic}的运行效率`,
         `学习${caseKey}的结构调整，优化${topic}的整体性能`
       ],
-      '能否颠倒': [
+      '颠倒': [
         `参考${caseKey}的逆向思维，颠倒${topic}的${getReversibleAspect(topic)}`,
         `借鉴${caseKey}的创新理念，反转${topic}的传统模式`,
         `学习${caseKey}的突破性思路，重新定义${topic}的价值主张`
       ],
-      '能否合并': [
+      '合并': [
         `参考${caseKey}的集成策略，将${topic}与${getCombinable(topic)}相结合`,
         `借鉴${caseKey}的融合理念，创造${topic}的协同效应`,
         `学习${caseKey}的组合模式，实现${topic}的功能整合`
@@ -526,47 +676,47 @@
   // 生成情境化建议
   function generateContextualSuggestion(topic, caseInfo, index) {
     const contextualPrompts = {
-      '能否他用': [
+      '他用': [
         `探索${topic}在不同年龄群体中的应用潜力`,
         `考虑${topic}在特殊环境下的使用可能性`,
         `研究${topic}与其他行业结合的创新机会`
       ],
-      '能否借用': [
+      '借用': [
         `从自然界寻找${topic}的设计灵感`,
         `借鉴成功企业的商业模式应用到${topic}`,
         `引入前沿科技提升${topic}的竞争力`
       ],
-      '能否改变': [
+      '改变': [
         `改变${topic}的服务时间和频率`,
         `调整${topic}的目标用户群体定位`,
         `修改${topic}的核心价值主张`
       ],
-      '能否扩大': [
+      '扩大': [
         `扩展${topic}的服务半径和覆盖范围`,
         `增加${topic}的附加价值和衍生服务`,
         `提升${topic}的处理能力和响应速度`
       ],
-      '能否缩小': [
+      '缩小': [
         `专注${topic}的核心功能，去除冗余特性`,
         `简化${topic}的操作界面和使用步骤`,
         `降低${topic}的使用门槛和学习成本`
       ],
-      '能否替代': [
+      '替代': [
         `寻找${topic}的环保替代方案`,
         `探索${topic}的低成本实现方式`,
         `研究${topic}的智能化替代技术`
       ],
-      '能否调整': [
+      '调整': [
         `优化${topic}的资源配置和分配策略`,
         `调整${topic}的服务流程和响应机制`,
         `重新设计${topic}的用户交互体验`
       ],
-      '能否颠倒': [
+      '颠倒': [
         `颠倒${topic}的传统供需关系`,
         `反转${topic}的服务提供方式`,
         `逆向思考${topic}的价值创造模式`
       ],
-      '能否合并': [
+      '合并': [
         `整合${topic}与相关服务的资源优势`,
         `合并${topic}的多个功能模块`,
         `联合${topic}与合作伙伴的核心能力`
@@ -630,17 +780,33 @@
       // 显示关键词分析结果
       displayKeywordAnalysis(keywordAnalysis);
       
-      if (downloadKeywordBtn) {
-        downloadKeywordBtn.style.display = 'inline-flex';
+      // 显示关键词下载选项
+      const keywordDownloadOptions = document.getElementById('keywordDownloadOptions');
+      if (keywordDownloadOptions) {
+        keywordDownloadOptions.style.display = 'flex';
       }
       
-      // 填充九宫格结果
+      // 填充九宫格结果并保存到本地案例数据库
       keys.forEach(key => {
         const textarea = document.querySelector(`textarea[data-key="${key}"]`);
         if (analysisResults[key] && Array.isArray(analysisResults[key])) {
           textarea.value = analysisResults[key].join('\n');
+          
+          // 自动保存每个建议到本地案例数据库
+          const dimension = key;
+          analysisResults[key].forEach(suggestion => {
+            if (suggestion && suggestion.trim()) {
+              const saved = storage.addNewCase(topic, dimension, suggestion.trim());
+              if (saved) {
+                console.log(`已保存新案例到维度 ${dimension}: ${suggestion.substring(0, 50)}...`);
+              }
+            }
+          });
         }
       });
+      
+      // 显示案例数据库统计信息
+      displayCaseStats();
       
     } catch (error) {
       console.error('分析错误:', error);
@@ -860,7 +1026,575 @@ ${prompts}
     analysisContent.innerHTML = html;
   }
 
-  // 下载功能 - 修复版本
+  // 获取卡片简洁色彩方案
+  function getCardColor(title, type) {
+    if (type === 'keyword') {
+      // 关键词分析7种简洁色彩
+      const keywordColors = {
+        '核心功能': 'rgba(59, 130, 246, 0.85)', // 蓝色
+        '关键属性': 'rgba(34, 197, 94, 0.85)', // 绿色
+        '现有形态': 'rgba(249, 115, 22, 0.85)', // 橙色
+        '目标用户': 'rgba(168, 85, 247, 0.85)', // 紫色
+        '使用场景': 'rgba(6, 182, 212, 0.85)', // 青色
+        '价值链条': 'rgba(236, 72, 153, 0.85)', // 粉色
+        '约束限制': 'rgba(239, 68, 68, 0.85)' // 红色
+      };
+      return keywordColors[title] || keywordColors['核心功能'];
+    } else {
+      // 九宫格分析9种简洁色彩
+      const gridColors = {
+        '他用': 'rgba(59, 130, 246, 0.85)', // 蓝色
+        '借用': 'rgba(34, 197, 94, 0.85)', // 绿色
+        '改变': 'rgba(249, 115, 22, 0.85)', // 橙色
+        '扩大': 'rgba(168, 85, 247, 0.85)', // 紫色
+        '缩小': 'rgba(6, 182, 212, 0.85)', // 青色
+        '替代': 'rgba(236, 72, 153, 0.85)', // 粉色
+        '调整': 'rgba(239, 68, 68, 0.85)', // 红色
+        '颠倒': 'rgba(99, 102, 241, 0.85)', // 靛蓝
+        '合并': 'rgba(139, 69, 19, 0.85)' // 棕色
+      };
+      return gridColors[title] || gridColors['他用'];
+    }
+  }
+
+  // 创建完全展示内容的卡片HTML模板 - 重新设计确保内容完整显示
+  function createCardHTML(title, content, topic, type = 'grid') {
+    const backgroundColor = getCardColor(title, type);
+    
+    // 处理内容数组
+    const contentArray = Array.isArray(content) ? content : [content.toString()];
+    
+    // 更精确地计算所需高度
+    let totalTextLength = 0;
+    contentArray.forEach(item => {
+      totalTextLength += item.length;
+    });
+    
+    // 基于内容长度动态计算高度
+    const baseHeight = 400; // 基础高度
+    const contentHeight = Math.max(300, contentArray.length * 80 + totalTextLength * 2); // 更宽松的计算
+    const finalHeight = baseHeight + contentHeight;
+    
+    return `
+      <div class="innovation-card" style="
+        width: 380px;
+        height: ${finalHeight}px;
+        background: ${backgroundColor};
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 28px;
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        position: relative;
+        box-shadow: 0 24px 48px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.25);
+        display: flex;
+        flex-direction: column;
+        margin: 15px;
+        overflow: visible;
+      ">
+        
+        <!-- 装饰性背景元素 -->
+        <div style="
+          position: absolute;
+          top: -40px;
+          right: -40px;
+          width: 140px;
+          height: 140px;
+          background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+          border-radius: 50%;
+          filter: blur(30px);
+        "></div>
+        
+        <!-- 主题区域 - 顶部突出显示 -->
+        <div style="
+          text-align: center;
+          margin-bottom: 20px;
+          position: relative;
+          z-index: 10;
+          padding: 20px 24px;
+          background: rgba(255,255,255,0.15);
+          border-radius: 18px;
+          border: 1px solid rgba(255,255,255,0.25);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        ">
+          <div style="
+            font-size: 24px; 
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 3px 15px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+          ">${topic}</div>
+          <div style="
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.4) 100%);
+            margin: 0 auto;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(255,255,255,0.3);
+          "></div>
+        </div>
+        
+        <!-- 维度标题区域 - 小一点 -->
+        <div style="
+          display: flex;
+          align-items: center;
+          margin-bottom: 16px;
+          position: relative;
+          z-index: 10;
+        ">
+          <div style="
+            width: 4px;
+            height: 24px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 2px;
+            margin-right: 12px;
+            box-shadow: 0 2px 8px rgba(255,255,255,0.3);
+          "></div>
+          <h3 style="
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+          ">${title}</h3>
+        </div>
+        
+        <!-- 内容展示区域 - 减少内边距但保持可读性 -->
+        <div style="
+          background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(12px);
+          color: #1a202c;
+          border-radius: 16px;
+          padding: 20px;
+          position: relative;
+          z-index: 10;
+          border: 1px solid rgba(255,255,255,0.4);
+          box-shadow: 
+            inset 0 2px 8px rgba(0,0,0,0.05),
+            0 4px 16px rgba(0,0,0,0.08);
+          flex: 1;
+          min-height: ${contentHeight}px;
+          overflow: visible;
+        ">
+          ${contentArray.map((item, index) => `
+            <div style="
+              display: flex;
+              align-items: flex-start;
+              margin-bottom: ${index === contentArray.length - 1 ? '0' : '20px'};
+              min-height: 60px;
+            ">
+              <div style="
+                width: 10px;
+                height: 10px;
+                background: ${backgroundColor.replace('0.85', '1')};
+                border-radius: 50%;
+                margin-top: 12px;
+                margin-right: 16px;
+                flex-shrink: 0;
+                box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+              "></div>
+              <div style="
+                font-size: 17px; 
+                color: #1a202c;
+                font-weight: 500;
+                line-height: 1.8;
+                word-wrap: break-word;
+                word-break: break-word;
+                hyphens: auto;
+                flex: 1;
+              ">${item}</div>
+            </div>
+          `).join('')}
+        </div>
+        
+        <!-- 底部标识 -->
+        <div style="
+          text-align: center;
+          margin-top: 20px;
+          font-size: 12px;
+          opacity: 0.85;
+          color: rgba(255,255,255,0.9);
+          font-weight: 600;
+          text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          position: relative;
+          z-index: 10;
+        ">
+          奥斯本创新九问 · ${new Date().toLocaleDateString()}
+        </div>
+      </div>
+    `;
+  }
+
+  // 创建临时容器并生成图片
+  async function generateCardImage(cardHTML, filename) {
+    const tempContainer = document.createElement('div');
+    tempContainer.style.cssText = `
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      background: white;
+      padding: 20px;
+    `;
+    tempContainer.innerHTML = cardHTML;
+    document.body.appendChild(tempContainer);
+    
+    try {
+      const canvas = await html2canvas(tempContainer.firstElementChild, {
+        backgroundColor: 'transparent',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+      
+      const link = document.createElement('a');
+      link.download = filename;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      
+      return true;
+    } catch (error) {
+      console.error('生成卡片图片失败:', error);
+      return false;
+    } finally {
+      document.body.removeChild(tempContainer);
+    }
+  }
+
+  // 批量下载（ZIP格式）
+  async function downloadAsZip(cards, zipName) {
+    if (typeof JSZip === 'undefined') {
+      showToast('ZIP功能未加载，将逐个下载图片', 'info');
+      // 逐个下载
+      for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        await generateCardImage(card.html, card.filename);
+        if (i < cards.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // 延迟避免浏览器阻止
+        }
+      }
+      return;
+    }
+    
+    const zip = new JSZip();
+    
+    for (const card of cards) {
+      const tempContainer = document.createElement('div');
+      tempContainer.style.cssText = 'position: fixed; top: -9999px; left: -9999px;';
+      tempContainer.innerHTML = card.html;
+      document.body.appendChild(tempContainer);
+      
+      try {
+        const canvas = await html2canvas(tempContainer.firstElementChild, {
+          backgroundColor: 'transparent',
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          logging: false
+        });
+        
+        const dataUrl = canvas.toDataURL('image/png');
+        const base64Data = dataUrl.split(',')[1];
+        zip.file(card.filename, base64Data, { base64: true });
+      } catch (error) {
+        console.error(`生成${card.filename}失败:`, error);
+      } finally {
+        document.body.removeChild(tempContainer);
+      }
+    }
+    
+    const content = await zip.generateAsync({ type: 'blob' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(content);
+    link.download = zipName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  // 关键词分析下载功能
+  async function downloadKeywordPNG(mode = 'full') {
+    const topic = topicInput.value.trim() || '未命名主题';
+    
+    if (mode === 'full') {
+      // 原有的完整下载功能
+      return downloadKeywordPNG();
+    }
+    
+    const analysisResult = document.querySelector('#keywordAnalysisResult .keyword-result');
+    if (!analysisResult) {
+      showToast('请先进行分析再下载', 'error');
+      return;
+    }
+    
+    try {
+      showToast('正在生成卡片...', 'info');
+      
+      // 提取关键词分析数据
+      const keywordData = extractKeywordData(analysisResult);
+      
+      if (mode === 'cards') {
+        // 显示卡片选择界面
+        showCardSelectionModal(keywordData, topic, 'keyword');
+      } else if (mode === 'all') {
+        // 批量下载所有卡片
+        const cards = [];
+        Object.entries(keywordData).forEach(([key, value]) => {
+          const title = getKeywordTitle(key);
+          const cardHTML = createCardHTML(title, value, topic, 'keyword');
+          cards.push({
+            html: cardHTML,
+            filename: `${topic}-${title}-${new Date().toISOString().slice(0,10)}.png`
+          });
+        });
+        
+        await downloadAsZip(cards, `${topic}-关键词分析卡片-${new Date().toISOString().slice(0,10)}.zip`);
+        showToast('关键词分析卡片批量下载完成！', 'success');
+      }
+    } catch (error) {
+      console.error('下载失败:', error);
+      showToast('下载失败，请重试', 'error');
+    }
+  }
+
+  // 九宫格下载功能
+  async function downloadGridPNG(mode = 'full') {
+    const topic = topicInput.value.trim() || '未命名主题';
+    
+    if (mode === 'full') {
+      // 原有的完整下载功能
+      return downloadGridPNG();
+    }
+    
+    try {
+      showToast('正在生成卡片...', 'info');
+      
+      // 提取九宫格数据
+      const gridData = {};
+      keys.forEach(key => {
+        const textarea = document.querySelector(`textarea[data-key="${key}"]`);
+        if (textarea && textarea.value.trim()) {
+          const suggestions = textarea.value.split('\n').filter(line => line.trim());
+          gridData[key] = suggestions;
+        }
+      });
+      
+      if (Object.keys(gridData).length === 0) {
+        showToast('请先进行分析或填写内容', 'error');
+        return;
+      }
+      
+      if (mode === 'cards') {
+        // 显示卡片选择界面
+        showCardSelectionModal(gridData, topic, 'grid');
+      } else if (mode === 'all') {
+        // 批量下载所有卡片
+        const cards = [];
+        Object.entries(gridData).forEach(([key, suggestions]) => {
+          const title = osbornCaseDatabase[key]?.title || key;
+          const cardHTML = createCardHTML(title, suggestions, topic, 'grid');
+          cards.push({
+            html: cardHTML,
+            filename: `${topic}-${title}-${new Date().toISOString().slice(0,10)}.png`
+          });
+        });
+        
+        await downloadAsZip(cards, `${topic}-九宫格分析卡片-${new Date().toISOString().slice(0,10)}.zip`);
+        showToast('九宫格分析卡片批量下载完成！', 'success');
+      }
+    } catch (error) {
+      console.error('下载失败:', error);
+      showToast('下载失败，请重试', 'error');
+    }
+  }
+
+  // 提取关键词数据
+  function extractKeywordData(analysisResult) {
+    const data = {};
+    const items = analysisResult.querySelectorAll('.keyword-item');
+    
+    items.forEach(item => {
+      const title = item.querySelector('h5')?.textContent;
+      const content = item.querySelector('p')?.textContent;
+      const tags = Array.from(item.querySelectorAll('.tag')).map(tag => tag.textContent);
+      
+      if (title) {
+        data[title] = content || tags.join('、') || '暂无数据';
+      }
+    });
+    
+    return data;
+  }
+
+  // 获取关键词标题
+  function getKeywordTitle(key) {
+    const titleMap = {
+      '核心功能': '核心功能',
+      '关键属性': '关键属性', 
+      '现有形态': '现有形态',
+      '目标用户': '目标用户',
+      '使用场景': '使用场景',
+      '价值链条': '价值链条',
+      '约束限制': '约束限制'
+    };
+    return titleMap[key] || key;
+  }
+
+  // 显示卡片选择模态框
+  function showCardSelectionModal(data, topic, type) {
+    // 先移除可能存在的旧模态框
+    const existingModal = document.querySelector('.card-selection-modal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
+    const modal = document.createElement('div');
+    modal.className = 'card-selection-modal';
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      backdrop-filter: blur(4px);
+    `;
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    `;
+    
+    const title = type === 'keyword' ? '选择关键词分析卡片' : '选择九宫格分析卡片';
+    content.innerHTML = `
+      <h3 style="margin: 0 0 20px 0; color: #2d3748;">${title}</h3>
+      <div class="card-selection">
+        ${Object.entries(data).map(([key, value]) => {
+          const displayTitle = type === 'keyword' ? getKeywordTitle(key) : (osbornCaseDatabase[key]?.title || key);
+          return `
+            <label style="
+              display: flex;
+              align-items: center;
+              padding: 12px;
+              border: 2px solid #e2e8f0;
+              border-radius: 8px;
+              margin-bottom: 8px;
+              cursor: pointer;
+              transition: all 0.2s;
+            " onmouseover="this.style.borderColor='#4a90e2'" onmouseout="this.style.borderColor='#e2e8f0'">
+              <input type="checkbox" value="${key}" checked style="margin-right: 12px;">
+              <span style="font-weight: 500;">${displayTitle}</span>
+            </label>
+          `;
+        }).join('')}
+      </div>
+      <div style="display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end;">
+        <button id="cancelSelection" style="
+          padding: 8px 16px;
+          border: 2px solid #e2e8f0;
+          background: white;
+          border-radius: 6px;
+          cursor: pointer;
+        ">取消</button>
+        <button id="downloadSelected" style="
+          padding: 8px 16px;
+          background: #4a90e2;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        ">下载选中卡片</button>
+      </div>
+    `;
+    
+    modal.appendChild(content);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 获取复选框
+    const checkboxes = content.querySelectorAll('input[type="checkbox"]');
+    
+    // 取消按钮
+    content.querySelector('#cancelSelection').onclick = () => {
+      modal.remove();
+    };
+    
+    // 下载按钮
+    content.querySelector('#downloadSelected').onclick = async () => {
+      const selected = Array.from(content.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(cb => cb.value);
+      
+      if (selected.length === 0) {
+        showToast('请至少选择一个卡片', 'error');
+        return;
+      }
+      
+      // 显示下载进度
+      const downloadBtn = content.querySelector('#downloadSelected');
+      const originalText = downloadBtn.textContent;
+      downloadBtn.textContent = '正在生成...';
+      downloadBtn.disabled = true;
+      
+      try {
+        // 生成并下载选中的卡片
+        for (let i = 0; i < selected.length; i++) {
+          const key = selected[i];
+          const value = data[key];
+          const displayTitle = type === 'keyword' ? getKeywordTitle(key) : (osbornCaseDatabase[key]?.title || key);
+          const cardHTML = createCardHTML(displayTitle, value, topic, type);
+          const filename = `${topic}-${displayTitle}-${new Date().toISOString().slice(0,10)}.png`;
+          
+          downloadBtn.textContent = `正在生成 ${i + 1}/${selected.length}...`;
+          
+          const success = await generateCardImage(cardHTML, filename);
+          if (!success) {
+            showToast(`生成第${i + 1}张卡片失败`, 'error');
+          }
+          
+          // 添加延迟避免浏览器阻止下载
+          if (i < selected.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+        }
+        
+        modal.remove();
+        showToast(`成功下载${selected.length}张卡片！`, 'success');
+        
+      } catch (error) {
+        console.error('下载过程中出错:', error);
+        showToast('下载过程中出现错误', 'error');
+        downloadBtn.textContent = originalText;
+        downloadBtn.disabled = false;
+      }
+    };
+    
+    // 点击背景关闭
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    };
+    
+    // 阻止内容区域点击事件冒泡
+    content.onclick = (e) => {
+      e.stopPropagation();
+    };
+  }
+
+  // 原有的完整下载功能 - 修复版本
   async function downloadGridPNG() {
     try {
       const node = document.getElementById('exportArea');
@@ -1089,6 +1823,255 @@ ${prompts}
     }
   }
 
+  // 显示案例数据库统计信息
+  function displayCaseStats() {
+    const stats = storage.getCaseStats();
+    
+    if (stats.totalCases > 0) {
+      const statsMessage = `📚 本地案例数据库已收录 ${stats.totalCases} 个案例`;
+      showToast(statsMessage, 'success');
+      
+      // 在控制台显示详细统计
+      console.log('📊 案例数据库统计:', {
+        总案例数: stats.totalCases,
+        各维度分布: stats.dimensionCounts,
+        最后更新: stats.lastUpdated ? new Date(stats.lastUpdated).toLocaleString() : '无'
+      });
+      
+      // 更新界面显示
+      updateCaseStatsDisplay(stats);
+    }
+  }
+
+  // 更新界面上的案例统计显示
+  function updateCaseStatsDisplay(stats) {
+    // 在分析页面添加统计信息
+    let statsElement = document.getElementById('caseStatsDisplay');
+    
+    if (!statsElement) {
+      // 创建统计显示元素
+      statsElement = document.createElement('div');
+      statsElement.id = 'caseStatsDisplay';
+      statsElement.style.cssText = `
+        background: linear-gradient(135deg, #4caf50 0%, #689f38 100%);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-top: 16px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        cursor: pointer;
+        transition: all 0.3s ease;
+      `;
+      
+      // 添加悬浮效果
+      statsElement.addEventListener('mouseenter', () => {
+        statsElement.style.transform = 'translateY(-2px)';
+        statsElement.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.4)';
+      });
+      
+      statsElement.addEventListener('mouseleave', () => {
+        statsElement.style.transform = 'translateY(0)';
+        statsElement.style.boxShadow = '0 4px 12px rgba(76, 175, 80, 0.3)';
+      });
+      
+      // 点击显示详细统计
+      statsElement.addEventListener('click', () => {
+        showDetailedCaseStats(stats);
+      });
+      
+      // 插入到配置区域
+      const configCard = document.querySelector('.topic-section.card');
+      if (configCard) {
+        configCard.appendChild(statsElement);
+      }
+    }
+    
+    // 更新统计内容
+    const dimensionNames = {
+      'he': '他用', 'jie': '借用', 'gai': '改变', 'da': '扩大', 'xiao': '缩小',
+      'ti': '替代', 'tiao': '调整', 'dian': '颠倒', 'hebing': '合并'
+    };
+    
+    const topDimensions = Object.entries(stats.dimensionCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([dim, count]) => `${dimensionNames[dim] || dim}(${count})`)
+      .join(' · ');
+    
+    statsElement.innerHTML = `
+      📚 智能案例库：已学习 <strong>${stats.totalCases}</strong> 个案例
+      ${topDimensions ? `<br><small style="opacity: 0.9;">热门维度：${topDimensions}</small>` : ''}
+      <br><small style="opacity: 0.8;">点击查看详细统计 →</small>
+    `;
+  }
+
+  // 显示详细案例统计
+  function showDetailedCaseStats(stats) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      backdrop-filter: blur(4px);
+    `;
+    
+    const dimensionNames = {
+      'he': '他用', 'jie': '借用', 'gai': '改变', 'da': '扩大', 'xiao': '缩小',
+      'ti': '替代', 'tiao': '调整', 'dian': '颠倒', 'hebing': '合并'
+    };
+    
+    const content = document.createElement('div');
+    content.style.cssText = `
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    `;
+    
+    const dimensionStats = Object.entries(stats.dimensionCounts)
+      .sort(([,a], [,b]) => b - a)
+      .map(([dim, count]) => {
+        const percentage = ((count / stats.totalCases) * 100).toFixed(1);
+        return `
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+          ">
+            <span style="font-weight: 600; color: #2d3748;">${dimensionNames[dim] || dim}</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="
+                width: 100px;
+                height: 8px;
+                background: #e2e8f0;
+                border-radius: 4px;
+                overflow: hidden;
+              ">
+                <div style="
+                  width: ${percentage}%;
+                  height: 100%;
+                  background: linear-gradient(135deg, #4caf50 0%, #689f38 100%);
+                  transition: width 0.3s ease;
+                "></div>
+              </div>
+              <span style="font-weight: 700; color: #4caf50; min-width: 60px; text-align: right;">
+                ${count} (${percentage}%)
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    
+    content.innerHTML = `
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px 0; color: #2d3748; font-size: 24px;">📊 智能案例数据库统计</h3>
+        <p style="color: #718096; margin: 0;">系统自动学习并积累创新案例</p>
+      </div>
+      
+      <div style="
+        background: linear-gradient(135deg, #4caf50 0%, #689f38 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        text-align: center;
+      ">
+        <div style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">${stats.totalCases}</div>
+        <div style="font-size: 16px; opacity: 0.9;">累计学习案例数</div>
+        ${stats.lastUpdated ? `
+          <div style="font-size: 12px; opacity: 0.8; margin-top: 8px;">
+            最后更新：${new Date(stats.lastUpdated).toLocaleString()}
+          </div>
+        ` : ''}
+      </div>
+      
+      <div style="margin-bottom: 24px;">
+        <h4 style="margin: 0 0 16px 0; color: #2d3748;">各维度案例分布</h4>
+        ${dimensionStats}
+      </div>
+      
+      <div style="
+        background: #f7fafc;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #4caf50;
+      ">
+        <h5 style="margin: 0 0 8px 0; color: #2d3748;">💡 智能学习机制</h5>
+        <p style="margin: 0; color: #718096; font-size: 14px; line-height: 1.5;">
+          每次分析后，系统会自动将生成的创新建议保存到本地案例数据库。
+          这些案例会在后续分析中被优先使用，让系统越用越智能！
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button id="clearCaseDatabase" style="
+          padding: 8px 16px;
+          border: 2px solid #e53e3e;
+          background: white;
+          color: #e53e3e;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+        ">清空数据库</button>
+        <button id="closeCaseStats" style="
+          padding: 8px 16px;
+          background: #4caf50;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: 600;
+        ">关闭</button>
+      </div>
+    `;
+    
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    
+    // 关闭按钮
+    content.querySelector('#closeCaseStats').onclick = () => {
+      modal.remove();
+    };
+    
+    // 清空数据库按钮
+    content.querySelector('#clearCaseDatabase').onclick = () => {
+      if (confirm('确定要清空所有学习的案例数据吗？此操作不可恢复！')) {
+        localStorage.removeItem('user_cases_database');
+        showToast('案例数据库已清空', 'info');
+        modal.remove();
+        
+        // 移除统计显示
+        const statsElement = document.getElementById('caseStatsDisplay');
+        if (statsElement) {
+          statsElement.remove();
+        }
+      }
+    };
+    
+    // 点击背景关闭
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    };
+  }
+
   // 显示提示消息
   function showToast(message, type = 'info') {
     // 创建提示元素
@@ -1152,8 +2135,10 @@ ${prompts}
       analysisContent.innerHTML = '<p class="placeholder">点击"开始分析"进行主题分析<br><small>系统将基于案例数据库进行分析，填入API密钥可获得AI深度分析</small></p>';
     }
     
-    if (downloadKeywordBtn) {
-      downloadKeywordBtn.style.display = 'none';
+    // 隐藏关键词下载选项
+    const keywordDownloadOptions = document.getElementById('keywordDownloadOptions');
+    if (keywordDownloadOptions) {
+      keywordDownloadOptions.style.display = 'none';
     }
     
     renderPreview();
@@ -1193,8 +2178,144 @@ ${prompts}
     downloadGridBtn.addEventListener('click', downloadGridPNG);
   }
   
-  if (downloadKeywordBtn) {
-    downloadKeywordBtn.addEventListener('click', downloadKeywordPNG);
+  // 等待DOM完全加载后绑定事件
+  document.addEventListener('DOMContentLoaded', function() {
+    // 关键词分析下载按钮事件
+    const downloadKeywordFullBtn = document.getElementById('downloadKeywordFullBtn');
+    const downloadKeywordCardsBtn = document.getElementById('downloadKeywordCardsBtn');
+    const downloadKeywordAllBtn = document.getElementById('downloadKeywordAllBtn');
+    
+    // 九宫格下载按钮事件
+    const downloadGridFullBtn = document.getElementById('downloadGridFullBtn');
+    const downloadGridCardsBtn = document.getElementById('downloadGridCardsBtn');
+    const downloadGridAllBtn = document.getElementById('downloadGridAllBtn');
+    
+    if (downloadKeywordFullBtn) {
+      downloadKeywordFullBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了完整关键词分析下载');
+        downloadKeywordPNG();
+      });
+    }
+    
+    if (downloadKeywordCardsBtn) {
+      downloadKeywordCardsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了单张关键词卡片下载');
+        downloadKeywordCards();
+      });
+    }
+    
+    if (downloadKeywordAllBtn) {
+      downloadKeywordAllBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了批量关键词下载');
+        downloadKeywordPNG('all');
+      });
+    }
+    
+    if (downloadGridFullBtn) {
+      downloadGridFullBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了完整九宫格下载');
+        downloadGridPNG();
+      });
+    }
+    
+    if (downloadGridCardsBtn) {
+      downloadGridCardsBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了单张九宫格卡片下载');
+        downloadGridCards();
+      });
+    }
+    
+    if (downloadGridAllBtn) {
+      downloadGridAllBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('点击了批量九宫格下载');
+        downloadGridPNG('all');
+      });
+    }
+  });
+
+  // 使用事件委托作为备用方案
+  document.addEventListener('click', (e) => {
+    const target = e.target;
+    
+    // 关键词分析下载按钮
+    if (target.id === 'downloadKeywordFullBtn' || target.closest('#downloadKeywordFullBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了完整关键词分析下载');
+      downloadKeywordPNG();
+    } else if (target.id === 'downloadKeywordCardsBtn' || target.closest('#downloadKeywordCardsBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了单张关键词卡片下载');
+      downloadKeywordCards();
+    } else if (target.id === 'downloadKeywordAllBtn' || target.closest('#downloadKeywordAllBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了批量关键词下载');
+      downloadKeywordPNG('all');
+    }
+    // 九宫格下载按钮
+    else if (target.id === 'downloadGridFullBtn' || target.closest('#downloadGridFullBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了完整九宫格下载');
+      downloadGridPNG();
+    } else if (target.id === 'downloadGridCardsBtn' || target.closest('#downloadGridCardsBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了单张九宫格卡片下载');
+      downloadGridCards();
+    } else if (target.id === 'downloadGridAllBtn' || target.closest('#downloadGridAllBtn')) {
+      e.preventDefault();
+      console.log('事件委托：点击了批量九宫格下载');
+      downloadGridPNG('all');
+    }
+  });
+  
+  // 新增专门的卡片选择下载函数
+  async function downloadGridCards() {
+    const topic = topicInput.value.trim() || '未命名主题';
+    
+    // 提取九宫格数据
+    const gridData = {};
+    keys.forEach(key => {
+      const textarea = document.querySelector(`textarea[data-key="${key}"]`);
+      if (textarea && textarea.value.trim()) {
+        const suggestions = textarea.value.split('\n').filter(line => line.trim());
+        gridData[key] = suggestions;
+      }
+    });
+    
+    if (Object.keys(gridData).length === 0) {
+      showToast('请先进行分析或填写内容', 'error');
+      return;
+    }
+    
+    // 显示卡片选择界面
+    showCardSelectionModal(gridData, topic, 'grid');
+  }
+  
+  // 新增专门的关键词卡片选择下载函数
+  async function downloadKeywordCards() {
+    const topic = topicInput.value.trim() || '未命名主题';
+    
+    const analysisResult = document.querySelector('#keywordAnalysisResult .keyword-result');
+    if (!analysisResult) {
+      showToast('请先进行分析再下载', 'error');
+      return;
+    }
+    
+    // 提取关键词分析数据
+    const keywordData = extractKeywordData(analysisResult);
+    
+    if (Object.keys(keywordData).length === 0) {
+      showToast('没有找到分析数据', 'error');
+      return;
+    }
+    
+    // 显示卡片选择界面
+    showCardSelectionModal(keywordData, topic, 'keyword');
   }
   
   if (clearBtn) {
