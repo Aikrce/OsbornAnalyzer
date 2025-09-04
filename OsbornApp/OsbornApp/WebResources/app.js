@@ -1,780 +1,648 @@
-(function () {
-  const topicInput = document.getElementById('topicInput');
-  const apiKeyInput = document.getElementById('apiKeyInput');
-  const topicShow = document.getElementById('topicShow');
-  const dateShow = document.getElementById('dateShow');
-  const downloadKeywordBtn = document.getElementById('downloadKeywordBtn');
-  const downloadGridBtn = document.getElementById('downloadGridBtn');
-  const clearBtn = document.getElementById('clearBtn');
-  const analyzeBtn = document.getElementById('analyzeBtn');
-  const toggleApiKeyBtn = document.getElementById('toggleApiKey');
-  const textareas = Array.from(document.querySelectorAll('textarea[data-key]'));
-  const keys = ['he','jie','gai','da','xiao','ti','tiao','dian','hebing'];
+// 奥斯本创新九问工具 - 性能优化版本
 
-  // 奥斯本检核表法完整案例数据库
-  const osbornCaseDatabase = {
-    he: { // 能否他用
-      title: "能否他用",
-      description: "探索其他用途和应用场景",
-      cases: [
-        "花生用途扩展：德国有人想出了300种利用花生的方法，仅用于烹调就有100多种",
-        "橡胶多重应用：用于制造床毯、浴盆、人行道边饰、衣夹、鸟笼、门扶手、棺材、墓碑等",
-        "X射线技术迁移：从医疗诊断扩展到安全检查、无损检测和工艺品制作",
-        "电吹风改造：用于工业生产中快速烘干油漆",
-        "3D打印技术应用扩展：从工业制造扩展到食品加工（3D食品打印机）和医疗领域（定制面膜）",
-        "炉渣再利用：探索炉渣在建筑材料中的新用途",
-        "废料创意利用：将工业废料转化为艺术品或建筑材料",
-        "边角料高效应用：服装厂利用边角料制作小型饰品或拼贴设计",
-        "无人机配送药物：将消费级无人机技术用于医疗物资配送",
-        "虚拟现实技术：从游戏娱乐扩展到医疗康复和心理治疗领域"
-      ]
-    },
-    jie: { // 能否借用
-      title: "能否借用",
-      description: "借鉴其他领域的做法和原理",
-      cases: [
-        "微爆破技术医疗应用：医生引入微爆破技术消除肾结石",
-        "电吹风工业应用：借鉴到工业生产中用于快速烘干油漆",
-        "3D食品打印机：将3D打印技术借鉴到食品加工领域",
-        "防震技术建筑应用：将机械防震技术借鉴到建筑防震设计中",
-        "纳米材料服装应用：将航空航天领域的纳米材料借鉴到服装行业",
-        "激光美容医疗：将工业激光技术借鉴到医疗美容领域",
-        "GPS动物追踪：将军事GPS技术借鉴到野生动物研究领域",
-        "二维码支付系统：将商品标识技术借鉴到金融支付领域",
-        "人工智能医学诊断：将人工智能技术从棋类游戏借鉴到医学影像诊断",
-        "潜艇生物研究：将军事潜艇技术借鉴到深海生物科学研究"
-      ]
-    },
-    gai: { // 能否改变
-      title: "能否改变",
-      description: "改变形态、流程、规则或属性",
-      cases: [
-        "平面镜变曲面镜：制成哈哈镜",
-        "福特T型车颜色：从只有黑色改为多种颜色选择",
-        "面包包装材料：改变包装使其具有芳香味道，提高嗅觉诱力",
-        "手机外壳材质：从塑料改为金属、玻璃甚至木质材料",
-        "汽车大灯形状：从圆形改为流线型设计，提高空气动力学性能",
-        "软件界面配色方案：改变颜色方案降低视觉疲劳",
-        "办公桌椅高度调节：可调节设计适应不同身高用户",
-        "食品口味变化：开发不同地域口味的方便面系列",
-        "建筑物外立面：改变纹理和颜色创造视觉吸引力",
-        "音响设备造型：从方正的设计改为流线型现代设计"
-      ]
-    },
-    da: { // 能否扩大
-      title: "能否扩大",
-      description: "扩大规模、功能、影响范围",
-      cases: [
-        "药物牙膏开发：在牙膏中加入某种配料，制成具有防酸、脱敏、止血等功能的药物牙膏",
-        "袜子加固设计：织袜厂通过加固袜头和袜跟，使袜子销售量大增",
-        "防弹玻璃创新：在两块玻璃之间加入特殊材料，制成防震、防碎、防弹的新型玻璃",
-        "智能手机屏幕：增大屏幕尺寸提高观看体验",
-        "电池容量提升：增加电池容量延长电子产品使用时间",
-        "存储空间扩展：为云计算服务提供更大的存储空间选项",
-        "会员特权增加：为高级会员增加更多专属特权和服务",
-        "课程内容扩充：在线课程增加辅助学习材料和实践项目",
-        "产品保修期延长：延长保修期提高客户信心",
-        "软件功能增强：为专业版软件增加更多高级功能"
-      ]
-    },
-    xiao: { // 能否缩小
-      title: "能否缩小",
-      description: "简化、专注核心功能、便携化",
-      cases: [
-        "袖珍电子产品：袖珍式收音机、微型计算机等",
-        "无内胎自行车轮胎：简化结构，避免泄气问题",
-        "便携式3D打印机：缩小打印机机体，实现手机直接打印",
-        "纳米芯片技术：缩小电子元件尺寸提高集成度",
-        "浓缩清洁剂：减少包装体积和运输成本",
-        "微型医疗器械：开发微型内窥镜等医疗设备减少患者痛苦",
-        "折叠屏手机：缩小体积提高便携性",
-        "压缩空气储能：缩小能源存储设备体积",
-        "无人机小型化：开发更小型无人机用于特定场景",
-        "可折叠自行车：缩小体积便于携带和存储"
-      ]
-    },
-    ti: { // 能否替代
-      title: "能否替代",
-      description: "替代材料、方法、技术或流程",
-      cases: [
-        "纸质铅笔：用纸代替木料做铅笔",
-        "液压传动替代：在气体中用液压传动来替代金属齿轮",
-        "充氩灯泡：用充氩的办法来代替电灯泡中的真空，使钨丝灯泡提高亮度",
-        "塑料凳子材质：用塑料替代木材制造凳子",
-        "植物基人造肉：用植物蛋白替代动物蛋白",
-        "可再生能源：用太阳能、风能替代化石燃料",
-        "视频会议系统：替代线下会议减少差旅需求",
-        "电子发票：替代纸质发票更加环保",
-        "虚拟键盘：替代物理键盘减少设备体积",
-        "合成皮革：替代动物皮革更加环保和低成本"
-      ]
-    },
-    tiao: { // 能否调整
-      title: "能否调整",
-      description: "调整顺序、结构、流程或时间",
-      cases: [
-        "飞机螺旋桨位置调整：从头部移到顶部成为直升机，再移到尾部成为喷气式飞机",
-        "商店柜台布局：重新安排柜台优化客户流线",
-        "3D打印流程调整：直接扫描打印简化流程",
-        "生产线重组：调整生产线布局提高生产效率",
-        "网站导航菜单：重新组织菜单结构提高用户体验",
-        "课程模块顺序：调整学习模块顺序优化学习曲线",
-        "组织结构扁平化：减少管理层级提高决策效率",
-        "交通信号灯时序：调整信号时序优化交通流量",
-        "软件功能菜单：重新组织功能菜单提高用户效率",
-        "物流配送路线：重新规划配送路线降低运输成本"
-      ]
-    },
-    dian: { // 能否颠倒
-      title: "能否颠倒",
-      description: "颠倒关系、反转思维、逆向操作",
-      cases: [
-        "电动机发明：将发电机原理颠倒",
-        "电能化学能转换：化学能可以转化为电能，电能也可以转化为化学能（蓄电池）",
-        "可逆凳子设计：制作无论是正着还是倒过来都能使用的凳子",
-        "自上而下管理模式：颠倒传统自下而上的管理方式",
-        "反向摄影：手机摄像头同时拍摄前后视角",
-        "逆序烹饪：改变传统烹饪顺序创造新口感",
-        "倒置房屋设计：屋顶在下地基在上的创意建筑",
-        "学生授课模式：学生代替老师授课加深理解",
-        "反向拍卖：买家出价卖家竞争",
-        "逆向物流：产品从消费者返回生产者的流程"
-      ]
-    },
-    hebing: { // 能否合并
-      title: "能否合并",
-      description: "合并、组合、联动、集成",
-      cases: [
-        "带橡皮铅笔：把铅笔和橡皮组合在一起",
-        "组合机床：将几种部件组合在一起变成组合机床",
-        "多功能家具：把餐桌、茶几和凳子组合在一起",
-        "模块化3D打印机：可根据打印产品大小调整打印机尺寸",
-        "智能手机：组合电话、相机、电脑等多种功能",
-        "智能家居系统：整合照明、安保、温控等功能",
-        "一体化办公系统：组合打印、扫描、复印功能"
-      ]
-    }
-  };
-
-  // 本地存储管理（iOS WebView兼容）
-  const storage = {
-    getApiKey: () => {
-      try {
-        return localStorage.getItem('deepseek_api_key') || '';
-      } catch (e) {
-        return '';
-      }
-    },
-    setApiKey: (key) => {
-      try {
-        localStorage.setItem('deepseek_api_key', key);
-      } catch (e) {
-        console.warn('无法保存API密钥');
-      }
-    },
-    clearApiKey: () => {
-      try {
-        localStorage.removeItem('deepseek_api_key');
-      } catch (e) {
-        console.warn('无法清除API密钥');
-      }
-    }
-  };
-
-  // 初始化
-  updateDate();
-  renderPreview();
-  setupPageTabs();
-  setupApiKeyToggle();
-  loadSavedApiKey();
-
-  // 加载保存的API密钥
-  function loadSavedApiKey() {
-    const savedKey = storage.getApiKey();
-    if (savedKey && apiKeyInput) {
-      apiKeyInput.value = savedKey;
-    }
-  }
-
-  // API密钥显示/隐藏切换
-  function setupApiKeyToggle() {
-    const toggleBtn = document.getElementById('toggleApiKey');
-    const apiInput = document.getElementById('apiKeyInput');
-    
-    if (toggleBtn && apiInput) {
-      toggleBtn.addEventListener('click', () => {
-        const isPassword = apiInput.type === 'password';
-        apiInput.type = isPassword ? 'text' : 'password';
-        toggleBtn.textContent = isPassword ? '🙈' : '👁️';
-        toggleBtn.setAttribute('aria-label', isPassword ? '隐藏密钥' : '显示密钥');
-      });
-    }
-  }
-
-  function renderPreview() {
-    const topic = topicInput.value.trim();
-    if (topicShow) {
-      topicShow.textContent = topic || '（未填写）';
-    }
-  }
-
-  function updateDate() {
-    const d = new Date();
-    const s = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    if (dateShow) {
-      dateShow.textContent = s;
-    }
-  }
-
-  // 基于案例数据库的本地分析
-  function analyzeWithDatabase(topic) {
-    const keywordAnalysis = generateKeywordAnalysisFromDatabase(topic);
-    const analysisResults = generateNineDimensionsFromDatabase(topic, keywordAnalysis);
-    
-    return { keywordAnalysis, analysisResults };
-  }
-
-  // 基于数据库生成关键词分析
-  function generateKeywordAnalysisFromDatabase(topic) {
-    const topicLower = topic.toLowerCase();
-    
-    let coreFunction, keyAttributes, currentForm, targetUsers, usageScenarios, valueChain, constraints;
-    
-    // 智能匹配主题类型
-    if (topicLower.includes('手机') || topicLower.includes('电话')) {
-      coreFunction = '通信联络、信息处理、娱乐办公的综合功能';
-      keyAttributes = ['便携性', '智能化', '多功能', '网络连接'];
-      currentForm = '智能手机、功能机等移动通信设备';
-      targetUsers = '各年龄段用户，从学生到商务人士';
-      usageScenarios = ['日常通信', '移动办公', '娱乐消费', '学习教育'];
-      valueChain = '通信产业链核心终端设备';
-      constraints = ['电池续航', '屏幕尺寸', '成本控制', '技术更新'];
-    } else if (topicLower.includes('汽车') || topicLower.includes('车')) {
-      coreFunction = '人员和货物的陆地交通运输工具';
-      keyAttributes = ['机动性', '安全性', '舒适性', '环保性'];
-      currentForm = '燃油车、电动车、混合动力车等';
-      targetUsers = '个人用户、家庭用户、商业用户';
-      usageScenarios = ['日常出行', '长途旅行', '货物运输', '商务用车'];
-      valueChain = '汽车制造产业链核心产品';
-      constraints = ['环保法规', '能源供应', '交通拥堵', '购买成本'];
-    } else if (topicLower.includes('教育') || topicLower.includes('学习')) {
-      coreFunction = '知识传授、技能培养、人才培育';
-      keyAttributes = ['系统性', '互动性', '个性化', '可持续'];
-      currentForm = '学校教育、在线教育、培训机构等';
-      targetUsers = '学生、职场人士、终身学习者';
-      usageScenarios = ['课堂教学', '在线学习', '职业培训', '自主学习'];
-      valueChain = '教育服务产业链核心环节';
-      constraints = ['教育资源', '技术门槛', '学习时间', '成本投入'];
-    } else {
-      // 通用分析模板
-      coreFunction = `${topic}的核心功能和价值主张`;
-      keyAttributes = ['实用性', '便捷性', '创新性', '可靠性'];
-      currentForm = `${topic}的现有形态和实现方式`;
-      targetUsers = `${topic}的主要目标用户群体`;
-      usageScenarios = ['日常使用场景', '专业应用场景', '特殊需求场景'];
-      valueChain = `${topic}在相关产业价值链中的定位`;
-      constraints = ['技术限制', '成本约束', '市场竞争', '用户接受度'];
+// 性能优化工具类
+class PerformanceOptimizer {
+    static debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
     
-    return {
-      coreFunction,
-      keyAttributes,
-      currentForm,
-      targetUsers,
-      usageScenarios,
-      valueChain,
-      constraints
-    };
-  }
-
-  // 基于数据库生成九维度分析
-  function generateNineDimensionsFromDatabase(topic, keywordAnalysis) {
-    const results = {};
-    
-    keys.forEach(key => {
-      const caseInfo = osbornCaseDatabase[key];
-      const suggestions = generateSuggestionsFromCases(topic, keywordAnalysis, caseInfo);
-      results[key] = suggestions;
-    });
-    
-    return results;
-  }
-
-  // 基于案例生成建议
-  function generateSuggestionsFromCases(topic, keywordAnalysis, caseInfo) {
-    const suggestions = [];
-    
-    // 智能选择最相关的案例
-    const relevantCases = selectRelevantCases(topic, caseInfo.cases);
-    
-    // 生成高质量建议
-    relevantCases.forEach(caseExample => {
-      const suggestion = adaptCaseToTopic(caseExample, topic, caseInfo.title);
-      suggestions.push(suggestion);
-    });
-    
-    // 确保至少有3个建议
-    while (suggestions.length < 3) {
-      const genericSuggestion = generateContextualSuggestion(topic, caseInfo, suggestions.length);
-      suggestions.push(genericSuggestion);
+    static throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
     }
     
-    return suggestions.slice(0, 4);
-  }
-
-  // 智能选择相关案例
-  function selectRelevantCases(topic, cases) {
-    const topicLower = topic.toLowerCase();
-    const scoredCases = cases.map(caseExample => {
-      let score = 0;
-      const caseText = caseExample.toLowerCase();
-      
-      // 关键词匹配评分
-      const topicWords = topicLower.split(/[\s，。！？；：、]+/).filter(w => w.length > 1);
-      topicWords.forEach(word => {
-        if (caseText.includes(word)) score += 2;
-      });
-      
-      // 行业相关性评分
-      const industryKeywords = getIndustryKeywords(topicLower);
-      industryKeywords.forEach(keyword => {
-        if (caseText.includes(keyword)) score += 3;
-      });
-      
-      return { case: caseExample, score };
-    });
-    
-    return scoredCases
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 3)
-      .map(item => item.case);
-  }
-
-  // 获取行业关键词
-  function getIndustryKeywords(topic) {
-    const industryMap = {
-      '智能|ai|人工智能': ['技术', '自动化', '算法', '数据'],
-      '教育|学习|培训': ['知识', '课程', '学生', '教学'],
-      '医疗|健康|康复': ['治疗', '诊断', '患者', '医生'],
-      '交通|出行|车辆': ['运输', '道路', '驾驶', '乘客'],
-      '金融|支付|理财': ['资金', '投资', '银行', '交易'],
-      '购物|电商|零售': ['商品', '消费', '客户', '销售'],
-      '社交|社区|交流': ['用户', '互动', '分享', '连接'],
-      '家居|生活|日常': ['便利', '舒适', '实用', '家庭']
-    };
-    
-    for (const [pattern, keywords] of Object.entries(industryMap)) {
-      if (new RegExp(pattern).test(topic)) {
-        return keywords;
-      }
+    // 批量DOM更新
+    static batchDOMUpdate(callback) {
+        return new Promise(resolve => {
+            requestAnimationFrame(() => {
+                callback();
+                resolve();
+            });
+        });
     }
-    return ['创新', '优化', '改进', '发展'];
-  }
+}
 
-  // 高质量案例适配
-  function adaptCaseToTopic(caseExample, topic, method) {
-    const caseKey = extractCaseKey(caseExample);
-    const caseInnovation = extractInnovation(caseExample);
-    
-    const templates = {
-      '能否他用': [
-        `参考${caseKey}的跨界应用，${topic}可以拓展到${getAlternativeField(topic)}领域`,
-        `借鉴${caseKey}的多元化策略，为${topic}开发新的应用场景`,
-        `学习${caseKey}的成功经验，${topic}也可以${caseInnovation}`
-      ],
-      '能否借用': [
-        `引入${caseKey}的核心技术，提升${topic}的功能性能`,
-        `借鉴${caseKey}的创新模式，为${topic}注入新的活力`,
-        `学习${caseKey}的解决方案，优化${topic}的实现方式`
-      ],
-      '能否改变': [
-        `参考${caseKey}的变革思路，改变${topic}的${getChangeableAspect(topic)}`,
-        `借鉴${caseKey}的创新设计，为${topic}带来形态上的突破`,
-        `学习${caseKey}的改进策略，优化${topic}的用户体验`
-      ],
-      '能否扩大': [
-        `参考${caseKey}的扩展策略，增强${topic}的${getExpandableFeature(topic)}`,
-        `借鉴${caseKey}的成功模式，扩大${topic}的影响范围`,
-        `学习${caseKey}的发展思路，提升${topic}的综合能力`
-      ],
-      '能否缩小': [
-        `参考${caseKey}的精简理念，专注${topic}的核心价值`,
-        `借鉴${caseKey}的便携化设计，提高${topic}的易用性`,
-        `学习${caseKey}的优化方案，简化${topic}的操作流程`
-      ],
-      '能否替代': [
-        `参考${caseKey}的替代方案，为${topic}寻找更优的${getReplaceableComponent(topic)}`,
-        `借鉴${caseKey}的创新材料，提升${topic}的性能表现`,
-        `学习${caseKey}的技术革新，实现${topic}的升级换代`
-      ],
-      '能否调整': [
-        `参考${caseKey}的优化布局，重新设计${topic}的${getAdjustableStructure(topic)}`,
-        `借鉴${caseKey}的流程改进，提升${topic}的运行效率`,
-        `学习${caseKey}的结构调整，优化${topic}的整体性能`
-      ],
-      '能否颠倒': [
-        `参考${caseKey}的逆向思维，颠倒${topic}的${getReversibleAspect(topic)}`,
-        `借鉴${caseKey}的创新理念，反转${topic}的传统模式`,
-        `学习${caseKey}的突破性思路，重新定义${topic}的价值主张`
-      ],
-      '能否合并': [
-        `参考${caseKey}的集成策略，将${topic}与${getCombinable(topic)}相结合`,
-        `借鉴${caseKey}的融合理念，创造${topic}的协同效应`,
-        `学习${caseKey}的组合模式，实现${topic}的功能整合`
-      ]
-    };
-    
-    const methodTemplates = templates[method] || [`基于${method}思路，为${topic}寻找创新机会`];
-    return methodTemplates[Math.floor(Math.random() * methodTemplates.length)];
-  }
-
-  // 辅助函数
-  function extractCaseKey(caseExample) {
-    return caseExample.split('：')[0] || caseExample.substring(0, 15);
-  }
-
-  function extractInnovation(caseExample) {
-    const parts = caseExample.split('：');
-    return parts.length > 1 ? parts[1].substring(0, 20) + '...' : '进行创新应用';
-  }
-
-  function getAlternativeField(topic) {
-    const fields = ['教育', '医疗', '娱乐', '办公', '家居', '交通'];
-    return fields[Math.floor(Math.random() * fields.length)];
-  }
-
-  function getChangeableAspect(topic) {
-    const aspects = ['外观设计', '交互方式', '功能配置', '使用流程'];
-    return aspects[Math.floor(Math.random() * aspects.length)];
-  }
-
-  function getExpandableFeature(topic) {
-    const features = ['功能范围', '服务能力', '用户覆盖', '应用场景'];
-    return features[Math.floor(Math.random() * features.length)];
-  }
-
-  function getReplaceableComponent(topic) {
-    const components = ['核心技术', '关键材料', '实现方式', '服务模式'];
-    return components[Math.floor(Math.random() * components.length)];
-  }
-
-  function getAdjustableStructure(topic) {
-    const structures = ['功能布局', '操作流程', '界面设计', '服务架构'];
-    return structures[Math.floor(Math.random() * structures.length)];
-  }
-
-  function getReversibleAspect(topic) {
-    const aspects = ['服务模式', '用户关系', '价值传递', '交互方式'];
-    return aspects[Math.floor(Math.random() * aspects.length)];
-  }
-
-  function getCombinable(topic) {
-    const combinables = ['相关服务', '互补功能', '协同技术', '配套产品'];
-    return combinables[Math.floor(Math.random() * combinables.length)];
-  }
-
-  // 生成情境化建议
-  function generateContextualSuggestion(topic, caseInfo, index) {
-    const contextualPrompts = {
-      '能否他用': [
-        `探索${topic}在不同年龄群体中的应用潜力`,
-        `考虑${topic}在特殊环境下的使用可能性`,
-        `研究${topic}与其他行业结合的创新机会`
-      ],
-      '能否借用': [
-        `从自然界寻找${topic}的设计灵感`,
-        `借鉴成功企业的商业模式应用到${topic}`,
-        `引入前沿科技提升${topic}的竞争力`
-      ],
-      '能否改变': [
-        `改变${topic}的服务时间和频率`,
-        `调整${topic}的目标用户群体定位`,
-        `修改${topic}的核心价值主张`
-      ],
-      '能否扩大': [
-        `扩展${topic}的服务半径和覆盖范围`,
-        `增加${topic}的附加价值和衍生服务`,
-        `提升${topic}的处理能力和响应速度`
-      ],
-      '能否缩小': [
-        `专注${topic}的核心功能，去除冗余特性`,
-        `简化${topic}的操作界面和使用步骤`,
-        `降低${topic}的使用门槛和学习成本`
-      ],
-      '能否替代': [
-        `寻找${topic}的环保替代方案`,
-        `探索${topic}的低成本实现方式`,
-        `研究${topic}的智能化替代技术`
-      ],
-      '能否调整': [
-        `优化${topic}的资源配置和分配策略`,
-        `调整${topic}的服务流程和响应机制`,
-        `重新设计${topic}的用户交互体验`
-      ],
-      '能否颠倒': [
-        `颠倒${topic}的传统供需关系`,
-        `反转${topic}的服务提供方式`,
-        `逆向思考${topic}的价值创造模式`
-      ],
-      '能否合并': [
-        `整合${topic}与相关服务的资源优势`,
-        `合并${topic}的多个功能模块`,
-        `联合${topic}与合作伙伴的核心能力`
-      ]
-    };
-    
-    const prompts = contextualPrompts[caseInfo.title] || [`深入思考${topic}的创新可能性`];
-    return prompts[index % prompts.length];
-  }
-
-  // 主分析函数 - 仅使用本地数据库
-  function analyzeWithLocalDatabase() {
-    const topic = topicInput.value.trim();
-    
-    if (!topic) {
-      showToast('请先输入主题', 'error');
-      return;
+// DOM管理器 - 缓存和优化DOM操作
+class DOMManager {
+    constructor() {
+        this.cache = new Map();
+        this.fragments = new Map();
     }
-
-    // 更新按钮状态
-    const btnText = analyzeBtn.querySelector('.btn-text');
-    const loadingSpinner = analyzeBtn.querySelector('.loading-spinner');
     
-    if (btnText && loadingSpinner) {
-      btnText.style.display = 'none';
-      loadingSpinner.style.display = 'inline-flex';
-    }
-    analyzeBtn.disabled = true;
-
-    // 模拟分析延迟
-    setTimeout(() => {
-      try {
-        // 使用本地数据库分析
-        const localResult = analyzeWithDatabase(topic);
-        const keywordAnalysis = localResult.keywordAnalysis;
-        const analysisResults = localResult.analysisResults;
-        
-        // 显示关键词分析结果
-        displayKeywordAnalysis(keywordAnalysis);
-        
-        if (downloadKeywordBtn) {
-          downloadKeywordBtn.style.display = 'inline-flex';
+    getElement(id) {
+        if (!this.cache.has(id)) {
+            const element = document.getElementById(id);
+            if (element) {
+                this.cache.set(id, element);
+            }
         }
+        return this.cache.get(id) || null;
+    }
+    
+    createElement(tag, className, innerHTML) {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (innerHTML) element.innerHTML = innerHTML;
+        return element;
+    }
+    
+    createFragment(items, createItemCallback) {
+        const fragment = document.createDocumentFragment();
+        items.forEach(item => {
+            const element = createItemCallback(item);
+            fragment.appendChild(element);
+        });
+        return fragment;
+    }
+    
+    clearCache() {
+        this.cache.clear();
+        this.fragments.clear();
+    }
+}
+
+// 奥斯本检核表法案例数据库
+const osbornCaseDatabase = {
+    ta: { 
+        title: "他用",
+        description: "探索其他用途和应用场景",
+        cases: [
+            "花生300种用途：从食品到工业原料的全面应用",
+            "X射线技术迁移：从医疗诊断扩展到安检和材料检测",
+            "GPS技术民用：从军事导航到日常生活导航",
+            "激光技术多元化：从科研工具到医疗、工业、娱乐应用",
+            "超声波技术扩展：从医疗检查到清洁、焊接、测距"
+        ]
+    },
+    jie: { 
+        title: "借用",
+        description: "借鉴其他领域的做法和原理",
+        cases: [
+            "微爆破技术医疗应用：医生引入微爆破技术消除肾结石",
+            "电吹风工业应用：借鉴到工业生产中用于快速烘干油漆",
+            "3D食品打印机：将3D打印技术借鉴到食品加工领域",
+            "仿生学设计：借鉴动植物结构设计飞机、建筑、材料",
+            "游戏化教育：将游戏机制借用到教育培训中"
+        ]
+    },
+    gai: { 
+        title: "改变",
+        description: "改变形态、流程、规则或属性",
+        cases: [
+            "福特汽车颜色变化：从单一黑色到多彩选择",
+            "平面镜变哈哈镜：改变镜面形状创造娱乐效果",
+            "传统教育在线化：改变教学形式和互动方式",
+            "纸质媒体数字化：改变信息传播载体和形式",
+            "现金支付电子化：改变交易方式和支付流程"
+        ]
+    },
+    kuo: { 
+        title: "扩大",
+        description: "扩大规模、功能、影响范围",
+        cases: [
+            "药物牙膏：在普通牙膏基础上增加药物功能",
+            "防弹玻璃创新：扩大玻璃的防护功能和应用范围",
+            "智能手机功能扩展：从通讯工具到生活助手",
+            "电商平台生态化：从购物网站到综合服务平台",
+            "社交媒体多元化：从交流工具到商业营销平台"
+        ]
+    },
+    suo: { 
+        title: "缩小",
+        description: "简化、专注核心功能、便携化",
+        cases: [
+            "袖珍收音机：将大型收音机微型化便携化",
+            "微型医疗器械：缩小医疗设备体积提高便携性",
+            "迷你电脑：将台式机功能压缩到小型设备",
+            "便携式投影仪：缩小传统投影设备体积",
+            "折叠自行车：缩小存储空间提高便携性"
+        ]
+    },
+    ti: { 
+        title: "替代",
+        description: "替代材料、方法、技术或流程",
+        cases: [
+            "纸质铅笔：用纸卷替代木材制作铅笔外壳",
+            "植物基人造肉：用植物蛋白替代动物蛋白",
+            "电子书替代纸书：用数字媒体替代纸质载体",
+            "LED替代白炽灯：用半导体照明替代传统照明",
+            "电动车替代燃油车：用电力驱动替代燃油驱动"
+        ]
+    },
+    tiao: { 
+        title: "调整",
+        description: "调整顺序、结构、流程或时间",
+        cases: [
+            "飞机螺旋桨位置调整：改变螺旋桨安装位置提高效率",
+            "生产线重组：调整生产流程顺序提高效率",
+            "网站布局优化：调整页面元素位置改善用户体验",
+            "工作流程再造：重新安排工作步骤提高效率",
+            "供应链优化：调整供应商顺序和配送路径"
+        ]
+    },
+    dao: { 
+        title: "颠倒",
+        description: "颠倒关系、反转思维、逆向操作",
+        cases: [
+            "电动机发明：颠倒发电机原理创造电动机",
+            "反向拍卖模式：买家出价卖家竞争的颠倒模式",
+            "逆向物流：从消费者到生产者的反向供应链",
+            "反向学习：从结果推导过程的教学方法",
+            "逆向工程：从产品分析设计和制造过程"
+        ]
+    },
+    he: { 
+        title: "合并",
+        description: "合并、组合、联动、集成",
+        cases: [
+            "带橡皮铅笔：将铅笔和橡皮合并为一体",
+            "智能手机集成：将电话、相机、电脑等功能合并",
+            "一体化办公软件：将文档、表格、演示合并",
+            "智能家居系统：将各种家电设备联网集成",
+            "移动支付生态：将支付、理财、生活服务合并"
+        ]
+    }
+};
+
+// 行业专业模板（简化版）
+const industryTemplates = {
+    "科技产品": {
+        coreFunction: "通过技术创新解决用户痛点，提升效率和体验",
+        keyAttributes: ["创新性", "易用性", "可靠性", "扩展性", "安全性"],
+        currentForm: "软件应用、硬件设备、平台服务、技术解决方案",
+        targetUsers: "个人用户、企业客户、开发者、技术爱好者",
+        usageScenarios: ["日常使用", "工作协作", "娱乐休闲", "学习提升", "问题解决"]
+    },
+    "默认": {
+        coreFunction: "提供核心价值和服务",
+        keyAttributes: ["实用性", "可靠性", "易用性"],
+        currentForm: "产品或服务",
+        targetUsers: "目标用户群体",
+        usageScenarios: ["主要使用场景"]
+    }
+};
+
+// 主应用类
+class OsbornApp {
+    constructor() {
+        this.domManager = new DOMManager();
+        this.analysisCache = new Map();
+        this.isAnalyzing = false;
         
-        // 填充九宫格结果
-        keys.forEach(key => {
-          const textarea = document.querySelector(`textarea[data-key="${key}"]`);
-          if (analysisResults[key] && Array.isArray(analysisResults[key])) {
-            textarea.value = analysisResults[key].join('\n');
-          }
+        // 防抖的分析函数
+        this.debouncedAnalyze = PerformanceOptimizer.debounce(
+            this.performAnalysis.bind(this), 
+            500
+        );
+        
+        this.init();
+    }
+    
+    async init() {
+        console.log('初始化奥斯本创新九问工具...');
+        
+        // 等待DOM加载
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.setupApp());
+        } else {
+            this.setupApp();
+        }
+    }
+    
+    setupApp() {
+        try {
+            this.setupEventListeners();
+            this.loadSavedApiKey();
+            this.setupPageTabs();
+            console.log('应用初始化完成');
+        } catch (error) {
+            console.error('应用初始化失败:', error);
+            this.showNotification('应用初始化失败，请刷新页面重试', 'error');
+        }
+    }
+    
+    setupEventListeners() {
+        // API密钥保存
+        const apiKeyInput = this.domManager.getElement('apiKeyInput');
+        if (apiKeyInput) {
+            apiKeyInput.addEventListener('blur', (e) => {
+                if (e.target.value.trim()) {
+                    localStorage.setItem('deepseek_api_key', e.target.value.trim());
+                }
+            });
+        }
+    }
+    
+    loadSavedApiKey() {
+        const savedApiKey = localStorage.getItem('deepseek_api_key');
+        const apiKeyInput = this.domManager.getElement('apiKeyInput');
+        if (savedApiKey && apiKeyInput) {
+            apiKeyInput.value = savedApiKey;
+        }
+    }
+    
+    setupPageTabs() {
+        const pageTabs = document.querySelectorAll('.page-tab');
+        pageTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                this.switchPage(e.target.getAttribute('data-page'));
+            });
+        });
+    }
+    
+    switchPage(pageId) {
+        // 移除所有active类
+        document.querySelectorAll('.page-tab').forEach(tab => {
+            tab.classList.remove('active');
         });
         
-        showToast('分析完成！请点击"九宫格编辑"标签页查看结果。', 'success');
+        // 添加当前active类
+        document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
         
-      } catch (error) {
-        console.error('分析错误:', error);
-        showToast(`分析失败：${error.message}`, 'error');
-      } finally {
-        // 恢复按钮状态
-        if (btnText && loadingSpinner) {
-          btnText.style.display = 'inline';
-          loadingSpinner.style.display = 'none';
-        }
-        analyzeBtn.disabled = false;
-      }
-    }, 1000);
-  }
-
-  function displayKeywordAnalysis(analysis) {
-    const analysisContent = document.getElementById('keywordAnalysisResult');
-    if (!analysisContent) return;
+        // 切换页面内容
+        const pages = ['keywordAnalysis', 'gridAnalysis'];
+        pages.forEach(id => {
+            const page = this.domManager.getElement(id);
+            if (page) {
+                page.classList.toggle('active', id === pageId);
+            }
+        });
+    }
     
-    const html = `
-      <div class="keyword-result">
-        <div class="analysis-header">
-          <h4>关键词深度分析结果</h4>
-        </div>
+    async startAnalysis() {
+        if (this.isAnalyzing) {
+            this.showNotification('分析正在进行中，请稍候...', 'warning');
+            return;
+        }
         
-        <div class="analysis-grid">
-          <div class="keyword-item">
-            <h5>核心功能</h5>
-            <p>${analysis.coreFunction || '暂无数据'}</p>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>关键属性</h5>
-            <div class="tags">
-              ${Array.isArray(analysis.keyAttributes) ? analysis.keyAttributes.map(attr => `<span class="tag">${attr}</span>`).join('') : '<span class="tag">暂无</span>'}
-            </div>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>现有形态</h5>
-            <p>${analysis.currentForm || '暂无数据'}</p>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>目标用户</h5>
-            <p>${analysis.targetUsers || '暂无数据'}</p>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>使用场景</h5>
-            <div class="tags">
-              ${Array.isArray(analysis.usageScenarios) ? analysis.usageScenarios.map(scenario => `<span class="tag">${scenario}</span>`).join('') : '<span class="tag">暂无</span>'}
-            </div>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>价值链条</h5>
-            <p>${analysis.valueChain || '暂无数据'}</p>
-          </div>
-          
-          <div class="keyword-item">
-            <h5>约束限制</h5>
-            <div class="tags">
-              ${Array.isArray(analysis.constraints) ? analysis.constraints.map(constraint => `<span class="tag warning">${constraint}</span>`).join('') : '<span class="tag">暂无</span>'}
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    analysisContent.innerHTML = html;
-  }
-
-  // 下载功能 - iOS优化版本
-  async function downloadGridPNG() {
-    try {
-      showToast('正在生成图片，请稍候...', 'info');
-      
-      // 在iOS中，我们可以提示用户截屏
-      showToast('请使用设备截屏功能保存九宫格分析图', 'info');
-      
-    } catch (error) {
-      console.error('下载失败:', error);
-      showToast('请使用设备截屏功能保存图片', 'info');
-    }
-  }
-
-  async function downloadKeywordPNG() {
-    try {
-      showToast('请使用设备截屏功能保存关键词分析图', 'info');
-    } catch (error) {
-      console.error('下载失败:', error);
-      showToast('请使用设备截屏功能保存图片', 'info');
-    }
-  }
-
-  // 显示提示消息
-  function showToast(message, type = 'info') {
-    // 创建提示元素
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    
-    // 添加样式
-    Object.assign(toast.style, {
-      position: 'fixed',
-      top: '20px',
-      right: '20px',
-      padding: '12px 24px',
-      borderRadius: '8px',
-      color: 'white',
-      fontWeight: '600',
-      fontSize: '14px',
-      zIndex: '10000',
-      opacity: '0',
-      transform: 'translateY(-20px)',
-      transition: 'all 0.3s ease',
-      maxWidth: '300px',
-      wordWrap: 'break-word'
-    });
-    
-    // 设置背景色
-    if (type === 'success') {
-      toast.style.background = 'linear-gradient(135deg, #4caf50 0%, #689f38 100%)';
-    } else if (type === 'error') {
-      toast.style.background = 'linear-gradient(135deg, #e91e63 0%, #ad1457 100%)';
-    } else {
-      toast.style.background = 'linear-gradient(135deg, #4a90e2 0%, #357abd 100%)';
-    }
-    
-    document.body.appendChild(toast);
-    
-    // 显示动画
-    setTimeout(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateY(0)';
-    }, 10);
-    
-    // 自动隐藏
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(-20px)';
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
+        const topicInput = this.domManager.getElement('topicInput');
+        const topic = topicInput?.value?.trim();
+        
+        if (!topic) {
+            this.showNotification('请输入分析主题', 'warning');
+            return;
         }
-      }, 300);
-    }, 3000);
-  }
-
-  function clearAll() {
-    topicInput.value = '';
-    textareas.forEach(ta => ta.value = '');
-    
-    const analysisContent = document.getElementById('keywordAnalysisResult');
-    if (analysisContent) {
-      analysisContent.innerHTML = '<p class="placeholder">点击"开始分析"进行主题分析<br><small>系统将基于案例数据库进行分析</small></p>';
+        
+        await this.debouncedAnalyze(topic);
     }
     
-    if (downloadKeywordBtn) {
-      downloadKeywordBtn.style.display = 'none';
+    async performAnalysis(topic) {
+        this.isAnalyzing = true;
+        this.setLoadingState(true);
+        
+        try {
+            // 检查缓存
+            const cacheKey = `analysis_${topic}`;
+            let results = this.analysisCache.get(cacheKey);
+            
+            if (!results) {
+                // 并行执行分析任务
+                const [keywordAnalysis, gridSuggestions] = await Promise.all([
+                    this.analyzeKeywords(topic),
+                    this.generateGridSuggestions(topic)
+                ]);
+                
+                results = { keywordAnalysis, gridSuggestions };
+                this.analysisCache.set(cacheKey, results);
+            }
+            
+            // 批量更新UI
+            await this.updateUI(results, topic);
+            
+            this.showNotification('分析完成！', 'success');
+            
+        } catch (error) {
+            console.error('分析失败:', error);
+            this.showNotification('分析失败，请重试', 'error');
+        } finally {
+            this.isAnalyzing = false;
+            this.setLoadingState(false);
+        }
     }
     
-    renderPreview();
-    switchToPage('analysis');
-  }
-
-  function setupPageTabs() {
-    const pageTabs = document.querySelectorAll('.page-tab');
-    pageTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        switchToPage(tab.dataset.page);
-      });
-    });
-  }
-
-  function switchToPage(pageName) {
-    document.querySelectorAll('.page-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    async analyzeKeywords(topic) {
+        // 简化的关键词分析
+        const template = this.matchIndustryTemplate(topic);
+        return {
+            coreFunction: template.coreFunction.replace(/通用/, topic),
+            keyAttributes: template.keyAttributes,
+            currentForm: template.currentForm,
+            targetUsers: template.targetUsers,
+            usageScenarios: template.usageScenarios
+        };
+    }
     
-    const targetTab = document.querySelector(`[data-page="${pageName}"]`);
-    const targetPage = document.getElementById(`${pageName}-page`);
+    matchIndustryTemplate(topic) {
+        const topicLower = topic.toLowerCase();
+        
+        if (topicLower.includes('智能') || topicLower.includes('AI') || 
+            topicLower.includes('软件') || topicLower.includes('技术')) {
+            return industryTemplates["科技产品"];
+        }
+        
+        return industryTemplates["默认"];
+    }
     
-    if (targetTab) targetTab.classList.add('active');
-    if (targetPage) targetPage.classList.add('active');
-  }
+    async generateGridSuggestions(topic) {
+        const dimensions = ['ta', 'jie', 'gai', 'kuo', 'suo', 'ti', 'tiao', 'dao', 'he'];
+        const suggestions = {};
+        
+        // 分批处理，避免阻塞UI
+        for (let i = 0; i < dimensions.length; i += 3) {
+            const batch = dimensions.slice(i, i + 3);
+            
+            batch.forEach(dim => {
+                suggestions[dim] = this.generateSuggestionForDimension(topic, dim);
+            });
+            
+            // 让出控制权
+            await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        
+        return suggestions;
+    }
+    
+    generateSuggestionForDimension(topic, dimension) {
+        const cases = osbornCaseDatabase[dimension]?.cases || [];
+        const selectedCases = cases.slice(0, 3); // 只取前3个，提高性能
+        
+        return selectedCases.map(caseExample => {
+            const rules = {
+                'ta': `探索${topic}在其他领域的应用`,
+                'jie': `借鉴其他行业做法应用到${topic}`,
+                'gai': `改变${topic}的现有形态`,
+                'kuo': `扩大${topic}的功能范围`,
+                'suo': `简化${topic}的复杂度`,
+                'ti': `寻找${topic}的替代方案`,
+                'tiao': `调整${topic}的流程结构`,
+                'dao': `颠倒${topic}的使用方式`,
+                'he': `将${topic}与其他服务整合`
+            };
+            
+            return `${rules[dimension]}：参考${caseExample.split('：')[0]}`;
+        });
+    }
+    
+    async updateUI(results, topic) {
+        await PerformanceOptimizer.batchDOMUpdate(() => {
+            this.displayKeywordAnalysis(results.keywordAnalysis);
+            this.displayGridSuggestions(results.gridSuggestions);
+            this.updateTopicDisplay(topic);
+        });
+    }
+    
+    displayKeywordAnalysis(analysis) {
+        const dimensions = [
+            { key: 'coreFunction', title: '核心功能', icon: '🎯', color: '#FF6B6B' },
+            { key: 'keyAttributes', title: '关键属性', icon: '⭐', color: '#4ECDC4' },
+            { key: 'currentForm', title: '现有形态', icon: '📦', color: '#45B7D1' },
+            { key: 'targetUsers', title: '目标用户', icon: '👥', color: '#96CEB4' },
+            { key: 'usageScenarios', title: '使用场景', icon: '🎬', color: '#FFEAA7' }
+        ];
+        
+        const keywordGrid = this.domManager.getElement('keywordGrid');
+        if (!keywordGrid) return;
+        
+        // 使用DocumentFragment优化DOM操作
+        const fragment = this.domManager.createFragment(dimensions, (dim) => {
+            const value = analysis[dim.key];
+            const displayValue = Array.isArray(value) ? value.join('、') : value;
+            
+            return this.domManager.createElement('div', 'keyword-card', `
+                <div class="keyword-header" style="border-left: 4px solid ${dim.color}">
+                    <span class="keyword-icon">${dim.icon}</span>
+                    <span class="keyword-title">${dim.title}</span>
+                </div>
+                <div class="keyword-content">${displayValue}</div>
+            `);
+        });
+        
+        keywordGrid.innerHTML = '';
+        keywordGrid.appendChild(fragment);
+    }
+    
+    displayGridSuggestions(suggestions) {
+        const dimensionInfo = {
+            'ta': { title: '能否他用', color: '#FF6B6B', icon: '🔄' },
+            'jie': { title: '能否借用', color: '#4ECDC4', icon: '🤝' },
+            'gai': { title: '能否改变', color: '#45B7D1', icon: '🔧' },
+            'kuo': { title: '能否扩大', color: '#96CEB4', icon: '📈' },
+            'suo': { title: '能否缩小', color: '#FFEAA7', icon: '📉' },
+            'ti': { title: '能否替代', color: '#DDA0DD', icon: '🔀' },
+            'tiao': { title: '能否调整', color: '#98D8C8', icon: '⚙️' },
+            'dao': { title: '能否颠倒', color: '#F7DC6F', icon: '🔃' },
+            'he': { title: '能否合并', color: '#F1948A', icon: '🔗' }
+        };
+        
+        const gridContainer = this.domManager.getElement('gridContainer');
+        if (!gridContainer) return;
+        
+        const fragment = this.domManager.createFragment(Object.keys(suggestions), (dim) => {
+            const info = dimensionInfo[dim];
+            const suggestionList = suggestions[dim].map(s => `<li>${s}</li>`).join('');
+            
+            return this.domManager.createElement('div', 'grid-item', `
+                <div class="grid-header" style="border-top: 4px solid ${info.color}">
+                    <span class="grid-icon">${info.icon}</span>
+                    <span class="grid-title">${info.title}</span>
+                </div>
+                <div class="grid-content">
+                    <ul>${suggestionList}</ul>
+                </div>
+            `);
+        });
+        
+        gridContainer.innerHTML = '';
+        gridContainer.appendChild(fragment);
+    }
+    
+    updateTopicDisplay(topic) {
+        const topicShow = this.domManager.getElement('topicShow');
+        const dateShow = this.domManager.getElement('dateShow');
+        
+        if (topicShow) topicShow.textContent = topic;
+        if (dateShow) dateShow.textContent = new Date().toLocaleDateString('zh-CN');
+    }
+    
+    setLoadingState(isLoading) {
+        const analyzeBtn = document.querySelector('.analyze-btn');
+        if (analyzeBtn) {
+            analyzeBtn.disabled = isLoading;
+            analyzeBtn.textContent = isLoading ? '分析中...' : '开始分析';
+        }
+    }
+    
+    showNotification(message, type = 'info') {
+        const colors = {
+            success: '#4CAF50',
+            error: '#f44336',
+            warning: '#ff9800',
+            info: '#2196F3'
+        };
+        
+        const notification = this.domManager.createElement('div', 'notification', message);
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${colors[type]};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 10000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => notification.remove(), 300);
+            }
+        }, 3000);
+    }
+    
+    // 下载功能（简化版）
+    downloadKeywordAnalysis() {
+        const element = this.domManager.getElement('keywordAnalysis');
+        if (!element) {
+            this.showNotification('没有可下载的内容', 'warning');
+            return;
+        }
+        
+        if (typeof html2canvas === 'function') {
+            html2canvas(element, {
+                backgroundColor: '#0d1421',
+                scale: 1, // 降低scale提高性能
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `关键词分析_${new Date().toLocaleDateString('zh-CN')}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('下载失败:', error);
+                this.showNotification('下载失败，请重试', 'error');
+            });
+        } else {
+            this.showNotification('下载功能不可用', 'warning');
+        }
+    }
+    
+    downloadGridAnalysis() {
+        const element = this.domManager.getElement('gridAnalysis');
+        if (!element) {
+            this.showNotification('没有可下载的内容', 'warning');
+            return;
+        }
+        
+        if (typeof html2canvas === 'function') {
+            html2canvas(element, {
+                backgroundColor: '#0d1421',
+                scale: 1,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `九宫格分析_${new Date().toLocaleDateString('zh-CN')}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            }).catch(error => {
+                console.error('下载失败:', error);
+                this.showNotification('下载失败，请重试', 'error');
+            });
+        } else {
+            this.showNotification('下载功能不可用', 'warning');
+        }
+    }
+    
+    clearAll() {
+        if (!confirm('确定要清空所有内容吗？')) return;
+        
+        const topicInput = this.domManager.getElement('topicInput');
+        const keywordGrid = this.domManager.getElement('keywordGrid');
+        const gridContainer = this.domManager.getElement('gridContainer');
+        const topicShow = this.domManager.getElement('topicShow');
+        const dateShow = this.domManager.getElement('dateShow');
+        
+        if (topicInput) topicInput.value = '';
+        if (keywordGrid) keywordGrid.innerHTML = '';
+        if (gridContainer) gridContainer.innerHTML = '';
+        if (topicShow) topicShow.textContent = '';
+        if (dateShow) dateShow.textContent = '';
+        
+        // 清空缓存
+        this.analysisCache.clear();
+        this.domManager.clearCache();
+        
+        this.showNotification('已清空所有内容', 'success');
+    }
+}
 
-  // 事件绑定
-  if (topicInput) {
-    topicInput.addEventListener('input', renderPreview);
-  }
-  
-  if (analyzeBtn) {
-    analyzeBtn.addEventListener('click', analyzeWithLocalDatabase);
-  }
-  
-  if (downloadGridBtn) {
-    downloadGridBtn.addEventListener('click', downloadGridPNG);
-  }
-  
-  if (downloadKeywordBtn) {
-    downloadKeywordBtn.addEventListener('click', downloadKeywordPNG);
-  }
-  
-  if (clearBtn) {
-    clearBtn.addEventListener('click', clearAll);
-  }
-})();
+// 全局应用实例
+let app;
+
+// 初始化应用
+function initApp() {
+    try {
+        app = new OsbornApp();
+        window.osbornApp = app; // 调试用
+    } catch (error) {
+        console.error('应用启动失败:', error);
+    }
+}
+
+// 页面卸载时清理
+window.addEventListener('beforeunload', () => {
+    if (app) {
+        app.domManager.clearCache();
+        app.analysisCache.clear();
+    }
+});
+
+// 暴露全局函数（兼容现有HTML）
+window.startAnalysis = () => app?.startAnalysis();
+window.downloadKeywordAnalysis = () => app?.downloadKeywordAnalysis();
+window.downloadGridAnalysis = () => app?.downloadGridAnalysis();
+window.clearAll = () => app?.clearAll();
+window.showKeywordAnalysis = () => app?.switchPage('keywordAnalysis');
+window.showGridAnalysis = () => app?.switchPage('gridAnalysis');
+
+// 启动应用
+initApp();
+
+// 添加CSS动画
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+.notification {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+}
+`;
+document.head.appendChild(style);
