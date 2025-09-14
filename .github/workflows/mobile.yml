@@ -1,0 +1,154 @@
+name: Mobile Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/android/**'
+      - 'packages/mobile-core/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/android/**'
+      - 'packages/mobile-core/**'
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9.0.0'
+
+jobs:
+  # Android 构建测试
+  android-build:
+    name: Android Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install dependencies
+        run: |
+          cd apps/android/HuiTuAndroid
+          pnpm install
+
+      - name: Run Android tests
+        run: |
+          cd apps/android/HuiTuAndroid
+          pnpm test
+
+      - name: Build Android APK
+        run: |
+          cd apps/android/HuiTuAndroid
+          pnpm run build
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: apps/android/HuiTuAndroid/android/app/build/outputs/apk/
+          retention-days: 7
+
+  # iOS 构建测试 (仅限 macOS)
+  ios-build:
+    name: iOS Build
+    runs-on: macos-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd apps/ios/OsbornApp
+          # 这里需要根据实际的iOS项目结构调整
+
+      - name: Build iOS app
+        run: |
+          echo "Building iOS app..."
+          # 这里添加iOS构建逻辑
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app
+          path: apps/ios/OsbornApp/
+          retention-days: 7
+
+  # 移动端代码质量检查
+  mobile-lint:
+    name: Mobile Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint mobile packages
+        run: |
+          cd packages/mobile-core
+          pnpm lint
+
+      - name: Type check mobile packages
+        run: |
+          cd packages/mobile-core
+          pnpm type-check
+
+      - name: Lint Android app
+        run: |
+          cd apps/android/HuiTuAndroid
+          pnpm lint
+
+      - name: Type check Android app
+        run: |
+          cd apps/android/HuiTuAndroid
+          pnpm type-check

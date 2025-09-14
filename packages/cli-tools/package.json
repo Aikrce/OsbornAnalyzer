@@ -1,0 +1,37 @@
+{
+  "name": "@huitu/cli-tools",
+  "version": "1.0.0",
+  "description": "HuiTu开发工具包 - 构建、部署和测试工具",
+  "type": "module",
+  "bin": {
+    "huitu-build": "./dist/build/index.js",
+    "huitu-deploy": "./dist/deploy/index.js",
+    "huitu-test": "./dist/test/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@huitu/shared": "workspace:*",
+    "commander": "^14.0.1",
+    "chalk": "^5.6.2",
+    "inquirer": "^12.9.4",
+    "fs-extra": "^11.3.1",
+    "glob": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.3",
+    "typescript": "^5.9.2",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.9",
+    "@types/glob": "^9.0.0",
+    "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

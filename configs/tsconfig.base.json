@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../packages/shared/src/*"],
+      "@web-core/*": ["../packages/web-core/src/*"],
+      "@mobile-core/*": ["../packages/mobile-core/src/*"]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "lib",
+    "coverage",
+    "**/*.test.*",
+    "**/*.spec.*"
+  ]
+}

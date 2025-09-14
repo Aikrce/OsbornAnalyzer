@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /* 语言和环境 */
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "jsx": "react-jsx",
+    
+    /* 类型检查 */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    /* 模块解析 */
+    "baseUrl": ".",
+    "paths": {
+      "@huitu/shared": ["packages/shared/src"],
+      "@huitu/shared/*": ["packages/shared/src/*"],
+      "@huitu/web-core": ["packages/web-core/src"],
+      "@huitu/web-core/*": ["packages/web-core/src/*"],
+      "@huitu/mobile-core": ["packages/mobile-core/src"],
+      "@huitu/mobile-core/*": ["packages/mobile-core/src/*"],
+      "@huitu/cli-tools": ["packages/cli-tools/src"],
+      "@huitu/cli-tools/*": ["packages/cli-tools/src/*"]
+    },
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    
+    /* 输出选项 */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true,
+    
+    /* 其他 */
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "*.d.ts"
+  ]
+}

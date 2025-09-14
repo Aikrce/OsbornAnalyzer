@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="基于AI深度分析的奥斯本创新九问工具，运用奥斯本检核表法进行系统性创新思维拓展和商业模式设计" />
+    <meta name="keywords" content="奥斯本检核表法,创新思维,AI分析,商业模式,九问分析,创新工具" />
+    <meta name="author" content="奥斯本创新分析工具" />
+    <meta name="theme-color" content="#3498db" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="奥斯本创新九问 · 智能分析工具" />
+    <meta property="og:description" content="基于AI深度分析的奥斯本创新九问工具，运用奥斯本检核表法进行系统性创新思维拓展" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="奥斯本创新九问 · 智能分析工具" />
+    <meta property="twitter:description" content="基于AI深度分析的奥斯本创新九问工具，运用奥斯本检核表法进行系统性创新思维拓展" />
+    
+    <title>奥斯本创新九问 · 智能分析工具</title>
+    <link rel="stylesheet" href="./style.css" />
+    
+    <!-- Favicon (使用内联SVG作为占位符) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>" />
+    
+    <!-- 禁止搜索引擎索引 -->
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body>
+    <noscript>
+      <div style="padding: 20px; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 5px; margin: 20px;">
+        <h3>JavaScript已禁用</h3>
+        <p>此工具需要JavaScript才能正常运行。请启用浏览器中的JavaScript功能。</p>
+      </div>
+    </noscript>
+    
+    <main class="main-page">
+      <header class="hero">
+        <h1>奥斯本创新九问 · 智能分析工具</h1>
+        <p class="sub">基于AI深度分析，运用奥斯本检核表法进行创新思维拓展</p>
+      </header>
+
+      <section class="workspace">
+        <div class="page-tabs">
+          <div class="page-tab active" data-page="analysis">
+            <span>主题分析</span>
+          </div>
+          <div class="page-tab" data-page="preview">
+            <span>九宫格编辑</span>
+          </div>
+        </div>
+        
+        <!-- 分析页面 -->
+        <div class="page active" id="analysis-page">
+          <div class="analysis-container">
+            <!-- 输入配置区 -->
+            <div class="topic-section card">
+              <div class="card-header">
+                <h3>配置与输入</h3>
+              </div>
+              
+              <div class="field">
+                <label for="apiKeyInput">DeepSeek API密钥（可选）</label>
+                <div class="input-group">
+                  <input
+                    id="apiKeyInput"
+                    type="password"
+                    placeholder="可选：输入API密钥获得AI深度分析..."
+                    aria-label="DeepSeek API密钥输入框"
+                  />
+                  <button type="button" id="toggleApiKey" class="toggle-btn" aria-label="显示/隐藏密钥">
+                    👁️
+                  </button>
+                </div>
+                <small class="hint">不填写API密钥将使用本地案例数据库分析，填写后可获得AI深度分析。密钥将安全保存在浏览器本地。<br><strong>提示：</strong>无需API密钥也可正常使用，本地数据库包含75+真实案例支持离线分析</small>
+              </div>
+
+              <div class="field">
+                <label for="topicInput">分析主题</label>
+                <input
+                  id="topicInput"
+                  type="text"
+                  placeholder="例如：智能咖啡机 / 在线教育平台 / 共享单车 / 社区团购..."
+                />
+                <small class="hint">输入您想要进行创新分析的主题，系统将进行深度解构和九维度创新分析</small>
+              </div>
+
+              <div class="actions">
+                <button id="analyzeBtn" class="primary" aria-label="开始分析">
+                  <span class="btn-text">开始分析</span>
+                  <span class="loading-spinner" style="display: none;">分析中...</span>
+                </button>
+                <button id="clearBtn" class="ghost" aria-label="清空所有内容重新开始">
+                  清空重来
+                </button>
+                <button id="caseLibraryBtn" class="ghost" aria-label="查看本地案例库">
+                  📚 案例库
+                </button>
+              </div>
+            </div>
+
+            <!-- 关键词分析结果区 -->
+            <div id="keywordAnalysisCard" class="card">
+              <div class="card-header">
+                <h3>关键词深度分析</h3>
+                <div class="download-options" id="keywordDownloadOptions" style="display: none;">
+                  <button id="downloadKeywordFullBtn" class="ghost small">
+                    📊 完整分析图
+                  </button>
+                  <button id="downloadKeywordCardsBtn" class="ghost small">
+                    🎴 单张卡片
+                  </button>
+                  <button id="downloadKeywordAllBtn" class="ghost small">
+                    📦 批量下载
+                  </button>
+                </div>
+              </div>
+              <div id="keywordAnalysisResult" class="analysis-content">
+                <p class="placeholder">
+                  点击"开始分析"进行主题分析<br>
+                  <small>系统将基于案例数据库进行分析，填入API密钥可获得AI深度分析</small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 九宫格编辑页面 -->
+        <div class="page" id="preview-page">
+          <div class="preview-container">
+            <div class="preview-actions">
+              <button id="downloadGridFullBtn" class="primary">
+                📊 完整九宫格
+              </button>
+              <button id="downloadGridCardsBtn" class="ghost">
+                🎴 单张卡片
+              </button>
+              <button id="downloadGridAllBtn" class="ghost">
+                📦 批量下载
+              </button>
+            </div>
+            
+            <!-- 统一的九宫格：可编辑且实时预览 -->
+            <div id="exportArea" class="export-card">
+              <div class="export-header">
+                <div class="title">奥斯本创新九问分析</div>
+                <div class="topic">分析主题：<span id="topicShow">（未填写）</span></div>
+              </div>
+              
+              <div class="export-grid">
+                <div class="cell">
+                  <h3 class="cell-title">他用</h3>
+                  <textarea id="t-ta" data-key="ta" placeholder="其他用途和应用场景..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">借用</h3>
+                  <textarea id="t-jie" data-key="jie" placeholder="借鉴其他领域的做法..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">改变</h3>
+                  <textarea id="t-gai" data-key="gai" placeholder="改变形态、流程、规则..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">扩大</h3>
+                  <textarea id="t-da" data-key="kuo" placeholder="扩大规模、功能、影响..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">缩小</h3>
+                  <textarea id="t-xiao" data-key="suo" placeholder="简化、专注核心功能..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">替代</h3>
+                  <textarea id="t-ti" data-key="ti" placeholder="替代材料、方法、技术..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">调整</h3>
+                  <textarea id="t-tiao" data-key="tiao" placeholder="调整顺序、结构、流程..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">颠倒</h3>
+                  <textarea id="t-dao" data-key="dao" placeholder="颠倒关系、反转思维..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+                <div class="cell">
+                  <h3 class="cell-title">合并</h3>
+                  <textarea id="t-he" data-key="he" placeholder="合并、组合、联动..." maxlength="200"></textarea>
+                  <div class="char-count"><span class="current">0</span>/200字</div>
+                </div>
+              </div>
+              
+              <div class="export-footer">
+                <span>基于奥斯本检核表法生成</span>
+                <span id="dateShow"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p>
+          <strong>使用提示：</strong>
+          每个文本框可输入150字左右的深度分析 · 支持实时编辑 · 可下载高清PNG图片
+        </p>
+      </footer>
+    </main>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>

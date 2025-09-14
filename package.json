@@ -1,27 +1,49 @@
 {
-  "name": "osborn-checklist-analyzer",
-  "version": "1.0.0",
-  "description": "奥斯本创新九问分析工具",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "keywords": [
-    "osborn",
-    "checklist",
-    "innovation",
-    "analysis"
+  "name": "huitu-monorepo",
+  "version": "2.0.0",
+  "description": "奥斯本检核表法创新思维工具 - Monorepo架构",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "services/*",
+    "tools/*"
   ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "axios": "^1.6.2",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2"
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "lint:fix": "eslint . --ext ts,tsx,js,jsx --fix",
+    "type-check": "turbo run type-check",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "prepare": "husky install",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
-  }
+    "@changesets/cli": "^2.29.7",
+    "@testing-library/dom": "^10.0.0",
+    "@types/node": "^24.3.3",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
+    "npm-check-updates": "^18.1.1",
+    "postcss": "^8.4",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.0.0"
 }
