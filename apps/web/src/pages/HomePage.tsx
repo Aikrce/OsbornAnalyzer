@@ -1,26 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAnalysis } from '@web-core/hooks';
-import { TopicInput } from '@web-core/components';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { TopicInput } from '../components/TopicInput';
 
 const HomePage: React.FC = () => {
   const [topic, setTopic] = useState('');
   const navigate = useNavigate();
-  const { analyze, isLoading } = useAnalysis();
 
   const handleStartAnalysis = useCallback(async () => {
     if (!topic.trim()) return;
     
     try {
-      await analyze(topic.trim());
+      // 模拟分析过程
+      console.log('开始分析:', topic);
       navigate('/analysis');
     } catch (error) {
       console.error('Analysis failed:', error);
     }
-  }, [topic, analyze, navigate]);
+  }, [topic, navigate]);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -48,11 +47,11 @@ const HomePage: React.FC = () => {
           />
           <Button
             onClick={handleStartAnalysis}
-            disabled={!topic.trim() || isLoading}
+            disabled={!topic.trim()}
             className="w-full"
             size="lg"
           >
-            {isLoading ? '分析中...' : '开始分析'}
+            开始分析
           </Button>
         </CardContent>
       </Card>
