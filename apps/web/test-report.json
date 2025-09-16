@@ -1,0 +1,31 @@
+{
+  "passed": 6,
+  "failed": 0,
+  "total": 6,
+  "details": [
+    {
+      "name": "项目文件结构检查",
+      "status": "passed"
+    },
+    {
+      "name": "package.json配置检查",
+      "status": "passed"
+    },
+    {
+      "name": "依赖安装检查",
+      "status": "passed"
+    },
+    {
+      "name": "TypeScript类型检查",
+      "status": "passed"
+    },
+    {
+      "name": "代码规范检查",
+      "status": "passed"
+    },
+    {
+      "name": "项目构建检查",
+      "status": "passed"
+    }
+  ]
+}

@@ -8,3 +8,6 @@ export { default as useLocalStorage } from './use-local-storage';
 // 工具
 export { default as useDebounce } from './use-debounce';
 export { default as useThrottle } from './use-throttle';
+
+// 性能优化
+export { default as usePerformance } from './use-performance';

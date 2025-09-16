@@ -70,7 +70,7 @@ class AnalysisService {
    */
   async generateReport(
     result: AnalysisResult,
-    format: 'json' | 'markdown' | 'html' = 'markdown'
+    // format: 'json' | 'markdown' | 'html' = 'markdown'
   ): Promise<string> {
     // TODO: Implement report generation
     return JSON.stringify(result, null, 2);
@@ -79,7 +79,7 @@ class AnalysisService {
   /**
    * 评估分析质量
    */
-  assessQuality(result: AnalysisResult) {
+  assessQuality(_result: AnalysisResult) {
     // TODO: Implement quality assessment
     return {
       score: 85,

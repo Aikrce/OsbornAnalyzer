@@ -7,29 +7,29 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./data": {
+      "types": "./dist/data/index.d.ts",
       "import": "./dist/data/index.mjs",
-      "require": "./dist/data/index.js",
-      "types": "./dist/data/index.d.ts"
+      "require": "./dist/data/index.js"
     },
     "./algorithms": {
+      "types": "./dist/algorithms/index.d.ts",
       "import": "./dist/algorithms/index.mjs",
-      "require": "./dist/algorithms/index.js",
-      "types": "./dist/algorithms/index.d.ts"
+      "require": "./dist/algorithms/index.js"
     },
     "./types": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/types/index.mjs",
-      "require": "./dist/types/index.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/types/index.js"
     },
     "./utils": {
+      "types": "./dist/utils/index.d.ts",
       "import": "./dist/utils/index.mjs",
-      "require": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+      "require": "./dist/utils/index.js"
     }
   },
   "files": [

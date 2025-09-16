@@ -5,7 +5,7 @@ import {
   aiConfigManager, 
   type AIServiceConfig, 
   type AIServiceStatus 
-} from '@shared/services/ai-config';
+} from '@huitu/shared';
 import { Button } from '../ui/button';
 
 // 简单的UI组件定义
@@ -28,14 +28,6 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <label className="text-sm font-medium">{children}</label>
 );
 
-const Input: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }> = ({ value, onChange, placeholder }) => (
-  <input 
-    value={value} 
-    onChange={onChange} 
-    placeholder={placeholder}
-    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-  />
-);
 
 const Slider: React.FC<{ value: number[]; onValueChange: (value: number[]) => void; min?: number; max?: number }> = ({ value, onValueChange, min = 0, max = 100 }) => (
   <input 
@@ -299,7 +291,7 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
               max={168}
               min={1}
               
-              onValueChange={([value]: number[]) => {
+              onValueChange={([_value]: number[]) => {
                 updateConfig({ cacheEnabled: true });
               }}
             />
@@ -315,7 +307,7 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
               max={5000}
               min={100}
               
-              onValueChange={([value]: number[]) => {
+              onValueChange={([_value]: number[]) => {
                 updateConfig({ cacheEnabled: true });
               }}
             />

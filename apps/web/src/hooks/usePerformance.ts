@@ -1,19 +1,19 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+
+interface PerformanceMeasurement {
+  name: string;
+  startTime: number;
+  endTime?: number;
+  duration?: number;
+}
 
 export const usePerformance = () => {
-  const startTimeRef = useRef<number>(0);
+  const [measurements, setMeasurements] = useState<PerformanceMeasurement[]>([]);
 
-  const startMeasurement = useCallback(() => {
-    startTimeRef.current = performance.now();
-  }, []);
-
-  const endMeasurement = useCallback((metricName: string) => {
-    if (startTimeRef.current > 0) {
-      const duration = performance.now() - startTimeRef.current;
-      console.log(`Performance Metric - ${metricName}: ${duration}ms`);
-      startTimeRef.current = 0;
-    }
-  }, []);
+  const startMeasurement = (name: string) => {
+    const startTime = performance.now();
+    setMeasurements(prev => [...prev, { name, startTime }]);
+  };
 
   useEffect(() => {
     const handleLoad = () => {
@@ -26,11 +26,26 @@ export const usePerformance = () => {
 
     if (document.readyState === 'complete') {
       handleLoad();
+      return () => {}; // 确保所有代码路径都有返回值
     } else {
       window.addEventListener('load', handleLoad);
       return () => window.removeEventListener('load', handleLoad);
     }
   }, []);
+
+  const endMeasurement = (name: string) => {
+    const endTime = performance.now();
+    setMeasurements(prev => prev.map(measurement => {
+      if (measurement.name === name && !measurement.endTime) {
+        return {
+          ...measurement,
+          endTime,
+          duration: endTime - measurement.startTime
+        };
+      }
+      return measurement;
+    }));
+  };
 
   return { startMeasurement, endMeasurement };
 };

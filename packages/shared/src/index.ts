@@ -8,7 +8,8 @@ export * from './utils';
 export * from './data';
 
 // 导出算法
-export * from './algorithms';
+// 导出服务
+export * from './services';export * from './algorithms';
 
 // 导出实例
 export { osbornAnalyzer } from './algorithms/osborn';

@@ -4,7 +4,7 @@ import type {
   OsbornAnalysisResult, 
   AnalysisConfig, 
   CaseStudy,
-  AnalysisMode 
+  // AnalysisMode 
 } from '@huitu/shared';
 
 interface UseAnalysisReturn {
@@ -20,6 +20,7 @@ export default function useAnalysis(): UseAnalysisReturn {
   const [deepAnalysis, setDeepAnalysis] = useState<DeepAnalysisResult | null>(null);
   const [osbornAnalysis, setOsbornAnalysis] = useState<OsbornAnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
     const analyze = useCallback(async (config: AnalysisConfig) => {
     if (!config.topic.trim()) {
       setError('请输入主题');
@@ -73,6 +74,7 @@ export default function useAnalysis(): UseAnalysisReturn {
   }, []);
 
   const reset = useCallback(() => {
+    setError(null);
     setDeepAnalysis(null);
     setOsbornAnalysis(null);
     setError(null);
@@ -83,6 +85,7 @@ export default function useAnalysis(): UseAnalysisReturn {
     deepAnalysis,
     osbornAnalysis,
     loading,
+    error,
     analyze,
     reset
   };
