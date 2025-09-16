@@ -1,11 +1,10 @@
-import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { renderHook } from '@testing-library/react';
 import { useAnalysis } from '../hooks/useAnalysis';
+import { expect, describe, it } from 'vitest';
 
-describe('useAnalysis Hook', () => {
-  it('should initialize with empty results', () => {
+describe('useAnalysis', () => {
+  it('should return initial state', () => {
     const { result } = renderHook(() => useAnalysis());
-    
     expect(result.current.results).toEqual([]);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(null);

@@ -103,7 +103,7 @@ class ExportService {
    * 导出为DOCX
    */
   private async exportToDOCX(data: ExportData, options: ExportOptions): Promise<Blob> {
-    const { default: docx } = await import('docx');
+    const docx = await import('docx');
     
     const children = [
       new docx.Paragraph({
@@ -125,7 +125,7 @@ class ExportService {
         new docx.Paragraph({
           children: [
             new docx.TextRun({
-              text: `${index + 1}. ${result.question}`,
+              text: `${index + 1}. ${result.title}`,
               bold: true,
               size: 24,
             }),
@@ -135,7 +135,7 @@ class ExportService {
         new docx.Paragraph({
           children: [
             new docx.TextRun({
-              text: result.analysis,
+              text: result.summary,
               size: 20,
             }),
           ],
@@ -144,7 +144,7 @@ class ExportService {
       );
 
       // 添加建议
-      if (result.suggestions && result.suggestions.length > 0) {
+      if (Object.values(result.questions || {}).flat().length > 0) {
         children.push(
           new docx.Paragraph({
             children: [
@@ -158,7 +158,7 @@ class ExportService {
           })
         );
 
-        result.suggestions.forEach(suggestion => {
+        result.questions ? Object.values(result.questions).flat() : [].forEach(suggestion => {
           children.push(
             new docx.Paragraph({
               children: [
@@ -217,10 +217,10 @@ class ExportService {
 
     data.results.forEach((result, index) => {
       worksheetData.push([
-        index + 1,
-        result.question,
-        result.analysis,
-        result.suggestions ? result.suggestions.join('; ') : '',
+        String(index + 1),
+        result.title,
+        result.summary,
+        Object.values(result.questions || {}).flat().join('; ') || '',
       ]);
     });
 
@@ -248,12 +248,12 @@ class ExportService {
     markdown += `## 奥斯本创新九问分析结果\n\n`;
 
     data.results.forEach((result, index) => {
-      markdown += `### ${index + 1}. ${result.question}\n\n`;
-      markdown += `${result.analysis}\n\n`;
+      markdown += `### ${index + 1}. ${result.title}\n\n`;
+      markdown += `${result.summary}\n\n`;
 
-      if (result.suggestions && result.suggestions.length > 0) {
+      if (Object.values(result.questions || {}).flat().length > 0) {
         markdown += `**建议：**\n`;
-        result.suggestions.forEach(suggestion => {
+        result.questions ? Object.values(result.questions).flat() : [].forEach(suggestion => {
           markdown += `- ${suggestion}\n`;
         });
         markdown += '\n';
@@ -300,17 +300,17 @@ class ExportService {
     data.results.forEach((result, index) => {
       html += `
         <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
-          <h3 style="color: #1e40af; margin-bottom: 15px;">${index + 1}. ${result.question}</h3>
-          <p style="line-height: 1.6; color: #374151; margin-bottom: 15px;">${result.analysis}</p>
+          <h3 style="color: #1e40af; margin-bottom: 15px;">${index + 1}. ${result.title}</h3>
+          <p style="line-height: 1.6; color: #374151; margin-bottom: 15px;">${result.summary}</p>
       `;
 
-      if (result.suggestions && result.suggestions.length > 0) {
+      if (Object.values(result.questions || {}).flat().length > 0) {
         html += `
           <div style="background-color: #f8fafc; padding: 15px; border-radius: 6px;">
             <h4 style="color: #6b7280; margin-bottom: 10px;">建议：</h4>
             <ul style="margin: 0; padding-left: 20px;">
         `;
-        result.suggestions.forEach(suggestion => {
+        result.questions ? Object.values(result.questions).flat() : [].forEach(suggestion => {
           html += `<li style="color: #6b7280; margin-bottom: 5px;">${suggestion}</li>`;
         });
         html += `</ul></div>`;
@@ -341,7 +341,7 @@ class ExportService {
     options: ExportOptions
   ): Promise<Blob> {
     if (options.format === 'json') {
-      return this.exportMultipleToJSON(dataList, options);
+      return this.exportMultipleToJSON(dataList);
     }
 
     // 对于其他格式，创建ZIP文件
@@ -361,8 +361,7 @@ class ExportService {
    * 导出多个分析结果为JSON
    */
   private async exportMultipleToJSON(
-    dataList: ExportData[],
-    options: ExportOptions
+    dataList: ExportData[]
   ): Promise<Blob> {
     const exportData = {
       analyses: dataList,

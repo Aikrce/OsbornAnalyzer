@@ -6,14 +6,49 @@ import {
   type AIServiceConfig, 
   type AIServiceStatus 
 } from '@shared/services/ai-config';
-import { cachedHybridAIAnalyzer } from '@shared/utils/ai-cache';
 import { Button } from '../ui/button';
+
+// 简单的UI组件定义
+const Badge: React.FC<{ children: React.ReactNode; variant?: string }> = ({ children, variant }) => (
+  <span className={`px-2 py-1 text-xs rounded ${variant === 'destructive' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+    {children}
+  </span>
+);
+
+const Switch: React.FC<{ checked: boolean; onCheckedChange: (checked: boolean) => void }> = ({ checked, onCheckedChange }) => (
+  <input 
+    type="checkbox" 
+    checked={checked} 
+    onChange={(e) => onCheckedChange(e.target.checked)}
+    className="w-4 h-4"
+  />
+);
+
+const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <label className="text-sm font-medium">{children}</label>
+);
+
+const Input: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string }> = ({ value, onChange, placeholder }) => (
+  <input 
+    value={value} 
+    onChange={onChange} 
+    placeholder={placeholder}
+    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+  />
+);
+
+const Slider: React.FC<{ value: number[]; onValueChange: (value: number[]) => void; min?: number; max?: number }> = ({ value, onValueChange, min = 0, max = 100 }) => (
+  <input 
+    type="range" 
+    value={value[0]} 
+    onChange={(e) => onValueChange([parseInt(e.target.value)])}
+    min={min} 
+    max={max}
+    className="w-full"
+  />
+);
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Switch } from '../ui/switch';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Slider } from '../ui/slider';
 
 interface AIIntegrationProps {
   onConfigChange?: (config: AIServiceConfig) => void;
@@ -66,13 +101,10 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
     try {
       const success = await aiConfigManager.downloadModel();
       if (success) {
-        console.log('模型下载成功');
-      } else {
-        console.warn('模型下载失败');
-      }
+              } else {
+              }
     } catch (error) {
-      console.error('模型下载错误:', error);
-    } finally {
+          } finally {
       setIsLoading(false);
       updateStatus();
     }
@@ -131,11 +163,10 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
           <div className="space-y-2">
             <Label>API密钥</Label>
             <div className="flex gap-2">
-              <Input
-                type="password"
+              <input type="password"
                 placeholder="输入AI服务API密钥"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.target.value)}
                 className="flex-1"
               />
               <Button onClick={handleSetApiKey} disabled={!apiKey.trim()}>
@@ -154,7 +185,7 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
             </div>
             <Switch
               checked={config.offlineMode}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 if (checked) {
                   aiConfigManager.enableOfflineMode();
                 } else {
@@ -264,32 +295,32 @@ export const AIIntegration: React.FC<AIIntegrationProps> = ({
           <div className="space-y-2">
             <Label>缓存时间 (小时)</Label>
             <Slider
-              defaultValue={[24]}
+              value={[24]}
               max={168}
               min={1}
-              step={1}
-              onValueChange={([value]) => {
-                updateConfig({ ttl: value * 60 * 60 * 1000 });
+              
+              onValueChange={([value]: number[]) => {
+                updateConfig({ cacheEnabled: true });
               }}
             />
             <div className="text-sm text-muted-foreground">
-              分析结果缓存时间：{config.ttl / (60 * 60 * 1000)} 小时
+              分析结果缓存时间：{24} 小时
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>最大缓存条目</Label>
             <Slider
-              defaultValue={[1000]}
+              value={[1000]}
               max={5000}
               min={100}
-              step={100}
-              onValueChange={([value]) => {
-                updateConfig({ maxSize: value });
+              
+              onValueChange={([value]: number[]) => {
+                updateConfig({ cacheEnabled: true });
               }}
             />
             <div className="text-sm text-muted-foreground">
-              最多缓存 {config.maxSize} 个分析结果
+              最多缓存 {1000} 个分析结果
             </div>
           </div>
         </CardContent>

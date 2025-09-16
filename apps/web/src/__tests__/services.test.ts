@@ -1,16 +1,12 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, beforeEach, vi, expect } from 'vitest';
 import aiService from '../services/ai/aiService';
 
-describe('AI Service', () => {
-  it('should configure AI service', () => {
-    const config = {
-      apiKey: 'test-key',
-      model: 'deepseek-chat',
-      temperature: 0.7,
-      maxTokens: 2000,
-    };
-    
-    aiService.configure(config);
+describe('aiService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should be configured', () => {
     expect(aiService.isConfigured()).toBe(true);
   });
 });

@@ -2,26 +2,30 @@ import { useState, useCallback } from 'react';
 import { AnalysisResult } from '@huitu/shared/types';
 import { performOsbornAnalysis } from '@huitu/shared/algorithms';
 
-export const useAnalysis = () => {
+export interface UseAnalysisReturn {
+  results: AnalysisResult[];
+  isLoading: boolean;
+  error: string | null;
+  analyze: (topic: string) => Promise<void>;
+  clearResults: () => void;
+}
+
+export function useAnalysis(): UseAnalysisReturn {
   const [results, setResults] = useState<AnalysisResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const analyze = useCallback(async (topic: string) => {
-    if (!topic.trim()) {
-      setError('请输入分析主题');
-      return;
-    }
-
+    if (!topic) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      setIsLoading(true);
-      setError(null);
-      
-      const analysisResults = await performOsbornAnalysis(topic.trim());
-      setResults(analysisResults);
+      const analysisResult = performOsbornAnalysis(topic, {});
+      setResults([analysisResult]);
     } catch (err) {
-      setError('分析过程中出现错误，请重试');
-      console.error('Analysis error:', err);
+      setError(err instanceof Error ? err.message : '分析失败');
     } finally {
       setIsLoading(false);
     }
@@ -37,8 +41,6 @@ export const useAnalysis = () => {
     isLoading,
     error,
     analyze,
-    clearResults,
+    clearResults
   };
-};
-
-export default useAnalysis;
+}

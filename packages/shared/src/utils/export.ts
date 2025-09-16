@@ -87,7 +87,6 @@ export class BatchExportManager {
         includeScore: true,
         includeInsights: true,
         includeMetadata: true,
-        quality: 'high',
       });
       return;
     }

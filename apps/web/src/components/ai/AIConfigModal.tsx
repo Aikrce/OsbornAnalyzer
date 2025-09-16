@@ -71,13 +71,13 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onSave }
               onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
             />
             <p className="text-sm text-muted-foreground">
-              您可以在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">DeepSeek平台</a> 获取API密钥
+              您可以在 <a href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">DeepSeek平台</a> 获取API密钥
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="model">模型</Label>
-            <Select value={config.model} onValueChange={(value) => setConfig({ ...config, model: value })}>
+            <Select value={config.model} onValueChange={(value: string) => setConfig({ ...config, model: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

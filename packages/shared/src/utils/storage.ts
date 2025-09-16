@@ -69,23 +69,25 @@ export class StorageManager {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES);
       const defaultPreferences: UserPreferences = {
-        language: 'zh-CN',
+        language: 'zh',
         theme: 'auto',
         notifications: true,
         autoSave: true,
         aiSuggestions: true,
         aiEnabled: false,
+        defaultAnalysisMode: 'local',
       };
       return data ? { ...defaultPreferences, ...JSON.parse(data) } : defaultPreferences;
     } catch (error) {
       console.error('读取用户偏好失败:', error);
       return {
-        language: 'zh-CN',
+        language: 'zh',
         theme: 'auto',
         notifications: true,
         autoSave: true,
         aiSuggestions: true,
         aiEnabled: false,
+        defaultAnalysisMode: 'local',
       };
     }
   }

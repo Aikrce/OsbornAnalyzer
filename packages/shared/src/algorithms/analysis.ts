@@ -33,7 +33,7 @@ export class AnalysisEngine {
     similarCases?: CaseStudy[];
   }> {
     // 1. 执行奥斯本分析
-    const result = await osbornAnalyzer.analyze(topic, description);
+    const result = await osbornAnalyzer.analyze(topic, {});
     
     let aiAnalysis: AIAnalysisResult | undefined;
     let similarCases: CaseStudy[] | undefined;
@@ -81,8 +81,8 @@ export class AnalysisEngine {
       const caseKeywords = [
         ...this.extractKeywords(caseStudy.title),
         ...this.extractKeywords(caseStudy.description),
-        ...caseStudy.tags,
-        caseStudy.industry,
+        ...(caseStudy.tags || [] || []),
+        ...(caseStudy.industry || "" ? [caseStudy.industry || ""] : []),
       ];
       
       const similarity = this.calculateSimilarity(topicKeywords, caseKeywords);
@@ -159,7 +159,7 @@ export class AnalysisEngine {
       report += `## AI深度分析\n\n`;
       
       report += `### 关键洞察\n`;
-      aiAnalysis.suggestions.forEach((suggestion, index) => {
+      aiAnalysis.suggestions.forEach((suggestion: string, index: number) => {
         report += `${index + 1}. ${suggestion}\n`;
       });
       report += '\n';
@@ -168,7 +168,7 @@ export class AnalysisEngine {
       report += aiAnalysis.keywords.join('、') + '\n\n';
       
       report += `### 替代方案\n`;
-      aiAnalysis.alternatives.forEach((alternative, index) => {
+      aiAnalysis.alternatives.forEach((alternative: string, index: number) => {
         report += `${index + 1}. ${alternative}\n`;
       });
       report += '\n';

@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { TopicInput } from '../components/TopicInput';
 
@@ -24,10 +23,10 @@ const HomePage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-blue-600 mb-4">
+        <h1 className="text-4xl font-bold text-primary-600 mb-4">
           奥斯本创新九问
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-500">
           基于奥斯本检核表法的创新思维分析工具
         </p>
       </div>
@@ -62,7 +61,7 @@ const HomePage: React.FC = () => {
             <CardTitle className="text-lg">九维度分析</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               基于奥斯本检核表法的系统性创新思考框架
             </p>
           </CardContent>
@@ -73,7 +72,7 @@ const HomePage: React.FC = () => {
             <CardTitle className="text-lg">案例数据库</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               内置75+真实创新案例，提供参考和启发
             </p>
           </CardContent>
@@ -84,7 +83,7 @@ const HomePage: React.FC = () => {
             <CardTitle className="text-lg">AI增强</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-500">
               集成AI分析，提供深度洞察和智能建议
             </p>
           </CardContent>

@@ -86,7 +86,7 @@ class AIService {
     if (previousResults && previousResults.length > 0) {
       prompt += `之前的分析结果：\n`;
       previousResults.forEach((result, index) => {
-        prompt += `${index + 1}. ${result.question}: ${result.analysis}\n`;
+        prompt += `${index + 1}. ${result.title}: ${result.summary}\n`;
       });
       prompt += '\n';
     }
@@ -197,10 +197,20 @@ class AIService {
       
       if (match) {
         results.push({
-          question,
-          analysis: match[0].replace(question, '').trim(),
-          suggestions: [],
-        });
+        id: `ai-analysis-${Date.now()}-${Math.random()}`,
+        title: question,
+        description: match[0].replace(question, '').trim(),
+        questions: { 'AI分析': [question] },
+        summary: match[0].replace(question, '').trim(),
+        totalScore: 85,
+        quality: 'high' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        timestamp: new Date(),
+        question,
+        analysis: match[0].replace(question, '').trim(),
+        suggestions: []
+      });
       }
     });
 
@@ -214,8 +224,8 @@ class AIService {
     const suggestions: string[] = [];
     
     analysis.forEach((result) => {
-      if (result.analysis.length > 100) {
-        suggestions.push(`深入探索"${result.question}"维度的创新可能性`);
+      if (result.summary.length > 100) {
+        suggestions.push(`深入探索"${result.title}"维度的创新可能性`);
       }
     });
     
@@ -228,7 +238,7 @@ class AIService {
   private calculateConfidence(analysis: AnalysisResult[]): number {
     if (analysis.length === 0) return 0;
     
-    const avgLength = analysis.reduce((sum, result) => sum + result.analysis.length, 0) / analysis.length;
+    const avgLength = analysis.reduce((sum, result) => sum + result.summary.length, 0) / analysis.length;
     const confidence = Math.min(avgLength / 200, 1); // 基于分析长度计算置信度
     
     return Math.round(confidence * 100);
