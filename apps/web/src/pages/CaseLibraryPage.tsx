@@ -109,14 +109,48 @@ const CaseLibraryPage: React.FC = memo(() => {
     setIsDownloading(true);
     
     try {
+      // 处理分析数据结构
+      let osbornAnalysis = null;
+      let deepAnalysis = null;
+      
+      // 检查是否有analysisData字段（新格式）
+      if (selectedCase.analysisData) {
+        // 新格式：analysisData包含分析结果
+        if (selectedCase.analysisData.dimension || selectedCase.analysisData.questions) {
+          osbornAnalysis = {
+            analysis: selectedCase.analysisData.insights?.join(' ') || '',
+            questions: selectedCase.analysisData.questions ? 
+              { [selectedCase.analysisData.dimension || '分析维度']: selectedCase.analysisData.questions } : {},
+            suggestions: selectedCase.analysisData.innovationSchemes || []
+          };
+        }
+      }
+      
+      // 检查是否有osbornAnalysis和deepAnalysis字段（旧格式或双分析格式）
+      if (selectedCase.osbornAnalysis) {
+        osbornAnalysis = selectedCase.osbornAnalysis;
+      }
+      if (selectedCase.deepAnalysis) {
+        deepAnalysis = selectedCase.deepAnalysis;
+      }
+      
+      // 如果没有分析数据，创建一个基本的分析结构
+      if (!osbornAnalysis && !deepAnalysis) {
+        osbornAnalysis = {
+          analysis: '暂无详细分析数据',
+          questions: {},
+          suggestions: []
+        };
+      }
+
       const downloadOptions = {
         title: selectedCase.title,
         description: selectedCase.description,
-        tags: selectedCase.tags,
+        tags: selectedCase.tags || [],
         createdAt: new Date(selectedCase.createdAt).toLocaleString('zh-CN'),
         analysis: {
-          osbornAnalysis: selectedCase.osbornAnalysis,
-          deepAnalysis: selectedCase.deepAnalysis
+          osbornAnalysis,
+          deepAnalysis
         }
       };
 

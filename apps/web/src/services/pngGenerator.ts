@@ -156,6 +156,26 @@ export class PNGGenerator {
         'deep'
       );
     }
+    
+    // 如果没有分析数据，显示提示信息
+    if (!analysis.osbornAnalysis && !analysis.deepAnalysis) {
+      this.drawNoAnalysisMessage(ctx, width, startY);
+    }
+  }
+  
+  /**
+   * 绘制无分析数据提示
+   */
+  private drawNoAnalysisMessage(ctx: CanvasRenderingContext2D, width: number, startY: number): void {
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '16px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    
+    const message = '暂无详细分析数据';
+    const x = width / 2;
+    const y = startY + 60;
+    
+    ctx.fillText(message, x, y);
   }
 
   /**

@@ -199,6 +199,7 @@ export class PDFGenerator {
 
         ${analysis.osbornAnalysis ? this.generateOsbornAnalysisHTML(analysis.osbornAnalysis) : ''}
         ${analysis.deepAnalysis ? this.generateDeepAnalysisHTML(analysis.deepAnalysis) : ''}
+        ${!analysis.osbornAnalysis && !analysis.deepAnalysis ? this.generateNoAnalysisHTML() : ''}
       </body>
       </html>
     `;
@@ -450,6 +451,21 @@ export class PDFGenerator {
     
     html += '</div>';
     return html;
+  }
+
+  /**
+   * 生成无分析数据HTML
+   */
+  private generateNoAnalysisHTML(): string {
+    return `
+      <div class="section">
+        <h2>分析数据</h2>
+        <div style="text-align: center; padding: 40px; color: #6b7280;">
+          <p style="font-size: 18px; margin-bottom: 10px;">暂无详细分析数据</p>
+          <p style="font-size: 14px;">该案例可能来自基础案例库或分析数据不完整</p>
+        </div>
+      </div>
+    `;
   }
 
   /**
