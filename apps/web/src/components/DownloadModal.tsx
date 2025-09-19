@@ -16,7 +16,8 @@ export interface DownloadOption {
   description: string;
   icon: React.ReactNode;
   format: 'pdf' | 'png';
-  type: 'report' | 'card';
+  type: 'report' | 'card' | 'single-card';
+  dimension?: string; // 单张卡片时指定维度
 }
 
 interface DownloadModalProps {
@@ -25,6 +26,7 @@ interface DownloadModalProps {
   onDownload: (option: DownloadOption) => void;
   caseTitle: string;
   isLoading?: boolean;
+  analysisData?: any; // 分析数据，用于生成单张卡片选项
 }
 
 const downloadOptions: DownloadOption[] = [
@@ -59,8 +61,40 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
   onClose,
   onDownload,
   caseTitle,
-  isLoading = false
+  isLoading = false,
+  analysisData
 }) => {
+  // 生成单张卡片下载选项
+  const generateSingleCardOptions = (): DownloadOption[] => {
+    if (!analysisData?.osbornAnalysis?.questions) return [];
+    
+    const singleCardOptions: DownloadOption[] = [];
+    Object.keys(analysisData.osbornAnalysis.questions).forEach((dimension, index) => {
+      singleCardOptions.push(
+        {
+          id: `single-pdf-${index}`,
+          name: `${dimension} - PDF`,
+          description: `下载"${dimension}"维度的PDF卡片`,
+          icon: <IconFileText size={24} className="text-purple-600" />,
+          format: 'pdf',
+          type: 'single-card',
+          dimension: dimension
+        },
+        {
+          id: `single-png-${index}`,
+          name: `${dimension} - PNG`,
+          description: `下载"${dimension}"维度的PNG卡片`,
+          icon: <IconPhoto size={24} className="text-purple-600" />,
+          format: 'png',
+          type: 'single-card',
+          dimension: dimension
+        }
+      );
+    });
+    return singleCardOptions;
+  };
+
+  const allDownloadOptions = [...downloadOptions, ...generateSingleCardOptions()];
   const [selectedOption, setSelectedOption] = useState<DownloadOption | null>(null);
 
   if (!isOpen) return null;
@@ -99,7 +133,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
           <div className="space-y-3">
             <h3 className="font-semibold text-gray-900">选择下载格式</h3>
             <div className="grid gap-3">
-              {downloadOptions.map((option) => (
+              {allDownloadOptions.map((option) => (
                 <div
                   key={option.id}
                   className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${

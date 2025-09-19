@@ -134,6 +134,32 @@ const CaseLibraryPage: React.FC = memo(() => {
         deepAnalysis = selectedCase.deepAnalysis;
       }
       
+      // 检查是否有AI分析结果数组（最新格式）
+      if (selectedCase.analysisResult && Array.isArray(selectedCase.analysisResult)) {
+        // 将AI分析结果数组转换为奥斯本分析格式
+        const questions: Record<string, string[]> = {};
+        const allInsights: string[] = [];
+        const allRecommendations: string[] = [];
+        const allExamples: string[] = [];
+        
+        selectedCase.analysisResult.forEach((item: any) => {
+          if (item.title && item.description) {
+            questions[item.title] = [item.description];
+            if (item.insights) allInsights.push(...item.insights);
+            if (item.recommendations) allRecommendations.push(...item.recommendations);
+            if (item.examples) allExamples.push(...item.examples);
+          }
+        });
+        
+        osbornAnalysis = {
+          analysis: allInsights.join(' ') || '基于奥斯本九问的深度分析',
+          questions: questions,
+          suggestions: allRecommendations,
+          insights: allInsights,
+          examples: allExamples
+        };
+      }
+      
       // 如果没有分析数据，创建一个基本的分析结构
       if (!osbornAnalysis && !deepAnalysis) {
         osbornAnalysis = {
@@ -151,17 +177,24 @@ const CaseLibraryPage: React.FC = memo(() => {
         analysis: {
           osbornAnalysis,
           deepAnalysis
-        }
+        },
+        type: option.type as 'report' | 'card'
       };
 
       if (option.format === 'pdf') {
         if (option.type === 'report') {
           pdfGenerator.generateReport(downloadOptions);
+        } else if (option.type === 'single-card') {
+          pdfGenerator.generateSingleCard(downloadOptions, option.dimension);
         } else {
           pdfGenerator.generateCard(downloadOptions);
         }
       } else if (option.format === 'png') {
-        await pngGenerator.generateCard(downloadOptions);
+        if (option.type === 'single-card') {
+          await pngGenerator.generateSingleCard(downloadOptions, option.dimension);
+        } else {
+          await pngGenerator.generateCard(downloadOptions);
+        }
       }
 
       console.log('下载成功:', selectedCase.title, option.name);
@@ -436,6 +469,7 @@ const CaseLibraryPage: React.FC = memo(() => {
         onDownload={handleDownload}
         caseTitle={selectedCase?.title || ''}
         isLoading={isDownloading}
+        analysisData={selectedCase}
       />
     </div>
   );

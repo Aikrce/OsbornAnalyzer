@@ -35,6 +35,20 @@ export class PDFGenerator {
   }
 
   /**
+   * 生成单张维度PDF卡片
+   */
+  generateSingleCard(options: PDFGenerationOptions, dimension?: string): void {
+    const { title, description, tags, createdAt, analysis } = options;
+    
+    // 创建HTML内容
+    const htmlContent = this.generateSingleCardHTML(title, description, tags, createdAt, analysis, dimension);
+    
+    // 使用浏览器打印功能生成PDF
+    const filename = dimension ? `${title}_${dimension}_卡片.pdf` : `${title}_单张卡片.pdf`;
+    this.printToPDF(htmlContent, filename);
+  }
+
+  /**
    * 生成报告HTML
    */
   private generateReportHTML(title: string, description: string, tags: string[], createdAt: string, analysis: any): string {
@@ -103,19 +117,31 @@ export class PDFGenerator {
             padding: 20px;
             border-radius: 8px;
             border-left: 4px solid #3b82f6;
+            margin-bottom: 20px;
           }
           .question-card h4 {
-            margin: 0 0 10px 0;
+            margin: 0 0 15px 0;
             color: #1f2937;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
+          }
+          .question-content {
+            margin: 0;
+          }
+          .question-content p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
           }
           .question-card ul {
             margin: 0;
             padding-left: 20px;
           }
           .question-card li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-size: 14px;
+            line-height: 1.5;
           }
           .insights-grid {
             display: grid;
@@ -351,6 +377,181 @@ export class PDFGenerator {
   }
 
   /**
+   * 生成单张卡片HTML
+   */
+  private generateSingleCardHTML(title: string, description: string, tags: string[], createdAt: string, analysis: any, dimension?: string): string {
+    if (!dimension || !analysis.osbornAnalysis?.questions?.[dimension]) {
+      return this.generateCardHTML(title, description, tags, createdAt, analysis);
+    }
+
+    const dimensionContent = analysis.osbornAnalysis.questions[dimension];
+    const dimensionInsights = analysis.osbornAnalysis.insights || [];
+    const dimensionSuggestions = analysis.osbornAnalysis.suggestions || [];
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${title} - ${dimension}</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+          }
+          .card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+          }
+          .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: bold;
+          }
+          .header h2 {
+            margin: 0 0 15px 0;
+            font-size: 20px;
+            opacity: 0.9;
+          }
+          .header p {
+            margin: 0;
+            opacity: 0.8;
+            font-size: 14px;
+          }
+          .content {
+            padding: 30px;
+          }
+          .dimension-content {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 25px;
+          }
+          .dimension-content h3 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            font-size: 18px;
+          }
+          .dimension-content p {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+          }
+          .insights, .suggestions {
+            margin-bottom: 20px;
+          }
+          .insights h4, .suggestions h4 {
+            margin: 0 0 10px 0;
+            color: #1f2937;
+            font-size: 16px;
+          }
+          .insights ul, .suggestions ul {
+            margin: 0;
+            padding-left: 20px;
+          }
+          .insights li, .suggestions li {
+            margin-bottom: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #374151;
+          }
+          .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+          }
+          .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+          }
+          .tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+          }
+          .time {
+            font-size: 12px;
+            color: #6b7280;
+          }
+          @media print {
+            body { margin: 0; padding: 0; background: white; }
+            .card { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="header">
+            <h1>${title}</h1>
+            <h2>${dimension}</h2>
+            <p>${description}</p>
+          </div>
+          
+          <div class="content">
+            <div class="dimension-content">
+              <h3>分析内容</h3>
+              ${Array.isArray(dimensionContent) ? 
+                dimensionContent.map((content: string) => `<p>${content}</p>`).join('') : 
+                `<p>${dimensionContent}</p>`
+              }
+            </div>
+            
+            ${dimensionInsights.length > 0 ? `
+              <div class="insights">
+                <h4>关键洞察</h4>
+                <ul>
+                  ${dimensionInsights.map((insight: string) => `<li>${insight}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+            
+            ${dimensionSuggestions.length > 0 ? `
+              <div class="suggestions">
+                <h4>实施建议</h4>
+                <ul>
+                  ${dimensionSuggestions.map((suggestion: string) => `<li>${suggestion}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="footer">
+            <div class="tags">
+              ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+            </div>
+            <div class="time">${createdAt}</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
    * 生成奥斯本分析HTML
    */
   private generateOsbornAnalysisHTML(osbornAnalysis: any): string {
@@ -371,21 +572,46 @@ export class PDFGenerator {
         html += `
           <div class="question-card">
             <h4>${category}</h4>
-            <ul>
-              ${Array.isArray(questions) ? questions.map((q: string) => `<li>${q}</li>`).join('') : `<li>${questions}</li>`}
-            </ul>
+            <div class="question-content">
+              ${Array.isArray(questions) ? questions.map((q: string) => `<p>${q}</p>`).join('') : `<p>${questions}</p>`}
+            </div>
           </div>
         `;
       });
       html += '</div>';
     }
     
+    // 显示洞察
+    if (osbornAnalysis.insights && osbornAnalysis.insights.length > 0) {
+      html += `
+        <div class="recommendations">
+          <h3>关键洞察</h3>
+          <ul>
+            ${osbornAnalysis.insights.map((insight: string) => `<li>${insight}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+    
+    // 显示建议
     if (osbornAnalysis.suggestions && osbornAnalysis.suggestions.length > 0) {
       html += `
         <div class="recommendations">
-          <h3>创新建议</h3>
+          <h3>实施建议</h3>
           <ul>
             ${osbornAnalysis.suggestions.map((suggestion: string) => `<li>${suggestion}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+    
+    // 显示案例
+    if (osbornAnalysis.examples && osbornAnalysis.examples.length > 0) {
+      html += `
+        <div class="recommendations">
+          <h3>成功案例</h3>
+          <ul>
+            ${osbornAnalysis.examples.map((example: string) => `<li>${example}</li>`).join('')}
           </ul>
         </div>
       `;

@@ -48,6 +48,46 @@ export class PNGGenerator {
   }
 
   /**
+   * 生成单张维度PNG卡片
+   */
+  async generateSingleCard(options: PNGGenerationOptions, dimension?: string): Promise<void> {
+    const { title, description, tags, createdAt, analysis } = options;
+    
+    try {
+      // 创建Canvas
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('无法创建Canvas上下文');
+      }
+      
+      // 设置画布尺寸
+      canvas.width = 800;
+      canvas.height = 600;
+      
+      // 绘制背景
+      this.drawBackground(ctx, canvas.width, canvas.height);
+      
+      // 绘制标题区域（包含维度信息）
+      this.drawSingleCardHeader(ctx, title, description, dimension, canvas.width);
+      
+      // 绘制单张卡片内容
+      this.drawSingleCardContent(ctx, analysis, dimension, canvas.width, 200);
+      
+      // 绘制底部信息
+      this.drawFooter(ctx, tags, createdAt, canvas.width, canvas.height);
+      
+      // 下载PNG
+      const filename = dimension ? `${title}_${dimension}_卡片.png` : `${title}_单张卡片.png`;
+      this.downloadPNG(canvas, filename);
+      
+    } catch (error) {
+      console.error('PNG生成失败:', error);
+      throw new Error('PNG生成失败，请重试');
+    }
+  }
+
+  /**
    * 绘制背景
    */
   private drawBackground(ctx: CanvasRenderingContext2D, width: number, height: number): void {
@@ -176,6 +216,95 @@ export class PNGGenerator {
     const y = startY + 60;
     
     ctx.fillText(message, x, y);
+  }
+
+  /**
+   * 绘制单张卡片标题区域
+   */
+  private drawSingleCardHeader(ctx: CanvasRenderingContext2D, title: string, description: string, dimension: string | undefined, width: number): void {
+    // 背景
+    const gradient = ctx.createLinearGradient(0, 0, width, 0);
+    gradient.addColorStop(0, '#3b82f6');
+    gradient.addColorStop(1, '#1d4ed8');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, 120);
+    
+    // 标题
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 24px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(title, width / 2, 40);
+    
+    // 维度
+    if (dimension) {
+      ctx.font = 'bold 18px "Segoe UI", sans-serif';
+      ctx.fillText(dimension, width / 2, 70);
+    }
+    
+    // 描述
+    ctx.font = '14px "Segoe UI", sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    this.wrapText(ctx, description, width / 2, 100, width - 40, 16);
+  }
+
+  /**
+   * 绘制单张卡片内容
+   */
+  private drawSingleCardContent(ctx: CanvasRenderingContext2D, analysis: any, dimension: string | undefined, width: number, startY: number): void {
+    if (!dimension || !analysis.osbornAnalysis?.questions?.[dimension]) {
+      this.drawNoAnalysisMessage(ctx, width, startY);
+      return;
+    }
+
+    const dimensionContent = analysis.osbornAnalysis.questions[dimension];
+    const insights = analysis.osbornAnalysis.insights || [];
+    const suggestions = analysis.osbornAnalysis.suggestions || [];
+
+    let currentY = startY;
+
+    // 绘制维度内容
+    ctx.fillStyle = '#1f2937';
+    ctx.font = 'bold 16px "Segoe UI", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('分析内容', 40, currentY);
+    currentY += 25;
+
+    ctx.fillStyle = '#374151';
+    ctx.font = '14px "Segoe UI", sans-serif';
+    const contentText = Array.isArray(dimensionContent) ? dimensionContent.join(' ') : dimensionContent;
+    currentY = this.wrapText(ctx, contentText, 40, currentY, width - 80, 18) + 20;
+
+    // 绘制洞察
+    if (insights.length > 0) {
+      ctx.fillStyle = '#1f2937';
+      ctx.font = 'bold 16px "Segoe UI", sans-serif';
+      ctx.fillText('关键洞察', 40, currentY);
+      currentY += 25;
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '14px "Segoe UI", sans-serif';
+      insights.slice(0, 3).forEach((insight: string) => {
+        ctx.fillText('• ' + insight, 40, currentY);
+        currentY += 20;
+      });
+      currentY += 10;
+    }
+
+    // 绘制建议
+    if (suggestions.length > 0) {
+      ctx.fillStyle = '#1f2937';
+      ctx.font = 'bold 16px "Segoe UI", sans-serif';
+      ctx.fillText('实施建议', 40, currentY);
+      currentY += 25;
+
+      ctx.fillStyle = '#374151';
+      ctx.font = '14px "Segoe UI", sans-serif';
+      suggestions.slice(0, 3).forEach((suggestion: string) => {
+        ctx.fillText('• ' + suggestion, 40, currentY);
+        currentY += 20;
+      });
+    }
   }
 
   /**
