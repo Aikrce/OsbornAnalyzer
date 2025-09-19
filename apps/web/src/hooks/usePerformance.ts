@@ -8,7 +8,7 @@ interface PerformanceMeasurement {
 }
 
 export const usePerformance = () => {
-  const [measurements, setMeasurements] = useState<PerformanceMeasurement[]>([]);
+  const [, setMeasurements] = useState<PerformanceMeasurement[]>([]);
 
   const startMeasurement = (name: string) => {
     const startTime = performance.now();

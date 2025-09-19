@@ -5,48 +5,40 @@ import { runTests } from "../../test/index";
 vi.mock("child_process");
 
 describe("Test Module", () => {
-  it("should run tests successfully", async () => {
+  it("should run tests successfully", () => {
     const mockExecSync = vi.mocked(require("child_process").execSync);
     mockExecSync.mockReturnValue("Tests passed");
     
-    const result = await runTests({
-      testPath: "./src",
-      coverage: true,
-    });
-    
-    expect(result.success).toBe(true);
-    expect(result.coverage).toBeDefined();
+    // runTests is a void function, so we just test it doesn't throw
+    expect(() => runTests()).not.toThrow();
   });
 
-  it("should handle test failures", async () => {
+  it("should handle test failures", () => {
     const mockExecSync = vi.mocked(require("child_process").execSync);
     mockExecSync.mockImplementation(() => {
       throw new Error("Tests failed");
     });
     
-    const result = await runTests({
-      testPath: "./src",
-      coverage: false,
+    // Should exit with code 1 on error
+    const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
+      throw new Error('process.exit called');
     });
     
-    expect(result.success).toBe(false);
-    expect(result.error).toContain("Tests failed");
+    expect(() => runTests()).toThrow('process.exit called');
+    expect(mockExit).toHaveBeenCalledWith(1);
+    
+    mockExit.mockRestore();
   });
 
-  it("should run tests with different options", async () => {
+  it("should execute test commands", () => {
     const mockExecSync = vi.mocked(require("child_process").execSync);
     mockExecSync.mockReturnValue("Tests completed");
     
-    const result = await runTests({
-      testPath: "./tests",
-      coverage: true,
-      watch: true,
-    });
+    runTests();
     
-    expect(result.success).toBe(true);
     expect(mockExecSync).toHaveBeenCalledWith(
-      expect.stringContaining("--coverage"),
-      expect.any(Object)
+      'pnpm --filter "@huitu/shared" run test',
+      { stdio: 'inherit' }
     );
   });
 });

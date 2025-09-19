@@ -22,7 +22,7 @@ export default function useAnalysis(): UseAnalysisReturn {
     setError(null);
     
     try {
-      const analysisResult = performOsbornAnalysis(topic, {});
+      const analysisResult = await performOsbornAnalysis(topic, {});
       setResults([analysisResult]);
     } catch (err) {
       setError(err instanceof Error ? err.message : '分析失败');

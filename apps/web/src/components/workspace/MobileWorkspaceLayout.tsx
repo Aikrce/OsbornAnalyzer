@@ -69,8 +69,8 @@ const MobileWorkspaceLayout: React.FC<MobileWorkspaceLayoutProps> = ({
       }, 3000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isMobile, sidebarOpen]);
-    return () => {}; // 确保所有代码路径都有返回值
 
   const currentModeConfig = modes.find(mode => mode.id === currentMode);
   const CurrentIcon = currentModeConfig?.icon || Home;

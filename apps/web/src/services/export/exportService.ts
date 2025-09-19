@@ -1,4 +1,6 @@
 // 导出服务 - 用于导出分析结果
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 export interface ExportData {
   topic: string;
   results: any[];
@@ -6,8 +8,9 @@ export interface ExportData {
 }
 
 export interface ExportOptions {
-  format: 'json' | 'markdown' | 'html';
+  format: 'json' | 'markdown' | 'html' | 'pdf' | 'image';
   includeMetadata?: boolean;
+  cardStyle?: 'default' | 'minimal' | 'detailed';
 }
 
 class ExportService {
@@ -20,6 +23,10 @@ class ExportService {
         return this.exportToMarkdown(data, options);
       case 'html':
         return this.exportToHTML(data, options);
+      case 'pdf':
+        return this.exportToPDF(data, options);
+      case 'image':
+        return this.exportToImage(data, options);
       default:
         throw new Error(`Unsupported export format: ${options.format}`);
     }
@@ -64,6 +71,7 @@ class ExportService {
 
   // 生成HTML内容
   private generateHTMLContent(data: ExportData, options: ExportOptions): string {
+    
     let html = `
       <!DOCTYPE html>
       <html lang="zh-CN">
@@ -71,41 +79,171 @@ class ExportService {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${data.topic} - 奥斯本分析结果</title>
+        <script src="https://cdn.tailwindcss.com"></script>
         <style>
-          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-          h1 { color: #333; border-bottom: 2px solid #007acc; }
-          h2 { color: #555; margin-top: 30px; }
-          .result { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f8fafc;
+          }
+          .card-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin: 20px 0;
+          }
+          .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            text-align: center;
+          }
+          .result-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+          }
+          .result-category {
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+          }
+          .result-content {
+            color: #6b7280;
+            line-height: 1.6;
+          }
+          .metadata {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+            color: #9ca3af;
+          }
         </style>
       </head>
       <body>
-        <h1>${data.topic}</h1>
-        <h2>奥斯本创新九问分析结果</h2>
+        <div class="card-container">
+          <h1 class="card-title">${data.topic}</h1>
+          
+          <div class="results">
     `;
 
     data.results.forEach((result, index) => {
       html += `
-        <div class="result">
-          <h3>${result.category || `问题 ${index + 1}`}</h3>
-          <p>${result.analysis || result.content || ''}</p>
-        </div>
+            <div class="result-item">
+              <h3 class="result-category">${result.category || `问题 ${index + 1}`}</h3>
+              <p class="result-content">${this.escapeHtml(result.analysis || result.content || '')}</p>
+            </div>
       `;
     });
 
     if (options.includeMetadata && data.metadata) {
       html += `
-        <h2>元数据</h2>
-        <p>导出时间: ${new Date().toLocaleString()}</p>
-        <p>分析主题: ${data.topic}</p>
+          </div>
+          
+          <div class="metadata">
+            <p><strong>导出时间:</strong> ${new Date().toLocaleString('zh-CN')}</p>
+            <p><strong>分析主题:</strong> ${data.topic}</p>
+            ${data.metadata.analysisType ? `<p><strong>分析类型:</strong> ${data.metadata.analysisType}</p>` : ''}
+          </div>
+      `;
+    } else {
+      html += `
+          </div>
       `;
     }
 
     html += `
+        </div>
       </body>
       </html>
     `;
 
     return html;
+  }
+
+  // HTML转义工具函数
+  private escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // 导出为PDF格式
+  private async exportToPDF(data: ExportData, options: ExportOptions): Promise<Blob> {
+    // 创建临时HTML元素用于渲染
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = this.generateHTMLContent(data, options);
+    tempElement.style.position = 'absolute';
+    tempElement.style.left = '-9999px';
+    document.body.appendChild(tempElement);
+
+    try {
+      // 使用html2canvas将HTML转换为canvas
+      const canvas = await html2canvas(tempElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      // 创建PDF文档
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      // 清理临时元素
+      document.body.removeChild(tempElement);
+
+      return new Blob([pdf.output('blob')], { type: 'application/pdf' });
+    } catch (error) {
+      document.body.removeChild(tempElement);
+      throw new Error(`PDF导出失败: ${error}`);
+    }
+  }
+
+  // 导出为图片格式
+  private async exportToImage(data: ExportData, options: ExportOptions): Promise<Blob> {
+    // 创建临时HTML元素用于渲染
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = this.generateHTMLContent(data, options);
+    tempElement.style.position = 'absolute';
+    tempElement.style.left = '-9999px';
+    document.body.appendChild(tempElement);
+
+    try {
+      // 使用html2canvas将HTML转换为canvas
+      const canvas = await html2canvas(tempElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      // 清理临时元素
+      document.body.removeChild(tempElement);
+
+      // 转换为Blob
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('图片导出失败'));
+          }
+        }, 'image/png');
+      });
+    } catch (error) {
+      document.body.removeChild(tempElement);
+      throw new Error(`图片导出失败: ${error}`);
+    }
   }
 
   // 导出多个分析结果

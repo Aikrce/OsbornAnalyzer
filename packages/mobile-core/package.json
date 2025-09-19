@@ -1,7 +1,7 @@
 {
-  "name": "@huitu/mobile-core",
+  "name": "@osborn-analyzer/mobile-core",
   "version": "1.0.0",
-  "description": "HuiTu移动端核心库 - React Native组件和原生功能桥接",
+  "description": "OsbornAnalyzer移动端核心库 - React Native组件和原生功能桥接",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
@@ -20,16 +20,18 @@
     "react-redux": "^9.2.0"
   },
   "devDependencies": {
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/react-native": "^12.0.0",
+    "@types/node": "^24.3.3",
     "@types/react": "^19.1.13",
     "@types/react-native": "^0.73.0",
+    "@vitest/coverage-v8": "^1.0.0",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4",
-    "@vitest/coverage-v8": "^3.2.4",
-    "@testing-library/react-native": "^12.0.0",
-    "@testing-library/jest-native": "^5.4.3"
+    "vitest": "^1.0.0"
   },
   "peerDependencies": {
-    "react": "^19.1.1",
+    "react": "^18.3.1",
     "react-native": "^0.73.0"
   },
   "publishConfig": {

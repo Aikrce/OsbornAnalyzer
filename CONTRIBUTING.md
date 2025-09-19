@@ -58,7 +58,7 @@ pnpm install
 pnpm dev
 
 # 启动特定应用
-pnpm --filter @huitu/web dev
+pnpm --filter @osborn-analyzer/web dev
 ```
 
 4. **运行测试**
@@ -231,7 +231,7 @@ Closes #123
 pnpm test
 
 # 运行特定包的测试
-pnpm --filter @huitu/shared test
+pnpm --filter @osborn-analyzer/shared test
 
 # 运行测试并生成覆盖率报告
 pnpm test:coverage
@@ -377,7 +377,7 @@ describe('OsbornAnalyzer', () => {
 
 - **GitHub Issues**: [项目 Issues](https://github.com/your-org/huitu/issues)
 - **GitHub Discussions**: [社区讨论](https://github.com/your-org/huitu/discussions)
-- **Email**: contact@huitu.dev
+- **Email**: contact@osborn-analyzer.dev
 
 ## 📄 许可证
 

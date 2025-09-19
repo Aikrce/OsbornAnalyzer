@@ -1,4 +1,5 @@
-import { AnalysisResult } from '@huitu/shared/types';
+import { AnalysisResult } from '@huitu/shared';
+import { OSBORN_BASE_CASES, OsbornCase } from '../data/baseCases';
 
 export interface LocalCase {
   id: string;
@@ -12,6 +13,7 @@ export interface LocalCase {
   industry?: string;
   company?: string;
   rating?: number;
+  similarity?: number; // 添加相似度属性
 }
 
 class LocalCaseService {
@@ -19,7 +21,11 @@ class LocalCaseService {
   private cases: LocalCase[] = [];
 
   constructor() {
+    console.log('LocalCaseService constructor called');
     this.loadCases();
+    console.log('Cases loaded, count:', this.cases.length);
+    this.initializeBaseCases();
+    console.log('Base cases initialization completed, total cases:', this.cases.length);
   }
 
   // 加载案例
@@ -37,6 +43,84 @@ class LocalCaseService {
     } catch (error) {
       console.error('Failed to load cases:', error);
       this.cases = [];
+    }
+  }
+
+  // 初始化基础案例
+  private initializeBaseCases(): void {
+    console.log('Checking base cases initialization...');
+    console.log('OSBORN_BASE_CASES length:', OSBORN_BASE_CASES?.length || 0);
+    console.log('Current cases count:', this.cases.length);
+    
+    // 检查是否已经初始化过基础案例
+    const hasBaseCases = this.cases.some(caseItem => caseItem.id.startsWith('osborn-'));
+    console.log('Has base cases:', hasBaseCases);
+    
+    if (!hasBaseCases && OSBORN_BASE_CASES && OSBORN_BASE_CASES.length > 0) {
+      console.log('Initializing base cases...', OSBORN_BASE_CASES.length);
+      
+      // 将基础案例转换为 LocalCase 格式
+      const baseCases: LocalCase[] = OSBORN_BASE_CASES.map(osbornCase => ({
+        id: osbornCase.id,
+        title: osbornCase.title,
+        description: osbornCase.description,
+        topic: osbornCase.topic,
+        analysisResult: {
+          id: osbornCase.id,
+          title: osbornCase.title,
+          description: osbornCase.description,
+          question: osbornCase.topic,
+          analysis: `基于奥斯本${osbornCase.analysisData.dimension}维度的${osbornCase.topic}分析`,
+          suggestions: osbornCase.analysisData.innovationSchemes,
+          questions: {
+            [osbornCase.analysisData.dimension]: osbornCase.analysisData.questions
+          },
+          summary: `${osbornCase.topic}的${osbornCase.analysisData.dimension}分析，提供了${osbornCase.analysisData.insights.length}个关键洞察和${osbornCase.analysisData.innovationSchemes.length}个创新方案`,
+          totalScore: 85,
+          quality: 'high' as const,
+          timestamp: osbornCase.createdAt,
+          createdAt: osbornCase.createdAt,
+          updatedAt: osbornCase.updatedAt,
+          insights: {
+            keyOpportunities: osbornCase.analysisData.insights,
+            potentialRisks: ['市场竞争', '技术风险', '用户接受度'],
+            marketTrends: ['数字化转型', '创新驱动', '用户需求变化'],
+            competitiveAdvantages: ['技术领先', '创新思维', '市场洞察']
+          },
+          recommendations: {
+            shortTerm: osbornCase.analysisData.innovationSchemes.slice(0, 2),
+            mediumTerm: osbornCase.analysisData.innovationSchemes.slice(2, 4),
+            longTerm: osbornCase.analysisData.innovationSchemes.slice(4)
+          },
+          similarCases: [],
+          confidence: 0.9,
+          detailedAnalysis: {
+            osbornDimensions: [{
+              dimension: osbornCase.analysisData.dimension,
+              questions: osbornCase.analysisData.questions,
+              insights: osbornCase.analysisData.insights,
+              innovationSchemes: osbornCase.analysisData.innovationSchemes,
+              score: 85,
+              recommendations: osbornCase.analysisData.innovationSchemes
+            }],
+            crossIndustryInsights: [],
+            innovationPatterns: [],
+            implementationRoadmap: []
+          }
+        },
+        createdAt: osbornCase.createdAt,
+        updatedAt: osbornCase.updatedAt,
+        tags: osbornCase.tags,
+        industry: osbornCase.industry,
+        company: osbornCase.company,
+        rating: 4.5
+      }));
+
+      // 将基础案例添加到现有案例中
+      this.cases = [...baseCases, ...this.cases];
+      this.saveCases();
+      
+      console.log(`Initialized ${baseCases.length} base cases`);
     }
   }
 
@@ -94,8 +178,8 @@ class LocalCaseService {
       topic,
       analysisResult,
       tags: additionalData?.tags || this.generateTagsFromAnalysis(analysisResult),
-      industry: additionalData?.industry,
-      company: additionalData?.company,
+      industry: additionalData?.industry || '',
+      company: additionalData?.company || '',
       rating: 0,
     });
   }

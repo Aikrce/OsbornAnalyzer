@@ -1,4 +1,4 @@
-import { AnalysisResult } from '@huitu/shared/types';
+import { AnalysisResult } from '@huitu/shared';
 
 export interface CollaborationSession {
   id: string;

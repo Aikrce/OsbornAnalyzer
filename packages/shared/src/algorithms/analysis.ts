@@ -50,9 +50,10 @@ export class AnalysisEngine {
     // 3. 如果启用AI增强，增强问题列表
     if (options.enhanceWithAI && result) {
       try {
-        for (const category of Object.keys(result.questions) as any[]) {
-          result.questions[category] = await aiAnalyzer.enhanceQuestions(
-            result.questions[category]
+        for (const category of Object.keys(result.questions)) {
+          const categoryKey = category as keyof typeof result.questions;
+          result.questions[categoryKey] = await aiAnalyzer.enhanceQuestions(
+            result.questions[categoryKey]
           );
         }
       } catch (error) {
@@ -81,8 +82,8 @@ export class AnalysisEngine {
       const caseKeywords = [
         ...this.extractKeywords(caseStudy.title),
         ...this.extractKeywords(caseStudy.description),
-        ...(caseStudy.tags || [] || []),
-        ...(caseStudy.industry || "" ? [caseStudy.industry || ""] : []),
+        ...(caseStudy.tags || []),
+        ...(caseStudy.industry ? [caseStudy.industry] : []),
       ];
       
       const similarity = this.calculateSimilarity(topicKeywords, caseKeywords);
@@ -204,7 +205,7 @@ export class AnalysisEngine {
     const markdown = this.generateMarkdownReport(result, aiAnalysis, options);
     
     // 基础Markdown到HTML转换
-    let html = markdown
+    const html = markdown
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')

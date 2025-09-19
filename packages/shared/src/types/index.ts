@@ -112,6 +112,18 @@ export interface DeepAnalysisResult {
 }
 
 /**
+ * 奥斯本维度分析结果
+ */
+export interface OsbornDimensionResult {
+  dimension: OsbornQuestionType;
+  title: string;
+  description: string;
+  suggestions: string[];
+  score: number;
+  examples: string[];
+}
+
+/**
  * 奥斯本分析结果
  */
 export interface OsbornAnalysisResult {

@@ -3,15 +3,19 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 // 懒加载页面组件 - 添加预加载提示
 const HomePage = lazy(() => import('../pages/HomePage'));
 const UserPage = lazy(() => import('../pages/UserPage'));
 const OsbornAnalysisPage = lazy(() => import('../pages/OsbornAnalysisPage'));
 const DeepAnalysisPage = lazy(() => import('../pages/DeepAnalysisPage'));
+const AnalysisDetailPage = lazy(() => import('../pages/AnalysisDetailPage'));
+const AnalysisProgressPage = lazy(() => import('../pages/AnalysisProgressPage'));
 const CaseLibraryPage = lazy(() => import('../pages/CaseLibraryPage'));
 const CollaborationPage = lazy(() => import('../pages/CollaborationPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
+const AIDiagnosticsPage = lazy(() => import('../pages/AIDiagnosticsPage'));
 
 // 优化的加载中组件
 const PageLoader = ({ message = "加载中..." }: { message?: string }) => (
@@ -42,80 +46,111 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const AppRoutes: React.FC = () => {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/home" replace />} />
-      <Route 
-        path="/home" 
-        element={
-          <Suspense fallback={<PageLoader message="加载首页..." />}>
-            <Layout>
-              <HomePage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/osborn-analysis" 
-        element={
-          <Suspense fallback={<PageLoader message="加载奥斯本分析..." />}>
-            <Layout>
-              <OsbornAnalysisPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/deep-analysis" 
-        element={
-          <Suspense fallback={<PageLoader message="加载深度分析..." />}>
-            <Layout>
-              <DeepAnalysisPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/case-library" 
-        element={
-          <Suspense fallback={<PageLoader message="加载案例库..." />}>
-            <Layout>
-              <CaseLibraryPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/collaboration" 
-        element={
-          <Suspense fallback={<PageLoader message="加载协作页面..." />}>
-            <Layout>
-              <CollaborationPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/settings" 
-        element={
-          <Suspense fallback={<PageLoader message="加载设置页面..." />}>
-            <Layout>
-              <SettingsPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route 
-        path="/user" 
-        element={
-          <Suspense fallback={<PageLoader message="加载用户中心..." />}>
-            <Layout>
-              <UserPage />
-            </Layout>
-          </Suspense>
-        } 
-      />
-      <Route path="*" element={<Navigate to="/home" replace />} />
-    </Routes>
+    <Layout>
+      <Routes>
+        <Route 
+          path="/" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载首页..." />}>
+                <HomePage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/osborn-analysis" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载奥斯本分析..." />}>
+                <OsbornAnalysisPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/deep-analysis" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载深度分析..." />}>
+                <DeepAnalysisPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/analysis-detail" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载分析详情..." />}>
+                <AnalysisDetailPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/analysis-progress" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="准备分析..." />}>
+                <AnalysisProgressPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/case-library" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载案例库..." />}>
+                <CaseLibraryPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/collaboration" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载协作页面..." />}>
+                <CollaborationPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载设置页面..." />}>
+                <SettingsPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/ai-diagnostics" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载AI诊断..." />}>
+                <AIDiagnosticsPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route 
+          path="/user" 
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message="加载用户中心..." />}>
+                <UserPage />
+              </Suspense>
+            </ErrorBoundary>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Layout>
   );
 };
 

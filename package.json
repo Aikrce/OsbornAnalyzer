@@ -1,7 +1,7 @@
 {
-  "name": "huitu-monorepo",
+  "name": "osborn-analyzer",
   "version": "2.0.0",
-  "description": "奥斯本检核表法创新思维工具 - Monorepo架构",
+  "description": "奥斯本检核表法创新思维分析工具 - Monorepo架构",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -24,10 +24,16 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "@playwright/test": "1.40.0",
     "@testing-library/dom": "^10.0.0",
-    "@types/node": "^24.3.3",
+    "@types/glob": "^9.0.0",
+    "@types/lodash-es": "^4.17.12",
+    "@types/node": "^24.5.1",
+    "@types/react-native": "^0.73.0",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
     "@typescript-eslint/parser": "^8.43.0",
+    "debug": "^4.4.3",
+    "esbuild": "0.25.10",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -37,17 +43,16 @@
     "npm-check-updates": "^18.1.1",
     "postcss": "^8.4",
     "prettier": "^3.6.2",
+    "resolve-from": "^5.0.0",
+    "rollup": "^4.50.2",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.43.0",
-    "vitest": "^3.2.4"
+    "vitest": "^1.0.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
   },
-  "packageManager": "pnpm@9.0.0",
-  "dependencies": {
-    "@tailwindcss/postcss": "^4.1.13"
-  }
+  "packageManager": "pnpm@9.0.0"
 }

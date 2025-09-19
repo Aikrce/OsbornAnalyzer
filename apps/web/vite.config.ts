@@ -5,8 +5,6 @@ import path from 'path'
 export default defineConfig({
   plugins: [
     react({
-      // 启用React Fast Refresh
-      fastRefresh: true,
       // 优化JSX运行时
       jsxRuntime: 'automatic',
     }),
@@ -14,19 +12,21 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@shared': path.resolve(__dirname, '../../packages/shared/src'),
-      '@web-core': path.resolve(__dirname, '../../packages/web-core/src')
+      '@huitu/shared': path.resolve(__dirname, '../../packages/shared/src'),
+      '@huitu/web-core': path.resolve(__dirname, '../../packages/web-core/src')
     }
   },
   server: {
-    port: 5173,
+    port: 5371,
+    host: '0.0.0.0',
     open: true,
+    strictPort: false, // 允许端口自动选择
     // 启用HMR优化
     hmr: {
       overlay: true,
+      port: undefined, // 让HMR自动选择端口
     },
-    // 预构建优化
-    force: true,
+    // 预构建优化相关配置可放在 optimizeDeps 选项中
   },
   build: {
     target: 'esnext',
@@ -51,9 +51,8 @@ export default defineConfig({
           'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot'],
           'query-vendor': ['@tanstack/react-query'],
           'utils': ['clsx', 'tailwind-merge', 'lucide-react'],
-          'ai-services': ['@/services/ai/aiService'],
-          'collaboration-services': ['@/services/collaboration/collaborationService'],
-          'export-services': ['@/services/export/exportService'],
+          'ai-services': ['@huitu/shared'],
+          'collaboration-services': ['@huitu/web-core'],
         },
         // 优化chunk命名
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -77,21 +76,5 @@ export default defineConfig({
     exclude: ['@huitu/shared', '@huitu/web-core'],
   },
   // 启用构建缓存
-  cacheDir: 'node_modules/.vite',
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'src/test/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/mockData.ts'
-      ]
-    }
-  }
+  cacheDir: 'node_modules/.vite'
 })

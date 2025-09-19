@@ -1,15 +1,10 @@
 import type { AIAnalysisResult, AnalysisResult } from '../types';
-import { hybridAIAnalyzer, localAIAnalyzer } from './local-ai';
 
-// AI分析器接口
-export interface IAIAnalyzer {
-  analyze(result: AnalysisResult): Promise<AIAnalysisResult>;
-  enhanceQuestions(questions: string[]): Promise<string[]>;
-  suggestAlternatives(text: string): Promise<string[]>;
-}
+// AI分析器接口（从local-ai.ts导入）
+export type { IAIAnalyzer } from './local-ai';
 
 // 模拟AI分析器（实际使用时需要接入真实的AI服务）
-export default class AIAnalyzer implements IAIAnalyzer {
+export default class AIAnalyzer {
   private apiKey: string | null;
   private baseUrl: string;
   
@@ -315,10 +310,10 @@ export default class AIAnalyzer implements IAIAnalyzer {
 // 创建默认实例
 export const aiAnalyzer = new AIAnalyzer();
 
-// 导出智能分析相关功能
-export { hybridAIAnalyzer as smartAIAnalyzer, localAIAnalyzer } from './local-ai';
-
-// 智能分析快捷方法
-export const analyzeWithAI = hybridAIAnalyzer.analyze.bind(hybridAIAnalyzer);
-export const preloadAIModel = localAIAnalyzer.loadModel.bind(localAIAnalyzer);
+// 智能分析快捷方法（使用本地AI分析器）
+export const analyzeWithAI = aiAnalyzer.analyze.bind(aiAnalyzer);
+export const preloadAIModel = async () => {
+  console.log('AI模型预加载功能已禁用，使用云端分析');
+  return true;
+};
 

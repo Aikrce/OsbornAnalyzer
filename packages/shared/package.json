@@ -1,14 +1,14 @@
 {
-  "name": "@huitu/shared",
+  "name": "@osborn-analyzer/shared",
   "version": "1.0.0",
-  "description": "HuiTu共享库 - 核心数据、算法和工具函数",
+  "description": "OsbornAnalyzer共享库 - 核心数据、算法和工具函数",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
+      "import": "./dist/index.js",
       "require": "./dist/index.js"
     },
     "./data": {
@@ -20,6 +20,11 @@
       "types": "./dist/algorithms/index.d.ts",
       "import": "./dist/algorithms/index.mjs",
       "require": "./dist/algorithms/index.js"
+    },
+    "./algorithms/osborn": {
+      "types": "./dist/algorithms/osborn.d.ts",
+      "import": "./dist/algorithms/osborn.mjs",
+      "require": "./dist/algorithms/osborn.js"
     },
     "./types": {
       "types": "./dist/types/index.d.ts",
@@ -36,29 +41,27 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsc",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src --ext ts,tsx",
-    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "date-fns": "^4.1.0",
     "jszip": "^3.10.1",
-    "lodash-es": "^4.17.21",
     "nanoid": "^5.1.5",
     "zod": "^4.1.8"
   },
   "devDependencies": {
-    "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.3.3",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^1.0.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
+    "vitest": "^1.0.0"
   },
   "publishConfig": {
     "access": "restricted"

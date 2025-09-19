@@ -3,6 +3,7 @@ import { BrowserRouter } from 'react-router-dom'
 import AppRoutes from './routes'
 import { ThemeProvider } from './providers/theme-provider'
 import { NotificationProvider } from './providers/notification-provider'
+import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
 
 const queryClient = new QueryClient({
@@ -17,15 +18,22 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ThemeProvider>
-          <NotificationProvider>
-            <AppRoutes />
-          </NotificationProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <ThemeProvider>
+            <NotificationProvider>
+              <AppRoutes />
+            </NotificationProvider>
+          </ThemeProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   )
 }
 

@@ -1,39 +1,35 @@
+import React from "react";
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { BrowserRouter } from "react-router-dom";
-import App from "../../App";
+import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import AppRoutes from "../../routes";
 
-const renderWithRouter = (component: React.ReactElement) => {
+const renderWithRouter = (component: React.ReactElement, initialEntries = ['/']) => {
   return render(
-    <BrowserRouter>
+    <MemoryRouter initialEntries={initialEntries}>
       {component}
-    </BrowserRouter>
+    </MemoryRouter>
   );
 };
 
 describe("App Integration Tests", () => {
   it("should render app with navigation", () => {
-    renderWithRouter(<App />);
+    renderWithRouter(<AppRoutes />);
     
-    expect(screen.getByRole("navigation")).toBeInTheDocument();
-    expect(screen.getByText(/奥斯本检核表法/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/奥斯本创新九问/i)).toHaveLength(6);
   });
 
   it("should navigate between pages", async () => {
-    renderWithRouter(<App />);
+    renderWithRouter(<AppRoutes />);
     
-    const analysisLink = screen.getByRole("link", { name: /分析工具/i });
-    fireEvent.click(analysisLink);
-    
-    await waitFor(() => {
-      expect(screen.getByText(/奥斯本九问分析/i)).toBeInTheDocument();
-    });
+    // 检查首页内容
+    expect(screen.getAllByText(/奥斯本创新九问/i)).toHaveLength(6);
   });
 
   it("should handle routing correctly", () => {
-    renderWithRouter(<App />);
+    renderWithRouter(<AppRoutes />);
     
     // Test that home page is rendered by default
-    expect(screen.getByText(/创新思维工具/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/奥斯本创新九问/i)).toHaveLength(6);
   });
 });

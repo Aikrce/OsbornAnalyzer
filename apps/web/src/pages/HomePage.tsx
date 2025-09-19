@@ -1,10 +1,14 @@
 import React, { useState, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNavigation } from '../hooks/useNavigation';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { useLocalCases } from '../hooks/useLocalCases';
+import { useDualAnalysis } from '../hooks/useDualAnalysis';
+import { useAIConfig } from '../hooks/useAIConfig';
+import AIConfigModal from '../components/ai/AIConfigModal';
 import { 
   IconChartPie, 
   IconBrain, 
@@ -13,7 +17,6 @@ import {
   IconArrowRight,
   IconSparkles,
   IconTrendingUp,
-  
   IconTag
 } from '@tabler/icons-react';
 
@@ -58,27 +61,60 @@ const features = [
 
 const HomePage: React.FC = memo(() => {
   const [topic, setTopic] = useState('');
+  const [analysisType, setAnalysisType] = useState<'local' | 'api'>('local');
   const navigate = useNavigate();
+  const { goToCaseLibrary, goToOsbornAnalysis, goToDeepAnalysis, goToCollaboration } = useNavigation();
   const { cases, statistics, isLoading } = useLocalCases();
+  const { analyze, isLoading: isAnalyzing, progress, error, results } = useDualAnalysis();
+  const { config: aiConfig, updateConfig, isConfigured } = useAIConfig();
+  const [showAIConfigModal, setShowAIConfigModal] = useState(false);
 
   const handleStartAnalysis = useCallback(async () => {
     if (!topic.trim()) return;
     
-    try {
-      console.log('开始分析:', topic);
-      navigate(`/osborn-analysis?topic=${encodeURIComponent(topic)}`);
-    } catch (error) {
-      console.error('Analysis failed:', error);
+    // 检查API分析是否需要配置
+    if (analysisType === 'api' && !isConfigured) {
+      setShowAIConfigModal(true);
+      return;
     }
-  }, [topic, navigate]);
+    
+    try {
+      console.log(`开始${analysisType === 'local' ? '本地' : 'API'}分析:`, topic);
+      
+      // 跳转到分析进度页面
+      navigate(`/analysis-progress?topic=${encodeURIComponent(topic)}&type=${analysisType}`);
+      
+    } catch (error) {
+      console.error('分析失败:', error);
+      // 分析失败时，显示错误信息，不跳转
+    }
+  }, [topic, analysisType, isConfigured, navigate]);
 
   const handleQuickStart = useCallback((path: string) => {
-    navigate(path);
-  }, [navigate]);
+    if (path === '/osborn-analysis') {
+      goToOsbornAnalysis();
+    } else if (path === '/deep-analysis') {
+      goToDeepAnalysis();
+    } else if (path === '/collaboration') {
+      goToCollaboration();
+    } else {
+      goToCaseLibrary();
+    }
+  }, [goToOsbornAnalysis, goToDeepAnalysis, goToCollaboration, goToCaseLibrary]);
 
   const handleCaseClick = useCallback(() => {
-    navigate('/case-library');
-  }, [navigate]);
+    goToCaseLibrary();
+  }, [goToCaseLibrary]);
+
+  // 处理AI配置保存
+  const handleAIConfigSave = useCallback((config: any) => {
+    updateConfig(config);
+    setShowAIConfigModal(false);
+    // 配置保存后，如果用户之前选择了API分析，自动开始分析
+    if (analysisType === 'api' && topic.trim()) {
+      handleStartAnalysis();
+    }
+  }, [updateConfig, analysisType, topic, handleStartAnalysis]);
 
   // 获取最近的案例作为推荐
   const recentCases = cases.slice(0, 3);
@@ -114,15 +150,139 @@ const HomePage: React.FC = memo(() => {
                   className="w-full text-lg py-4 px-6 rounded-2xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                   onKeyPress={(e) => e.key === 'Enter' && handleStartAnalysis()}
                 />
+                
+                {/* 分析类型选择 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
+                      analysisType === 'local' 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    onClick={() => setAnalysisType('local')}
+                  >
+                    <div className="flex items-center mb-2">
+                      <IconChartPie size={20} className={`mr-2 ${analysisType === 'local' ? 'text-blue-600' : 'text-gray-500'}`} />
+                      <span className={`font-medium ${analysisType === 'local' ? 'text-blue-900' : 'text-gray-700'}`}>
+                        本地分析
+                      </span>
+                    </div>
+                    <p className={`text-sm ${analysisType === 'local' ? 'text-blue-700' : 'text-gray-600'}`}>
+                      基于本地算法和案例库，快速分析
+                    </p>
+                  </div>
+                  
+                  <div 
+                    className={`p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
+                      analysisType === 'api' 
+                        ? 'border-purple-500 bg-purple-50' 
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                    onClick={() => setAnalysisType('api')}
+                  >
+                    <div className="flex items-center mb-2">
+                      <IconBrain size={20} className={`mr-2 ${analysisType === 'api' ? 'text-purple-600' : 'text-gray-500'}`} />
+                      <span className={`font-medium ${analysisType === 'api' ? 'text-purple-900' : 'text-gray-700'}`}>
+                        API分析
+                      </span>
+                    </div>
+                    <p className={`text-sm ${analysisType === 'api' ? 'text-purple-700' : 'text-gray-600'}`}>
+                      调用AI模型，深度智能分析
+                    </p>
+                  </div>
+                </div>
+                
                 <Button 
                   onClick={handleStartAnalysis}
-                  disabled={!topic.trim()}
-                  className="w-full py-4 text-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  disabled={!topic.trim() || isAnalyzing}
+                  className={`w-full py-4 text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    analysisType === 'local'
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700'
+                  }`}
                 >
-                  <IconArrowRight size={20} className="mr-2" />
-                  开始奥斯本分析
+                  {isAnalyzing ? (
+                    <>
+                      <div className="animate-spin mr-2">
+                        <IconArrowRight size={20} />
+                      </div>
+                      分析中...
+                    </>
+                  ) : (
+                    <>
+                      <IconArrowRight size={20} className="mr-2" />
+                      开始{analysisType === 'local' ? '本地' : 'API'}分析
+                    </>
+                  )}
                 </Button>
               </div>
+              
+              {/* 进度显示 */}
+              {isAnalyzing && (
+                <div className="mt-4 bg-gray-100 rounded-2xl p-4">
+                  <div className="text-sm text-gray-700 mb-2">
+                    {analysisType === 'local' ? '本地分析进度' : 'API分析进度'}
+                  </div>
+                  <div className="space-y-2">
+                    {analysisType === 'local' ? (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">奥斯本九问分析</span>
+                          <span className="text-sm font-medium">{progress.osborn}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${progress.osborn}%` }}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">案例库匹配</span>
+                          <span className="text-sm font-medium">{progress.deep}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${progress.deep}%` }}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">AI模型调用</span>
+                          <span className="text-sm font-medium">{progress.osborn}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-purple-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${progress.osborn}%` }}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">结果处理</span>
+                          <span className="text-sm font-medium">{progress.deep}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-indigo-500 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${progress.deep}%` }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* 错误显示 */}
+              {error && (
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-2xl p-4">
+                  <div className="text-red-700 text-sm">{error}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -262,7 +422,7 @@ const HomePage: React.FC = memo(() => {
                     variant="secondary" 
                     className="bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 transition-colors duration-200"
                   >
-                    {tag} ({1})
+                    {tag} ({statistics.byTag[tag] || 0})
                   </Badge>
                 ))}
               </div>
@@ -270,6 +430,13 @@ const HomePage: React.FC = memo(() => {
           )}
         </div>
       </div>
+
+      {/* AI配置模态框 */}
+      <AIConfigModal
+        isOpen={showAIConfigModal}
+        onClose={() => setShowAIConfigModal(false)}
+        onSave={handleAIConfigSave}
+      />
     </div>
   );
 });

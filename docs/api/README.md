@@ -1,8 +1,8 @@
-# HuiTu API 文档
+# OsbornAnalyzer API 文档
 
 ## 概述
 
-HuiTu 是一个基于奥斯本检核表法的创新思维分析工具，提供完整的API接口用于分析、案例管理和AI增强功能。
+OsbornAnalyzer 是一个基于奥斯本检核表法的创新思维分析工具，提供完整的API接口用于分析、案例管理和AI增强功能。
 
 ## 核心API
 
@@ -140,7 +140,7 @@ interface CaseStudy {
 ### 基本分析流程
 
 ```typescript
-import { AnalysisEngine } from '@huitu/shared';
+import { AnalysisEngine } from '@osborn-analyzer/shared';
 
 const engine = AnalysisEngine.getInstance();
 
@@ -164,7 +164,7 @@ console.log('相似案例:', result.similarCases);
 ### 案例管理
 
 ```typescript
-import { CaseManager } from '@huitu/shared';
+import { CaseManager } from '@osborn-analyzer/shared';
 
 const caseManager = new CaseManager();
 
@@ -181,7 +181,7 @@ const similarCases = await caseManager.findSimilarCases('人工智能', 5);
 ### 数据导出
 
 ```typescript
-import { ExportService } from '@huitu/shared';
+import { ExportService } from '@osborn-analyzer/shared';
 
 const exportService = new ExportService();
 

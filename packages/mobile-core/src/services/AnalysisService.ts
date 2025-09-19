@@ -18,7 +18,7 @@ class AnalysisService {
   }> {
     try {
       // 执行奥斯本分析
-      const analysis = osbornAnalyzer.analyze(topic, {});
+      const analysis = await osbornAnalyzer.analyze(topic, {});
       
       // 简单提取关键词（从标题中提取）
       const keywords = this.extractKeywords(topic);
@@ -41,7 +41,7 @@ class AnalysisService {
    */
   async quickAnalysis(topic: string): Promise<AnalysisResult> {
     try {
-      return osbornAnalyzer.analyze(topic, {});
+      return await osbornAnalyzer.analyze(topic, {});
     } catch (error) {
       throw new Error(`快速分析失败: ${error instanceof Error ? error.message : '未知错误'}`);
     }

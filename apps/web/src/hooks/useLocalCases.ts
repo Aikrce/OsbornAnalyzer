@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { unifiedDataManager } from '../services/data/unifiedDataManager';
 
 // 本地案例接口
 export interface LocalCase {
@@ -11,7 +12,7 @@ export interface LocalCase {
   tags: string[];
   createdAt: Date;
   updatedAt: Date;
-  analysisData?: any;
+  analysisData?: Record<string, unknown>;
 }
 
 // 案例统计接口
@@ -23,7 +24,7 @@ export interface CaseStatistics {
   topTags: string[]; // 添加topTags属性
 }
 
-const STORAGE_KEY = 'huitu-local-cases';
+// const STORAGE_KEY = 'huitu-local-cases'; // 暂时注释掉，因为使用的是服务中的存储
 
 export const useLocalCases = () => {
   const [cases, setCases] = useState<LocalCase[]>([]);
@@ -36,20 +37,13 @@ export const useLocalCases = () => {
     topTags: []
   });
 
-  // 从本地存储加载案例
+  // 从统一数据管理器加载案例
   const loadCases = useCallback(() => {
     setIsLoading(true);
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsedCases = JSON.parse(stored).map((caseItem: any) => ({
-          ...caseItem,
-          createdAt: new Date(caseItem.createdAt),
-          updatedAt: new Date(caseItem.updatedAt)
-        }));
-        setCases(parsedCases);
-        updateStatistics(parsedCases);
-      }
+      const cases = unifiedDataManager.getLocalCases();
+      setCases(cases);
+      updateStatistics(cases);
     } catch (error) {
       console.error('Failed to load cases:', error);
     } finally {
@@ -57,12 +51,15 @@ export const useLocalCases = () => {
     }
   }, []);
 
-  // 保存案例到本地存储
+  // 保存案例到统一数据管理器
   const saveCases = useCallback((newCases: LocalCase[]) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newCases));
+      console.log('saveCases 被调用，案例数量:', newCases.length);
+      // 保存到统一数据管理器
+      unifiedDataManager.saveLocalCases(newCases);
       setCases(newCases);
       updateStatistics(newCases);
+      console.log('案例保存完成');
     } catch (error) {
       console.error('Failed to save cases:', error);
     }
@@ -161,8 +158,12 @@ export const useLocalCases = () => {
 
   // 删除案例
   const deleteCase = useCallback((id: string) => {
+    console.log('deleteCase 被调用，ID:', id);
+    console.log('删除前的案例数量:', cases.length);
     const updatedCases = cases.filter(caseItem => caseItem.id !== id);
+    console.log('删除后的案例数量:', updatedCases.length);
     saveCases(updatedCases);
+    console.log('案例删除完成');
   }, [cases, saveCases]);
 
   // 获取所有案例

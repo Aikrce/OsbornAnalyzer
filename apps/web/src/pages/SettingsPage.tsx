@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -45,7 +45,16 @@ const SettingsPage: React.FC = memo(() => {
   const [activeTab, setActiveTab] = useState<'ai' | 'preferences' | 'security' | 'data'>('ai');
 
   // AI配置相关
-  const { config, updateConfig } = useAIConfig();
+  const { 
+    config, 
+    updateConfig, 
+    apiConfigs, 
+    addApiConfig, 
+    updateApiConfig, 
+    deleteApiConfig, 
+    setActiveApiConfig, 
+    getActiveApiConfig 
+  } = useAIConfig();
   // const { theme, setTheme } = useTheme();
   const { showNotification } = useNotification();
 
@@ -53,6 +62,25 @@ const SettingsPage: React.FC = memo(() => {
   const [model, setModel] = useState(config.model);
   const [temperature, setTemperature] = useState(config.temperature);
   const [maxTokens, setMaxTokens] = useState(config.maxTokens);
+
+  // 同步配置状态
+  useEffect(() => {
+    setApiKey(config.apiKey);
+    setModel(config.model);
+    setTemperature(config.temperature);
+    setMaxTokens(config.maxTokens);
+  }, [config]);
+
+  // 多API配置状态
+  const [showAddApiForm, setShowAddApiForm] = useState(false);
+  const [newApiConfig, setNewApiConfig] = useState({
+    name: '',
+    provider: 'deepseek' as const,
+    apiKey: '',
+    model: 'deepseek-chat',
+    temperature: 0.7,
+    maxTokens: 2000
+  });
 
   // 应用偏好设置
   const [appPreferences, setAppPreferences] = useState<AppPreferences>({
@@ -75,6 +103,44 @@ const SettingsPage: React.FC = memo(() => {
     updateConfig({ apiKey, model, temperature, maxTokens });
     showNotification('AI配置已保存', 'success');
   }, [apiKey, model, temperature, maxTokens, updateConfig, showNotification]);
+
+  // 添加新的API配置
+  const handleAddApiConfig = useCallback(() => {
+    if (!newApiConfig.name.trim() || !newApiConfig.apiKey.trim()) {
+      showNotification('请填写API配置名称和密钥', 'error');
+      return;
+    }
+
+    addApiConfig({
+      ...newApiConfig,
+      isActive: apiConfigs.length === 0 // 如果是第一个配置，自动设为活跃
+    });
+    
+    setNewApiConfig({
+      name: '',
+      provider: 'deepseek',
+      apiKey: '',
+      model: 'deepseek-chat',
+      temperature: 0.7,
+      maxTokens: 2000
+    });
+    setShowAddApiForm(false);
+    showNotification('API配置已添加', 'success');
+  }, [newApiConfig, addApiConfig, apiConfigs.length, showNotification]);
+
+  // 删除API配置
+  const handleDeleteApiConfig = useCallback((id: string) => {
+    if (window.confirm('确定要删除这个API配置吗？')) {
+      deleteApiConfig(id);
+      showNotification('API配置已删除', 'success');
+    }
+  }, [deleteApiConfig, showNotification]);
+
+  // 设置活跃的API配置
+  const handleSetActiveApiConfig = useCallback((id: string) => {
+    setActiveApiConfig(id);
+    showNotification('已切换API配置', 'success');
+  }, [setActiveApiConfig, showNotification]);
 
 
   // 更新偏好设置
@@ -182,14 +248,185 @@ const SettingsPage: React.FC = memo(() => {
 
         {/* AI配置页面 */}
         {activeTab === 'ai' && (
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-4xl mx-auto">
+            {/* 多API配置管理 */}
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20 mb-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-gray-900 flex items-center justify-between">
+                  <div className="flex items-center">
+                    <IconBrain size={24} className="mr-3 text-purple-600" />
+                    多API配置管理
+                  </div>
+                  <Button 
+                    onClick={() => setShowAddApiForm(!showAddApiForm)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {showAddApiForm ? '取消' : '添加API配置'}
+                  </Button>
+                </CardTitle>
+                <p className="text-gray-600">管理多个AI服务提供商的API配置，支持快速切换</p>
+              </CardHeader>
+              <CardContent>
+                {/* 已保存的API配置列表 */}
+                {apiConfigs.length > 0 ? (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900">已保存的API配置</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {apiConfigs.map((apiConfig) => (
+                        <div 
+                          key={apiConfig.id} 
+                          className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                            apiConfig.isActive 
+                              ? 'border-green-500 bg-green-50' 
+                              : 'border-gray-200 bg-white hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{apiConfig.name}</h4>
+                              <p className="text-sm text-gray-600 capitalize">{apiConfig.provider}</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              {apiConfig.isActive && (
+                                <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                                  当前使用
+                                </span>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDeleteApiConfig(apiConfig.id)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <IconTrash size={16} />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">API密钥:</span>
+                              <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                                {apiConfig.apiKey.substring(0, 8)}...{apiConfig.apiKey.substring(apiConfig.apiKey.length - 4)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">模型:</span>
+                              <span className="font-medium">{apiConfig.model}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-gray-600">温度:</span>
+                              <span className="font-medium">{apiConfig.temperature}</span>
+                            </div>
+                          </div>
+                          
+                          {!apiConfig.isActive && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleSetActiveApiConfig(apiConfig.id)}
+                              className="w-full mt-3"
+                            >
+                              设为当前使用
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <IconBrain size={48} className="mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-600 mb-4">还没有配置任何API</p>
+                    <Button onClick={() => setShowAddApiForm(true)}>
+                      添加第一个API配置
+                    </Button>
+                  </div>
+                )}
+
+                {/* 添加新API配置表单 */}
+                {showAddApiForm && (
+                  <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">添加新的API配置</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="configName">配置名称</Label>
+                        <Input
+                          id="configName"
+                          value={newApiConfig.name}
+                          onChange={(e) => setNewApiConfig({ ...newApiConfig, name: e.target.value })}
+                          placeholder="例如：DeepSeek生产环境"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="provider">服务提供商</Label>
+                        <Select 
+                          value={newApiConfig.provider} 
+                          onValueChange={(value: any) => setNewApiConfig({ ...newApiConfig, provider: value })}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="deepseek">DeepSeek</SelectItem>
+                            <SelectItem value="openai">OpenAI</SelectItem>
+                            <SelectItem value="claude">Claude</SelectItem>
+                            <SelectItem value="custom">自定义</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="newApiKey">API密钥</Label>
+                        <Input
+                          id="newApiKey"
+                          type="password"
+                          value={newApiConfig.apiKey}
+                          onChange={(e) => setNewApiConfig({ ...newApiConfig, apiKey: e.target.value })}
+                          placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="newModel">模型</Label>
+                        <Select 
+                          value={newApiConfig.model} 
+                          onValueChange={(value) => setNewApiConfig({ ...newApiConfig, model: value })}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="deepseek-chat">DeepSeek Chat</SelectItem>
+                            <SelectItem value="deepseek-coder">DeepSeek Coder</SelectItem>
+                            <SelectItem value="gpt-4">GPT-4</SelectItem>
+                            <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                            <SelectItem value="claude-3">Claude 3</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-4">
+                      <Button variant="outline" onClick={() => setShowAddApiForm(false)}>
+                        取消
+                      </Button>
+                      <Button onClick={handleAddApiConfig}>
+                        添加配置
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 传统AI配置（保持向后兼容） */}
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20">
               <CardHeader>
                 <CardTitle className="text-2xl font-bold text-gray-900 flex items-center">
                   <IconBrain size={24} className="mr-3 text-purple-600" />
-                  AI配置
+                  默认AI配置
                 </CardTitle>
-                <p className="text-gray-600">配置您的AI服务接口，以获得更强大的分析能力</p>
+                <p className="text-gray-600">配置默认的AI服务接口（向后兼容）</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
@@ -214,7 +451,7 @@ const SettingsPage: React.FC = memo(() => {
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="选择AI模型" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[9999]">
                         <SelectItem value="deepseek-coder">DeepSeek Coder</SelectItem>
                         <SelectItem value="deepseek-chat">DeepSeek Chat</SelectItem>
                       </SelectContent>
@@ -296,7 +533,7 @@ const SettingsPage: React.FC = memo(() => {
                       <SelectTrigger className="mt-2">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[9999]">
                         <SelectItem value="light">
                           <div className="flex items-center">
                             <IconSun size={16} className="mr-2" />
@@ -322,7 +559,7 @@ const SettingsPage: React.FC = memo(() => {
                       <SelectTrigger className="mt-2">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[9999]">
                         <SelectItem value="zh">中文</SelectItem>
                         <SelectItem value="en">English</SelectItem>
                       </SelectContent>

@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
+import { useAnalysisNavigation } from '../hooks/useAnalysisNavigation';
 import { 
   IconHome, 
   IconChartPie, 
@@ -8,21 +9,25 @@ import {
   IconBooks, 
   IconUsers, 
   IconSettings,
-  IconUser
+  IconUser,
+  IconBug
 } from '@tabler/icons-react';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { navigationState, switchToOsbornAnalysis, switchToDeepAnalysis, goHomeAndClear, isInAnalysisPage } = useAnalysisNavigation();
 
   const navItems = [
-    { path: '/home', label: '首页', icon: IconHome, color: 'text-orange-500' },
+    { path: '/', label: '首页', icon: IconHome, color: 'text-orange-500' },
     { path: '/osborn-analysis', label: 'Osborn分析', icon: IconChartPie, color: 'text-blue-500' },
     { path: '/deep-analysis', label: '深度分析', icon: IconBrain, color: 'text-purple-500' },
     { path: '/case-library', label: '本地案例库', icon: IconBooks, color: 'text-green-500' },
     { path: '/collaboration', label: '团队', icon: IconUsers, color: 'text-indigo-500' },
     { path: '/settings', label: '设置', icon: IconSettings, color: 'text-gray-500' },
+    { path: '/ai-diagnostics', label: 'AI诊断', icon: IconBug, color: 'text-red-500' },
+    { path: '/user', label: '用户中心', icon: IconUser, color: 'text-pink-500' },
   ];
 
   // 预加载路由
@@ -44,8 +49,23 @@ const Navigation: React.FC = () => {
   // 优化的导航处理
   const handleNavigation = useCallback((path: string) => {
     setIsMobileMenuOpen(false);
+    
+    // 如果在分析页面之间切换，保持分析结果
+    if (isInAnalysisPage() && navigationState.hasResults) {
+      if (path === '/osborn-analysis') {
+        switchToOsbornAnalysis();
+        return;
+      } else if (path === '/deep-analysis') {
+        switchToDeepAnalysis();
+        return;
+      } else if (path === '/') {
+        goHomeAndClear();
+        return;
+      }
+    }
+    
     navigate(path);
-  }, [navigate]);
+  }, [navigate, isInAnalysisPage, navigationState.hasResults, switchToOsbornAnalysis, switchToDeepAnalysis, goHomeAndClear]);
 
   return (
     <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
@@ -53,9 +73,9 @@ const Navigation: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link 
-            to="/home" 
+            to="/" 
             className="flex items-center space-x-3 group"
-            onClick={() => handleNavigation('/home')}
+            onClick={() => handleNavigation('/')}
           >
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
               <span className="text-white font-bold text-[10px] tracking-tight">ΟΣΒΟΡΝ</span>
@@ -111,18 +131,6 @@ const Navigation: React.FC = () => {
             })}
           </div>
 
-          {/* 用户操作区 */}
-          <div className="hidden md:flex items-center space-x-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2 rounded-xl transition-all duration-200"
-              onClick={() => handleNavigation('/user')}
-            >
-              <IconUser size={16} className="mr-2" />
-              用户
-            </Button>
-          </div>
 
           {/* 移动端菜单按钮 */}
           <div className="md:hidden">

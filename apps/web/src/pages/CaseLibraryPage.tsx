@@ -1,4 +1,4 @@
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -74,15 +74,20 @@ const CaseLibraryPage: React.FC = memo(() => {
 
   // 删除案例
   const handleDeleteCase = useCallback((caseId: string) => {
+    console.log('删除案例被调用，案例ID:', caseId);
     if (window.confirm('确定要删除这个案例吗？')) {
+      console.log('用户确认删除，开始删除案例');
       deleteCase(caseId);
       refreshCases();
+      console.log('案例删除完成');
+    } else {
+      console.log('用户取消删除');
     }
   }, [deleteCase, refreshCases]);
 
-  // 查看案例详情
+  // 查看案例详情 - 跳转到分析详情页面
   const handleViewCase = useCallback((caseId: string) => {
-    navigate(`/case-library/${caseId}`);
+    navigate(`/analysis-detail?id=${caseId}`);
   }, [navigate]);
 
   // 开始新分析
@@ -90,8 +95,11 @@ const CaseLibraryPage: React.FC = memo(() => {
     navigate('/osborn-analysis');
   }, [navigate]);
 
-  // 获取所有标签
-  const allTags = Array.from(new Set(cases.flatMap(c => c.tags)));
+  // 获取所有标签 - 使用useMemo优化性能
+  const allTags = useMemo(() => 
+    Array.from(new Set(cases.flatMap(c => c.tags))), 
+    [cases]
+  );
 
   if (isLoading) {
     return (
@@ -161,7 +169,7 @@ const CaseLibraryPage: React.FC = memo(() => {
                 <SelectTrigger className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                   <SelectValue placeholder="选择标签" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[9999]">
                   <SelectItem value="all">所有标签</SelectItem>
                   {allTags.map(tag => (
                     <SelectItem key={tag} value={tag}>{tag}</SelectItem>
@@ -176,7 +184,7 @@ const CaseLibraryPage: React.FC = memo(() => {
                 <SelectTrigger className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
                   <SelectValue placeholder="排序方式" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[9999]">
                   <SelectItem value="newest">最新创建</SelectItem>
                   <SelectItem value="oldest">最早创建</SelectItem>
                   <SelectItem value="title">按标题</SelectItem>
@@ -215,6 +223,7 @@ const CaseLibraryPage: React.FC = memo(() => {
               <Card 
                 key={caseItem.id} 
                 className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-2 border-0 bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl"
+                onClick={() => handleViewCase(caseItem.id)}
               >
                 <CardHeader>
                   <div className="flex items-start justify-between mb-3">
@@ -222,17 +231,6 @@ const CaseLibraryPage: React.FC = memo(() => {
                       {caseItem.title}
                     </CardTitle>
                     <div className="flex items-center space-x-1 ml-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewCase(caseItem.id);
-                        }}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1"
-                      >
-                        <IconEye size={16} className="text-blue-600" />
-                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -330,7 +328,7 @@ const CaseLibraryPage: React.FC = memo(() => {
                       className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-700 border border-green-200 hover:bg-green-200 transition-colors duration-200 cursor-pointer"
                       onClick={() => setSelectedTag(tag)}
                     >
-                      {tag} ({1})
+                      {tag} ({statistics.byTag[tag] || 0})
                     </span>
                   ))}
                 </div>

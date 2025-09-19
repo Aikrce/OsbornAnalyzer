@@ -201,7 +201,7 @@ pnpm preview
 ### 📞 技术支持
 
 如有问题或建议，请通过以下方式联系：
-- 📧 邮箱：support@huitu.com
+- 📧 邮箱：support@osborn-analyzer.com
 - 🐛 问题反馈：GitHub Issues
 - 📖 文档：项目README
 

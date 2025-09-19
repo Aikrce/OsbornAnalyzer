@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import aiService, { AIConfig } from '@/services/ai/aiService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import aiService from '../../services/ai/aiService';
+import { AIConfig } from '../../hooks/useAIConfig';
 
 interface AIConfigModalProps {
   isOpen: boolean;
@@ -47,9 +48,12 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onSave }
 
     try {
       aiService.configure(config);
-      alert('AI服务配置成功！');
+      // 使用更友好的通知方式替代alert
+      console.log('AI服务配置成功！');
+      // TODO: 集成通知系统
     } catch (error) {
-      alert('AI服务配置失败，请检查API密钥');
+      console.error('AI服务配置失败:', error);
+      // TODO: 集成错误通知系统
     }
   };
 
@@ -81,7 +85,7 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onSave }
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[9999]">
                 <SelectItem value="deepseek-chat">DeepSeek Chat</SelectItem>
                 <SelectItem value="deepseek-coder">DeepSeek Coder</SelectItem>
               </SelectContent>

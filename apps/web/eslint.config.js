@@ -64,6 +64,9 @@ export default [
         CSS: 'readonly',
         // Performance
         PerformanceNavigationTiming: 'readonly',
+        // AbortController
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
         // Node.js (for build tools)
         process: 'readonly',
         __dirname: 'readonly',

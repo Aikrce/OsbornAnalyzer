@@ -1,4 +1,4 @@
-# HuiTu项目全栈改进计划
+# OsbornAnalyzer项目全栈改进计划
 
 ## Core Features
 
