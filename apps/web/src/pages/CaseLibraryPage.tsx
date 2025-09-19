@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useLocalCases } from '../hooks/useLocalCases';
+import DownloadModal, { DownloadOption } from '../components/DownloadModal';
+import { pdfGenerator } from '../services/pdfGenerator';
+import { pngGenerator } from '../services/pngGenerator';
 import { 
   IconSearch, 
   IconCalendar, 
@@ -33,6 +36,9 @@ const CaseLibraryPage: React.FC = memo(() => {
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [filteredCases, setFilteredCases] = useState(cases);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<any>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // 搜索和筛选逻辑
   const applyFilters = useCallback(() => {
@@ -90,48 +96,55 @@ const CaseLibraryPage: React.FC = memo(() => {
     navigate(`/analysis-detail?id=${caseId}`);
   }, [navigate]);
 
-  // 下载案例
+  // 打开下载模态框
   const handleDownloadCase = useCallback((caseItem: any) => {
+    setSelectedCase(caseItem);
+    setShowDownloadModal(true);
+  }, []);
+
+  // 处理下载
+  const handleDownload = useCallback(async (option: DownloadOption) => {
+    if (!selectedCase) return;
+
+    setIsDownloading(true);
+    
     try {
-      // 创建下载内容
-      const downloadContent = {
-        title: caseItem.title,
-        description: caseItem.description,
-        tags: caseItem.tags,
-        createdAt: caseItem.createdAt,
-        analysis: caseItem.analysis,
-        insights: caseItem.insights,
-        recommendations: caseItem.recommendations,
-        marketAnalysis: caseItem.marketAnalysis,
-        competitiveAnalysis: caseItem.competitiveAnalysis,
-        swotAnalysis: caseItem.swotAnalysis,
-        businessModel: caseItem.businessModel,
-        implementation: caseItem.implementation
+      const downloadOptions = {
+        title: selectedCase.title,
+        description: selectedCase.description,
+        tags: selectedCase.tags,
+        createdAt: new Date(selectedCase.createdAt).toLocaleString('zh-CN'),
+        analysis: {
+          osbornAnalysis: selectedCase.osbornAnalysis,
+          deepAnalysis: selectedCase.deepAnalysis
+        }
       };
 
-      // 创建JSON文件
-      const dataStr = JSON.stringify(downloadContent, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      if (option.format === 'pdf') {
+        if (option.type === 'report') {
+          pdfGenerator.generateReport(downloadOptions);
+        } else {
+          pdfGenerator.generateCard(downloadOptions);
+        }
+      } else if (option.format === 'png') {
+        await pngGenerator.generateCard(downloadOptions);
+      }
+
+      console.log('下载成功:', selectedCase.title, option.name);
+      setShowDownloadModal(false);
       
-      // 创建下载链接
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${caseItem.title}_分析报告.json`;
-      
-      // 触发下载
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      // 清理URL对象
-      URL.revokeObjectURL(url);
-      
-      console.log('案例下载成功:', caseItem.title);
     } catch (error) {
-      console.error('案例下载失败:', error);
+      console.error('下载失败:', error);
       alert('下载失败，请重试');
+    } finally {
+      setIsDownloading(false);
     }
+  }, [selectedCase]);
+
+  // 关闭下载模态框
+  const handleCloseDownloadModal = useCallback(() => {
+    setShowDownloadModal(false);
+    setSelectedCase(null);
   }, []);
 
   // 开始新分析
@@ -381,6 +394,15 @@ const CaseLibraryPage: React.FC = memo(() => {
           </div>
         )}
       </div>
+
+      {/* 下载模态框 */}
+      <DownloadModal
+        isOpen={showDownloadModal}
+        onClose={handleCloseDownloadModal}
+        onDownload={handleDownload}
+        caseTitle={selectedCase?.title || ''}
+        isLoading={isDownloading}
+      />
     </div>
   );
 });
