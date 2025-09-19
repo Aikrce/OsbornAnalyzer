@@ -502,10 +502,12 @@ const CaseLibraryPage: React.FC = memo(() => {
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={(e) => {
+                        console.log('👁️ 查看详情按钮被点击了！', caseItem.title);
+                        e.preventDefault();
                         e.stopPropagation();
                         handleViewCase(caseItem.id);
                       }}
@@ -521,10 +523,12 @@ const CaseLibraryPage: React.FC = memo(() => {
                         variant="ghost"
                         onClick={(e) => {
                           console.log('🔥 下载按钮被点击了！', caseItem.title);
+                          e.preventDefault();
                           e.stopPropagation();
                           handleDownloadCase(caseItem);
                         }}
                         className="p-2"
+                        title={`下载 ${caseItem.title} 的分析报告`}
                       >
                         <IconDownload size={14} className="text-gray-600" />
                       </Button>
