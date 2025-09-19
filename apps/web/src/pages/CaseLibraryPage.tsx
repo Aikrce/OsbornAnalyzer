@@ -98,13 +98,19 @@ const CaseLibraryPage: React.FC = memo(() => {
 
   // 打开下载模态框
   const handleDownloadCase = useCallback((caseItem: any) => {
+    console.log('📥 下载按钮被点击，案例:', caseItem.title);
     setSelectedCase(caseItem);
     setShowDownloadModal(true);
   }, []);
 
   // 处理下载
   const handleDownload = useCallback(async (option: DownloadOption) => {
-    if (!selectedCase) return;
+    console.log('🚀 handleDownload 被调用了！', option);
+    
+    if (!selectedCase) {
+      console.log('❌ 没有选中的案例');
+      return;
+    }
 
     setIsDownloading(true);
     
