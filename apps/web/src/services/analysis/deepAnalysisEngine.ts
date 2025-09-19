@@ -683,7 +683,7 @@ class DeepAnalysisEngine {
     return {
       id: `ai-analysis-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       topic,
-      analysis: this.extractAnalysisFromAI(aiResponse, topic),
+      analysis: aiResponse.analysis?.[0]?.analysis || `基于AI深度分析的${topic}创新方案`,
       insights: {
         keyOpportunities: this.extractOpportunitiesFromAI(aiResponse),
         potentialRisks: this.extractRisksFromAI(aiResponse),
@@ -714,58 +714,6 @@ class DeepAnalysisEngine {
         implementationRoadmap: this.generateImplementationRoadmap(aiResponse)
       }
     };
-  }
-
-  // 从AI响应中提取分析内容
-  private extractAnalysisFromAI(aiResponse: any, topic: string): string {
-    // 尝试多种方式提取分析内容
-    if (aiResponse.analysis && Array.isArray(aiResponse.analysis) && aiResponse.analysis.length > 0) {
-      // 如果是数组，合并所有分析内容
-      return aiResponse.analysis.map((item: any) => 
-        item.analysis || item.description || item.summary || ''
-      ).filter(Boolean).join('\n\n');
-    }
-    
-    if (aiResponse.analysis && typeof aiResponse.analysis === 'string') {
-      return aiResponse.analysis;
-    }
-    
-    if (aiResponse.summary) {
-      return aiResponse.summary;
-    }
-    
-    if (aiResponse.description) {
-      return aiResponse.description;
-    }
-    
-    // 如果AI响应包含奥斯本九问分析，提取并格式化
-    if (aiResponse.analysis && Array.isArray(aiResponse.analysis)) {
-      const osbornAnalysis = aiResponse.analysis.map((item: any, index: number) => {
-        const title = item.title || `分析维度 ${index + 1}`;
-        const description = item.description || item.analysis || '';
-        const insights = item.insights || [];
-        const recommendations = item.recommendations || [];
-        
-        let content = `## ${title}\n\n${description}`;
-        
-        if (insights.length > 0) {
-          content += `\n\n### 关键洞察\n${insights.map((insight: string) => `• ${insight}`).join('\n')}`;
-        }
-        
-        if (recommendations.length > 0) {
-          content += `\n\n### 实施建议\n${recommendations.map((rec: string) => `• ${rec}`).join('\n')}`;
-        }
-        
-        return content;
-      }).join('\n\n---\n\n');
-      
-      if (osbornAnalysis.trim()) {
-        return `# ${topic} - AI深度分析\n\n${osbornAnalysis}`;
-      }
-    }
-    
-    // 默认返回
-    return `基于AI深度分析的${topic}创新方案。\n\n通过奥斯本九问创新法，从多个维度深入分析了${topic}的创新机会和发展潜力。分析涵盖了市场趋势、竞争格局、技术发展、用户需求等多个方面，为创新实践提供了全面的指导。`;
   }
 
   // 从AI响应中提取机会
