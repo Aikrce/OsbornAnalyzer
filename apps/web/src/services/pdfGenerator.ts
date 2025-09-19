@@ -557,6 +557,8 @@ export class PDFGenerator {
   private generateOsbornAnalysisHTML(osbornAnalysis: any): string {
     if (!osbornAnalysis) return '';
     
+    console.log('生成奥斯本分析HTML，数据:', osbornAnalysis);
+    
     let html = `
       <div class="section">
         <h2>奥斯本九问分析</h2>
@@ -566,7 +568,7 @@ export class PDFGenerator {
       html += `<p>${osbornAnalysis.analysis}</p>`;
     }
     
-    if (osbornAnalysis.questions) {
+    if (osbornAnalysis.questions && Object.keys(osbornAnalysis.questions).length > 0) {
       html += '<div class="questions-grid">';
       Object.entries(osbornAnalysis.questions).forEach(([category, questions]: [string, any]) => {
         html += `
@@ -579,6 +581,8 @@ export class PDFGenerator {
         `;
       });
       html += '</div>';
+    } else {
+      html += '<p style="color: #666; font-style: italic;">暂无问题数据</p>';
     }
     
     // 显示洞察

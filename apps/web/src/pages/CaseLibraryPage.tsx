@@ -148,8 +148,18 @@ const CaseLibraryPage: React.FC = memo(() => {
           // 处理建议数据
           const suggestions = Array.isArray(data.innovationSchemes) ? data.innovationSchemes : [];
           
+          // 创建分析文本
+          let analysisText = '';
+          if (insights.length > 0) {
+            analysisText = insights.join(' ');
+          } else if (data.description) {
+            analysisText = data.description;
+          } else {
+            analysisText = `基于${data.dimension || '奥斯本'}维度的分析`;
+          }
+          
           osbornAnalysis = {
-            analysis: insights.join(' ') || data.description || `基于${data.dimension || '奥斯本'}维度的分析`,
+            analysis: analysisText,
             questions: questions,
             suggestions: suggestions,
             insights: insights,
@@ -157,6 +167,13 @@ const CaseLibraryPage: React.FC = memo(() => {
           };
           
           console.log('从analysisData转换的结果:', osbornAnalysis);
+          console.log('转换后的统计:', {
+            questionsCount: Object.keys(questions).length,
+            insightsCount: insights.length,
+            suggestionsCount: suggestions.length
+          });
+        } else {
+          console.log('analysisData存在但内容为空:', data);
         }
       }
       
