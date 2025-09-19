@@ -126,16 +126,37 @@ const CaseLibraryPage: React.FC = memo(() => {
       let osbornAnalysis = null;
       let deepAnalysis = null;
       
-      // 检查是否有analysisData字段（新格式）
+      // 检查是否有analysisData字段（基础案例格式）
       if (selectedCase.analysisData) {
-        // 新格式：analysisData包含分析结果
-        if (selectedCase.analysisData.dimension || selectedCase.analysisData.questions) {
+        const data = selectedCase.analysisData;
+        console.log('analysisData内容:', data);
+        
+        // 检查是否有有效的分析数据
+        if (data.dimension || data.questions || data.insights || data.innovationSchemes) {
+          const questions: Record<string, string[]> = {};
+          
+          // 处理问题数据
+          if (data.questions && Array.isArray(data.questions)) {
+            questions[data.dimension || '分析维度'] = data.questions;
+          } else if (data.questions && typeof data.questions === 'object') {
+            Object.assign(questions, data.questions);
+          }
+          
+          // 处理洞察数据
+          const insights = Array.isArray(data.insights) ? data.insights : [];
+          
+          // 处理建议数据
+          const suggestions = Array.isArray(data.innovationSchemes) ? data.innovationSchemes : [];
+          
           osbornAnalysis = {
-            analysis: selectedCase.analysisData.insights?.join(' ') || '',
-            questions: selectedCase.analysisData.questions ? 
-              { [selectedCase.analysisData.dimension || '分析维度']: selectedCase.analysisData.questions } : {},
-            suggestions: selectedCase.analysisData.innovationSchemes || []
+            analysis: insights.join(' ') || data.description || `基于${data.dimension || '奥斯本'}维度的分析`,
+            questions: questions,
+            suggestions: suggestions,
+            insights: insights,
+            examples: []
           };
+          
+          console.log('从analysisData转换的结果:', osbornAnalysis);
         }
       }
       
@@ -147,30 +168,42 @@ const CaseLibraryPage: React.FC = memo(() => {
         deepAnalysis = selectedCase.deepAnalysis;
       }
       
-      // 检查是否有AI分析结果数组（最新格式）
-      if (selectedCase.analysisResult && Array.isArray(selectedCase.analysisResult)) {
-        // 将AI分析结果数组转换为奥斯本分析格式
-        const questions: Record<string, string[]> = {};
-        const allInsights: string[] = [];
-        const allRecommendations: string[] = [];
-        const allExamples: string[] = [];
-        
-        selectedCase.analysisResult.forEach((item: any) => {
-          if (item.title && item.description) {
-            questions[item.title] = [item.description];
-            if (item.insights) allInsights.push(...item.insights);
-            if (item.recommendations) allRecommendations.push(...item.recommendations);
-            if (item.examples) allExamples.push(...item.examples);
-          }
-        });
-        
-        osbornAnalysis = {
-          analysis: allInsights.join(' ') || '基于奥斯本九问的深度分析',
-          questions: questions,
-          suggestions: allRecommendations,
-          insights: allInsights,
-          examples: allExamples
-        };
+      // 检查是否有AI分析结果（可能是数组或对象格式）
+      if (selectedCase.analysisResult) {
+        if (Array.isArray(selectedCase.analysisResult)) {
+          // 数组格式：将AI分析结果数组转换为奥斯本分析格式
+          const questions: Record<string, string[]> = {};
+          const allInsights: string[] = [];
+          const allRecommendations: string[] = [];
+          const allExamples: string[] = [];
+          
+          selectedCase.analysisResult.forEach((item: any) => {
+            if (item.title && item.description) {
+              questions[item.title] = [item.description];
+              if (item.insights) allInsights.push(...item.insights);
+              if (item.recommendations) allRecommendations.push(...item.recommendations);
+              if (item.examples) allExamples.push(...item.examples);
+            }
+          });
+          
+          osbornAnalysis = {
+            analysis: allInsights.join(' ') || '基于奥斯本九问的深度分析',
+            questions: questions,
+            suggestions: allRecommendations,
+            insights: allInsights,
+            examples: allExamples
+          };
+        } else if (typeof selectedCase.analysisResult === 'object') {
+          // 对象格式：直接使用analysisResult作为奥斯本分析
+          const result = selectedCase.analysisResult;
+          osbornAnalysis = {
+            analysis: result.analysis || result.summary || '基于奥斯本九问的分析',
+            questions: result.questions || {},
+            suggestions: result.suggestions || result.recommendations || [],
+            insights: result.insights || [],
+            examples: result.examples || []
+          };
+        }
       }
       
       // 检查是否有detailedAnalysis.osbornDimensions（智能分析格式）
