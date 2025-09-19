@@ -42,6 +42,9 @@ const AIDiagnosticsPage: React.FC = () => {
   const [isValidatingApiKey, setIsValidatingApiKey] = useState(false);
   const [networkDiagnostics, setNetworkDiagnostics] = useState<any>(null);
 
+  // 获取当前有效配置
+  const effectiveConfig = getEffectiveConfig();
+
   const runDiagnostics = async () => {
     setIsRunning(true);
     setDiagnostics(null);
@@ -281,7 +284,7 @@ const AIDiagnosticsPage: React.FC = () => {
   };
 
   const validateCurrentApiKey = async () => {
-    if (!config?.apiKey) {
+    if (!effectiveConfig?.apiKey) {
       alert('请先配置API密钥');
       return;
     }
@@ -294,10 +297,10 @@ const AIDiagnosticsPage: React.FC = () => {
       
       // 先同步配置到AI服务
       const { default: aiService } = await import('../services/ai/aiService');
-      aiService.configure(config);
+      aiService.configure(effectiveConfig);
       console.log('🔄 已同步配置到AI服务');
       
-      const result = await APIKeyValidator.testAPIKey(config.apiKey, 'deepseek');
+      const result = await APIKeyValidator.testAPIKey(effectiveConfig.apiKey, 'deepseek');
       setApiKeyValidationResult(result);
       
       if (result.isValid) {
@@ -311,8 +314,8 @@ const AIDiagnosticsPage: React.FC = () => {
       setApiKeyValidationResult({
         isValid: false,
         error: `验证异常: ${(error as Error).message}`,
-        keyLength: config.apiKey.length,
-        keyPrefix: config.apiKey.substring(0, 5) + '...',
+        keyLength: effectiveConfig?.apiKey?.length || 0,
+        keyPrefix: effectiveConfig?.apiKey?.substring(0, 5) + '...' || '...',
         provider: 'deepseek'
       });
     } finally {
@@ -389,13 +392,13 @@ const AIDiagnosticsPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">API密钥:</span>
-                <Badge variant={config?.apiKey ? "default" : "destructive"}>
-                  {config?.apiKey ? `已设置 (${config.apiKey.length}字符)` : "未设置"}
+                <Badge variant={effectiveConfig?.apiKey ? "default" : "destructive"}>
+                  {effectiveConfig?.apiKey ? `已设置 (${effectiveConfig.apiKey.length}字符)` : "未设置"}
                 </Badge>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">模型:</span>
-                <Badge variant="outline">{config?.model || "未知"}</Badge>
+                <Badge variant="outline">{effectiveConfig?.model || config?.model || "未知"}</Badge>
               </div>
             </div>
           </CardContent>
@@ -647,7 +650,7 @@ const AIDiagnosticsPage: React.FC = () => {
           
           <Button 
             onClick={validateCurrentApiKey} 
-            disabled={isValidatingApiKey || !config?.apiKey}
+            disabled={isValidatingApiKey || !effectiveConfig?.apiKey}
             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
           >
             <RefreshCw className={`h-4 w-4 ${isValidatingApiKey ? 'animate-spin' : ''}`} />
@@ -656,13 +659,13 @@ const AIDiagnosticsPage: React.FC = () => {
           
           <Button 
             onClick={async () => {
-              if (!config?.apiKey) {
+              if (!effectiveConfig?.apiKey) {
                 alert('请先配置API密钥');
                 return;
               }
               try {
                 const { default: aiService } = await import('../services/ai/aiService');
-                aiService.configure(config);
+                aiService.configure(effectiveConfig);
                 alert('配置已同步到AI服务');
                 console.log('✅ 配置已同步到AI服务');
               } catch (error) {
@@ -670,7 +673,7 @@ const AIDiagnosticsPage: React.FC = () => {
                 alert('同步配置失败');
               }
             }}
-            disabled={!config?.apiKey}
+            disabled={!effectiveConfig?.apiKey}
             className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white"
           >
             <Settings className="h-4 w-4" />

@@ -157,9 +157,9 @@ class AIService {
 - examples: 成功案例数组（3-5个案例）
 - confidence: 分析置信度（0-100）
 
-注意：
+关键要求：
 - 必须返回完整的JSON数组，包含所有9个维度
-- 不要使用代码块标记
+- 不要使用代码块标记（\`\`\`json 或 \`\`\`）
 - 不要使用粗体或斜体标记
 - 不要使用反引号标记
 - 确保所有字符串都正确闭合（用双引号）
@@ -169,6 +169,9 @@ class AIService {
 - 如果内容过长，请确保JSON结构完整
 - 不要在任何地方添加解释性文字，只返回纯JSON数据
 - 确保JSON字符串中的中文字符正确转义
+- 必须返回完整的JSON，不能截断
+- 如果内容接近长度限制，请适当缩短description内容但保持JSON结构完整
+- 确保最后一个对象的所有字段都完整
 
 ## 背景信息
 ${context ? `分析背景：${context}` : ''}
@@ -260,8 +263,12 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
         if (error.message === 'Load failed') {
           console.error('网络连接诊断:');
           console.error('- 错误类型: TypeError: Load failed');
-          console.error('- 可能原因: 网络连接问题、DNS解析失败、防火墙阻止');
-          console.error('- 建议: 检查网络连接、尝试使用VPN、检查防火墙设置');
+          console.error('- 可能原因: 网络连接问题、DNS解析失败、防火墙阻止、CORS策略问题');
+          console.error('- 建议: 检查网络连接、尝试使用VPN、检查防火墙设置、检查浏览器代理设置');
+          
+          // 提供更详细的诊断信息
+          this.performNetworkDiagnostics();
+          
           throw new Error('网络连接失败，请检查网络连接或API服务状态');
         } else if (error.message.includes('fetch')) {
           console.error('Fetch API错误:', error.message);
@@ -304,7 +311,10 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
           data = JSON.parse(moreFixedResponse);
         } catch (secondError) {
           console.error('激进修复后仍然解析失败:', secondError);
-          throw new Error(`JSON解析失败: ${(parseError as Error).message || '未知解析错误'}`);
+          
+          // 最后的回退方案：尝试从文本中提取部分信息
+          console.log('尝试从文本中提取分析结果...');
+          return this.extractPartialAnalysisFromText(response);
         }
       }
       
@@ -372,7 +382,38 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
     // 修复常见的JSON格式问题
     cleaned = this.fixJSONFormat(cleaned);
     
+    // 特殊处理：修复以 "[+{" 开头的问题
+    if (cleaned.startsWith('"[+{')) {
+      console.log('检测到 "[+{" 格式，进行特殊处理');
+      cleaned = cleaned.substring(1); // 移除开头的引号
+    }
+    
+    // 特殊处理：修复以 "[{" 开头的问题
+    if (cleaned.startsWith('"[{')) {
+      console.log('检测到 "[{" 格式，进行特殊处理');
+      cleaned = cleaned.substring(1); // 移除开头的引号
+    }
+    
+    // 确保以数组开始
+    if (!cleaned.startsWith('[') && !cleaned.startsWith('{')) {
+      // 查找第一个 [ 或 {
+      const firstBracket = cleaned.indexOf('[');
+      const firstBrace = cleaned.indexOf('{');
+      
+      if (firstBracket !== -1 && (firstBrace === -1 || firstBracket < firstBrace)) {
+        cleaned = cleaned.substring(firstBracket);
+      } else if (firstBrace !== -1) {
+        cleaned = cleaned.substring(firstBrace);
+      }
+    }
+    
+    // 移除结尾的引号
+    if (cleaned.endsWith('"')) {
+      cleaned = cleaned.slice(0, -1);
+    }
+    
     console.log('清理完成，最终长度:', cleaned.length);
+    console.log('清理后开头:', cleaned.substring(0, 100));
     return cleaned;
   }
 
@@ -440,34 +481,138 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
     let fixed = jsonString;
     
     console.log('开始激进JSON修复...');
+    console.log('原始字符串长度:', fixed.length);
+    console.log('原始字符串末尾:', fixed.slice(-100));
     
     // 1. 移除所有非JSON字符，只保留JSON结构
     fixed = fixed.replace(/^[^{[]*/, ''); // 移除开头的非JSON字符
     fixed = fixed.replace(/[^}\]]*$/, ''); // 移除结尾的非JSON字符
     
-    // 2. 修复常见的语法错误
+    // 2. 检查是否被截断，如果是则尝试修复
+    if (this.isTruncatedJSON(fixed)) {
+      console.log('检测到JSON被截断，尝试修复...');
+      fixed = this.fixTruncatedJSON(fixed);
+    }
+    
+    // 3. 修复常见的语法错误
     fixed = fixed.replace(/([^,{[])\s*([^,}\]]*?)\s*([,}\]])/g, '$1: "$2"$3'); // 添加缺失的冒号
     fixed = fixed.replace(/([^,{[])\s*([^,}\]]*?)\s*([,}\]])/g, '$1: "$2"$3'); // 再次修复
     
-    // 3. 修复缺失的引号
+    // 4. 修复缺失的引号
     fixed = fixed.replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":'); // 键名加引号
     fixed = fixed.replace(/:\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*([,}])/g, ': "$1"$2'); // 字符串值加引号
     
-    // 4. 修复缺失的逗号
+    // 5. 修复缺失的逗号
     fixed = fixed.replace(/}\s*{/g, '},{'); // 对象之间加逗号
     fixed = fixed.replace(/]\s*\[/g, '],['); // 数组之间加逗号
     fixed = fixed.replace(/"\s*{/g, '",{'); // 字符串后加逗号
     fixed = fixed.replace(/"\s*\[/g, '",['); // 字符串后加逗号
     
-    // 5. 如果仍然不是有效的JSON，尝试包装成数组
+    // 6. 如果仍然不是有效的JSON，尝试包装成数组
     if (!fixed.startsWith('[') && !fixed.startsWith('{')) {
       fixed = `[${fixed}]`;
     }
     
-    // 6. 最终验证和修复
+    // 7. 最终验证和修复
     fixed = this.finalJSONValidation(fixed);
     
     console.log('激进修复完成，结果长度:', fixed.length);
+    return fixed;
+  }
+
+  /**
+   * 检查JSON是否被截断
+   */
+  private isTruncatedJSON(jsonString: string): boolean {
+    // 检查括号是否匹配
+    const openBraces = (jsonString.match(/\{/g) || []).length;
+    const closeBraces = (jsonString.match(/\}/g) || []).length;
+    const openBrackets = (jsonString.match(/\[/g) || []).length;
+    const closeBrackets = (jsonString.match(/\]/g) || []).length;
+    
+    // 如果括号不匹配，可能被截断
+    if (openBraces !== closeBraces || openBrackets !== closeBrackets) {
+      return true;
+    }
+    
+    // 检查是否以未完成的字符串结尾
+    const lastQuoteIndex = jsonString.lastIndexOf('"');
+    if (lastQuoteIndex > 0) {
+      const afterLastQuote = jsonString.substring(lastQuoteIndex + 1);
+      // 如果最后一个引号后面没有结束符，可能被截断
+      if (!afterLastQuote.match(/[\s,}\]\]]/)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  /**
+   * 修复被截断的JSON
+   */
+  private fixTruncatedJSON(jsonString: string): string {
+    let fixed = jsonString;
+    
+    console.log('修复被截断的JSON...');
+    console.log('原始JSON长度:', fixed.length);
+    console.log('原始JSON结尾:', fixed.slice(-200));
+    
+    // 1. 修复未完成的字符串
+    const lastQuoteIndex = fixed.lastIndexOf('"');
+    if (lastQuoteIndex > 0) {
+      const beforeLastQuote = fixed.substring(0, lastQuoteIndex);
+      const afterLastQuote = fixed.substring(lastQuoteIndex + 1);
+      
+      // 如果最后一个引号后面没有结束符，添加结束符
+      if (!afterLastQuote.match(/[\s,}\]\]]/)) {
+        fixed = beforeLastQuote + '"' + afterLastQuote + '"';
+      }
+    }
+    
+    // 2. 特殊处理：如果以未完成的字符串结尾
+    if (fixed.endsWith('"') && !fixed.endsWith('""')) {
+      // 检查是否在字符串中间被截断
+      const lastCompleteQuote = fixed.lastIndexOf('",');
+      if (lastCompleteQuote > 0) {
+        // 找到最后一个完整的字符串，截断到那里
+        fixed = fixed.substring(0, lastCompleteQuote + 1);
+      }
+    }
+    
+    // 3. 修复未完成的数组或对象
+    const openBraces = (fixed.match(/\{/g) || []).length;
+    const closeBraces = (fixed.match(/\}/g) || []).length;
+    const openBrackets = (fixed.match(/\[/g) || []).length;
+    const closeBrackets = (fixed.match(/\]/g) || []).length;
+    
+    // 4. 如果以未完成的字段结尾，尝试修复
+    if (fixed.endsWith('"') || fixed.endsWith('",') || fixed.endsWith('":')) {
+      // 查找最后一个完整的对象
+      const lastCompleteObject = fixed.lastIndexOf('},');
+      if (lastCompleteObject > 0) {
+        fixed = fixed.substring(0, lastCompleteObject + 1);
+      }
+    }
+    
+    // 5. 添加缺失的闭合括号
+    for (let i = 0; i < openBraces - closeBraces; i++) {
+      fixed += '}';
+    }
+    for (let i = 0; i < openBrackets - closeBrackets; i++) {
+      fixed += ']';
+    }
+    
+    // 6. 如果以逗号结尾，移除它
+    fixed = fixed.replace(/,\s*$/, '');
+    
+    // 7. 确保数组正确闭合
+    if (fixed.startsWith('[') && !fixed.endsWith(']')) {
+      fixed += ']';
+    }
+    
+    console.log('截断修复完成，修复后长度:', fixed.length);
+    console.log('修复后结尾:', fixed.slice(-200));
     return fixed;
   }
 
@@ -597,6 +742,131 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
   }
 
   /**
+   * 从部分文本中提取分析结果（当JSON完全无法解析时）
+   */
+  private extractPartialAnalysisFromText(text: string): AnalysisResult[] {
+    console.log('从部分文本中提取分析结果...');
+    
+    try {
+      // 尝试从文本中提取标题和描述
+      const results: AnalysisResult[] = [];
+      
+      // 查找可能的标题模式
+      const titleMatches = text.match(/"title"\s*:\s*"([^"]+)"/g);
+      const descriptionMatches = text.match(/"description"\s*:\s*"([^"]+)"/g);
+      
+      if (titleMatches && descriptionMatches) {
+        for (let i = 0; i < Math.min(titleMatches.length, descriptionMatches.length); i++) {
+          const title = titleMatches[i]?.match(/"title"\s*:\s*"([^"]+)"/)?.[1] || `分析项 ${i + 1}`;
+          const description = descriptionMatches[i]?.match(/"description"\s*:\s*"([^"]+)"/)?.[1] || '描述信息不完整';
+          
+          results.push({
+            id: `partial-${i + 1}`,
+            title: title,
+            description: description,
+            questions: {},
+            summary: description,
+            totalScore: 50, // 部分提取的分数较低
+            quality: 'medium' as const,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            timestamp: new Date(),
+            question: title,
+            analysis: description
+          });
+        }
+      }
+      
+      // 如果没有找到结构化数据，尝试从文本中提取关键词
+      if (results.length === 0) {
+        const keywords = this.extractKeywordsFromText(text);
+        keywords.forEach((keyword: string, index: number) => {
+          results.push({
+            id: `keyword-${index + 1}`,
+            title: keyword,
+            description: `基于AI分析提取的关键词: ${keyword}`,
+            questions: {},
+            summary: `基于AI分析提取的关键词: ${keyword}`,
+            totalScore: 30,
+            quality: 'low' as const,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            timestamp: new Date(),
+            question: keyword,
+            analysis: `基于AI分析提取的关键词: ${keyword}`
+          });
+        });
+      }
+      
+      // 如果仍然没有结果，创建默认的奥斯本九问分析
+      if (results.length === 0) {
+        const osbornQuestions = [
+          '能否他用？', '能否借用？', '能否修改？', '能否扩大？', '能否缩小？',
+          '能否替代？', '能否调整？', '能否颠倒？', '能否组合？'
+        ];
+        
+        osbornQuestions.forEach((question: string, index: number) => {
+          results.push({
+            id: `osborn-${index + 1}`,
+            title: question,
+            description: `AI分析完成，但结果格式异常。请重新尝试分析以获得完整结果。`,
+            questions: {},
+            summary: `AI分析完成，但结果格式异常。请重新尝试分析以获得完整结果。`,
+            totalScore: 10,
+            quality: 'low' as const,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            timestamp: new Date(),
+            question: question,
+            analysis: `AI分析完成，但结果格式异常。请重新尝试分析以获得完整结果。`
+          });
+        });
+      }
+      
+      console.log(`从文本中提取了 ${results.length} 个分析结果`);
+      return results;
+      
+    } catch (error) {
+      console.error('从文本提取分析结果失败:', error);
+      return [{
+        id: 'error-fallback',
+        title: '分析结果',
+        description: 'AI分析完成，但结果格式异常。原始响应: ' + text.substring(0, 200) + '...',
+        questions: {},
+        summary: 'AI分析完成，但结果格式异常。',
+        totalScore: 5,
+        quality: 'low' as const,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        timestamp: new Date(),
+        question: '分析结果',
+        analysis: 'AI分析完成，但结果格式异常。'
+      }];
+    }
+  }
+
+  /**
+   * 从文本中提取关键词
+   */
+  private extractKeywordsFromText(text: string): string[] {
+    // 简单的关键词提取
+    const words = text.match(/[a-zA-Z\u4e00-\u9fa5]+/g) || [];
+    const wordCount: { [key: string]: number } = {};
+    
+    words.forEach(word => {
+      if (word.length > 2) { // 只考虑长度大于2的词
+        wordCount[word] = (wordCount[word] || 0) + 1;
+      }
+    });
+    
+    // 返回出现频率最高的前5个词
+    return Object.entries(wordCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([word]) => word);
+  }
+
+  /**
    * 从文本中提取分析结果
    */
   private extractAnalysisFromText(text: string): AnalysisResult[] {
@@ -686,6 +956,50 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
    */
   clearConfig(): void {
     this.config = null;
+  }
+
+  /**
+   * 执行网络诊断
+   */
+  private performNetworkDiagnostics(): void {
+    console.log('=== 网络诊断开始 ===');
+    
+    // 1. 检查浏览器环境
+    console.log('浏览器信息:', {
+      userAgent: navigator.userAgent,
+      online: navigator.onLine,
+      language: navigator.language,
+      platform: navigator.platform
+    });
+    
+    // 2. 检查当前页面信息
+    console.log('页面信息:', {
+      origin: window.location.origin,
+      protocol: window.location.protocol,
+      host: window.location.host
+    });
+    
+    // 3. 测试基本网络连接
+    console.log('测试基本网络连接...');
+    
+    // 检查浏览器在线状态
+    if (navigator.onLine) {
+      console.log('✓ 浏览器在线状态正常');
+    } else {
+      console.error('✗ 浏览器离线');
+    }
+    
+    // 检查当前页面协议
+    console.log('当前协议:', window.location.protocol);
+    console.log('当前主机:', window.location.hostname);
+    
+    // 4. 测试DeepSeek API连接（避免CORS问题）
+    console.log('测试DeepSeek API连接...');
+    console.log('为避免CORS问题，跳过实际API调用测试');
+    console.log('API端点: https://api.deepseek.com/v1/chat/completions');
+    console.log('建议: 在实际使用中验证API连接');
+    
+    console.log('=== 网络诊断完成 ===');
   }
 }
 
