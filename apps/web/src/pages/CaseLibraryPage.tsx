@@ -90,6 +90,50 @@ const CaseLibraryPage: React.FC = memo(() => {
     navigate(`/analysis-detail?id=${caseId}`);
   }, [navigate]);
 
+  // 下载案例
+  const handleDownloadCase = useCallback((caseItem: any) => {
+    try {
+      // 创建下载内容
+      const downloadContent = {
+        title: caseItem.title,
+        description: caseItem.description,
+        tags: caseItem.tags,
+        createdAt: caseItem.createdAt,
+        analysis: caseItem.analysis,
+        insights: caseItem.insights,
+        recommendations: caseItem.recommendations,
+        marketAnalysis: caseItem.marketAnalysis,
+        competitiveAnalysis: caseItem.competitiveAnalysis,
+        swotAnalysis: caseItem.swotAnalysis,
+        businessModel: caseItem.businessModel,
+        implementation: caseItem.implementation
+      };
+
+      // 创建JSON文件
+      const dataStr = JSON.stringify(downloadContent, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      
+      // 创建下载链接
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${caseItem.title}_分析报告.json`;
+      
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // 清理URL对象
+      URL.revokeObjectURL(url);
+      
+      console.log('案例下载成功:', caseItem.title);
+    } catch (error) {
+      console.error('案例下载失败:', error);
+      alert('下载失败，请重试');
+    }
+  }, []);
+
   // 开始新分析
   const handleStartAnalysis = useCallback(() => {
     navigate('/osborn-analysis');
@@ -296,7 +340,7 @@ const CaseLibraryPage: React.FC = memo(() => {
                         variant="ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // TODO: 实现分享功能
+                          handleDownloadCase(caseItem);
                         }}
                         className="p-2"
                       >

@@ -186,76 +186,7 @@ class DeepAnalysisEngine {
     } catch (error) {
       console.error('AI分析失败，回退到本地分析:', error);
       // 如果AI分析失败，回退到本地分析
-      const baseAnalysis = this.generateBaseAnalysis(topic, context as AnalysisContext);
-    
-      // 模拟AI增强的分析结果
-      return {
-        ...baseAnalysis,
-        topic: topic,
-        analysis: `基于AI深度分析的${topic}具有以下特点：\n\n1. 市场潜力巨大：${topic}在相关行业中具有显著的发展潜力\n2. 技术创新机会：通过AI技术可以显著提升${topic}的智能化水平\n3. 用户需求匹配：AI分析显示用户对${topic}的个性化需求正在增长\n4. 竞争优势明显：通过AI驱动的创新可以建立技术壁垒`,
-        insights: {
-          keyOpportunities: [
-            `AI驱动的${topic}个性化服务`,
-            `基于大数据的${topic}智能推荐`,
-            `${topic}的自动化运营优化`,
-            `智能化的${topic}用户体验设计`
-          ],
-          potentialRisks: [
-            'AI技术实施成本较高',
-            '数据隐私和安全风险',
-            '技术更新换代风险',
-            '用户接受度不确定性'
-          ],
-          marketTrends: [
-            'AI技术在各行业的快速普及',
-            '用户对智能化服务的需求增长',
-            '数据驱动决策成为主流',
-            '个性化服务成为竞争优势'
-          ],
-          competitiveAdvantages: [
-            'AI技术领先优势',
-            '数据积累和分析能力',
-            '智能化用户体验',
-            '持续学习和优化能力'
-          ]
-        },
-        recommendations: {
-          shortTerm: [
-            `建立${topic}的AI技术团队`,
-            '收集和分析用户数据',
-            '制定AI技术实施路线图'
-          ],
-          mediumTerm: [
-            `开发${topic}的AI核心功能`,
-            '建立数据分析和机器学习模型',
-            '优化AI驱动的用户体验'
-          ],
-          longTerm: [
-            '建立AI技术生态',
-            '探索新的AI应用场景',
-            '成为行业AI技术领导者'
-          ]
-        },
-        confidence: 0.85, // AI分析的置信度更高
-        marketAnalysis: {
-          marketSize: '万亿级市场',
-          growthRate: '年增长率20-30%',
-          keyPlayers: ['行业领先企业A', '创新公司B', '技术巨头C'],
-          marketTrends: ['AI技术普及', '智能化升级', '数据驱动决策']
-        },
-        competitiveAnalysis: {
-          directCompetitors: ['竞争对手A', '竞争对手B'],
-          indirectCompetitors: ['替代方案A', '替代方案B'],
-          competitiveAdvantages: ['AI技术优势', '数据积累', '用户体验'],
-          competitiveThreats: ['技术替代', '新进入者', '政策变化']
-        },
-        swotAnalysis: {
-          strengths: ['AI技术领先', '数据资源丰富', '团队能力强'],
-          weaknesses: ['技术实施成本高', '市场教育需要时间'],
-          opportunities: ['AI技术普及', '市场需求增长', '政策支持'],
-          threats: ['技术更新快', '竞争加剧', '监管变化']
-        }
-      };
+      return this.generateLocalAnalysis(topic, context as AnalysisContext);
     }
   }
 
