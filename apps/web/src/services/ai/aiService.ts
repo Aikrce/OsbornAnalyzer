@@ -151,10 +151,10 @@ class AIService {
 
 返回格式必须是完整的JSON数组，包含所有9个奥斯本维度，每个元素包含以下字段：
 - title: 维度名称（如"能否他用？"）
-- description: 详细分析内容（200-300字）
-- insights: 关键洞察数组（3-5个洞察）
-- recommendations: 实施建议数组（3-5个建议）
-- examples: 成功案例数组（3-5个案例）
+- description: 详细分析内容（150-200字，简洁但完整）
+- insights: 关键洞察数组（3-4个洞察）
+- recommendations: 实施建议数组（3-4个建议）
+- examples: 成功案例数组（2-3个案例）
 - confidence: 分析置信度（0-100）
 
 关键要求：
@@ -165,13 +165,13 @@ class AIService {
 - 确保所有字符串都正确闭合（用双引号）
 - 确保所有括号和大括号都正确闭合
 - JSON格式必须完全正确，可以被直接解析
-- 每个维度的description字段必须包含200-300字的详细分析
-- 如果内容过长，请确保JSON结构完整
+- 每个维度的description字段控制在150-200字，确保内容简洁但完整
+- 如果内容过长，请适当缩短description内容但保持JSON结构完整
 - 不要在任何地方添加解释性文字，只返回纯JSON数据
 - 确保JSON字符串中的中文字符正确转义
 - 必须返回完整的JSON，不能截断
-- 如果内容接近长度限制，请适当缩短description内容但保持JSON结构完整
 - 确保最后一个对象的所有字段都完整
+- 优先保证JSON结构完整性，内容可以适当精简
 
 ## 背景信息
 ${context ? `分析背景：${context}` : ''}
@@ -312,9 +312,24 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
         } catch (secondError) {
           console.error('激进修复后仍然解析失败:', secondError);
           
-          // 最后的回退方案：尝试从文本中提取部分信息
-          console.log('尝试从文本中提取分析结果...');
-          return this.extractPartialAnalysisFromText(response);
+          // 检查是否是截断的JSON
+          if (this.isTruncatedJSON(moreFixedResponse)) {
+            console.log('检测到截断的JSON，尝试修复...');
+            const fixedTruncated = this.fixTruncatedJSON(moreFixedResponse);
+            try {
+              data = JSON.parse(fixedTruncated);
+              console.log('截断JSON修复成功');
+            } catch (truncatedError) {
+              console.error('截断JSON修复失败:', truncatedError);
+              // 最后的回退方案：尝试从文本中提取部分信息
+              console.log('尝试从文本中提取分析结果...');
+              return this.extractPartialAnalysisFromText(response);
+            }
+          } else {
+            // 最后的回退方案：尝试从文本中提取部分信息
+            console.log('尝试从文本中提取分析结果...');
+            return this.extractPartialAnalysisFromText(response);
+          }
         }
       }
       
@@ -558,7 +573,32 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
     console.log('原始JSON长度:', fixed.length);
     console.log('原始JSON结尾:', fixed.slice(-200));
     
-    // 1. 修复未完成的字符串
+    // 1. 特殊处理：如果以未完成的字符串结尾（如你的情况）
+    if (fixed.endsWith('"') && !fixed.endsWith('""')) {
+      // 查找最后一个完整的对象结束位置
+      const lastCompleteObject = fixed.lastIndexOf('},');
+      if (lastCompleteObject > 0) {
+        // 截断到最后一个完整的对象
+        fixed = fixed.substring(0, lastCompleteObject + 1);
+        console.log('截断到最后一个完整对象');
+      } else {
+        // 如果没有找到完整的对象，尝试找到最后一个完整的字段
+        const lastCompleteField = fixed.lastIndexOf('",');
+        if (lastCompleteField > 0) {
+          // 截断到最后一个完整的字段，并添加闭合
+          fixed = fixed.substring(0, lastCompleteField + 1);
+          // 添加缺失的闭合括号
+          const openBraces = (fixed.match(/\{/g) || []).length;
+          const closeBraces = (fixed.match(/\}/g) || []).length;
+          for (let i = 0; i < openBraces - closeBraces; i++) {
+            fixed += '}';
+          }
+          console.log('截断到最后一个完整字段并添加闭合');
+        }
+      }
+    }
+    
+    // 2. 修复未完成的字符串
     const lastQuoteIndex = fixed.lastIndexOf('"');
     if (lastQuoteIndex > 0) {
       const beforeLastQuote = fixed.substring(0, lastQuoteIndex);
@@ -567,16 +607,6 @@ ${previousResults.map((result, index) => `${index + 1}. ${result.title}: ${resul
       // 如果最后一个引号后面没有结束符，添加结束符
       if (!afterLastQuote.match(/[\s,}\]\]]/)) {
         fixed = beforeLastQuote + '"' + afterLastQuote + '"';
-      }
-    }
-    
-    // 2. 特殊处理：如果以未完成的字符串结尾
-    if (fixed.endsWith('"') && !fixed.endsWith('""')) {
-      // 检查是否在字符串中间被截断
-      const lastCompleteQuote = fixed.lastIndexOf('",');
-      if (lastCompleteQuote > 0) {
-        // 找到最后一个完整的字符串，截断到那里
-        fixed = fixed.substring(0, lastCompleteQuote + 1);
       }
     }
     
