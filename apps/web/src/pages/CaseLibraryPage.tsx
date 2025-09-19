@@ -517,7 +517,14 @@ const CaseLibraryPage: React.FC = memo(() => {
                       查看详情
                     </Button>
                     
-                    <div className="flex items-center space-x-1">
+                    <div 
+                      className="flex items-center space-x-1"
+                      onClick={(e) => {
+                        console.log('📦 按钮容器被点击了！', caseItem.title);
+                        e.stopPropagation();
+                      }}
+                      style={{ pointerEvents: 'auto' }}
+                    >
                       <Button
                         size="sm"
                         variant="ghost"
@@ -527,8 +534,11 @@ const CaseLibraryPage: React.FC = memo(() => {
                           e.stopPropagation();
                           handleDownloadCase(caseItem);
                         }}
+                        onMouseDown={() => console.log('🖱️ 下载按钮鼠标按下')}
+                        onMouseUp={() => console.log('🖱️ 下载按钮鼠标抬起')}
                         className="p-2"
                         title={`下载 ${caseItem.title} 的分析报告`}
+                        style={{ pointerEvents: 'auto', zIndex: 10 }}
                       >
                         <IconDownload size={14} className="text-gray-600" />
                       </Button>
