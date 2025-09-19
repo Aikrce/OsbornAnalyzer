@@ -42,6 +42,10 @@ export const useLocalCases = () => {
     setIsLoading(true);
     try {
       const cases = unifiedDataManager.getLocalCases();
+      console.log('📚 useLocalCases: 加载了', cases.length, '个案例');
+      if (cases.length > 0 && cases[0]) {
+        console.log('第一个案例:', cases[0].title, cases[0]);
+      }
       setCases(cases);
       updateStatistics(cases);
     } catch (error) {

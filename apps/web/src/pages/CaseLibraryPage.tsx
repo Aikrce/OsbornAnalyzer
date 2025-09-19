@@ -520,6 +520,7 @@ const CaseLibraryPage: React.FC = memo(() => {
                         size="sm"
                         variant="ghost"
                         onClick={(e) => {
+                          console.log('🔥 下载按钮被点击了！', caseItem.title);
                           e.stopPropagation();
                           handleDownloadCase(caseItem);
                         }}
