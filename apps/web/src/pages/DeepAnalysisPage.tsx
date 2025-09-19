@@ -17,8 +17,95 @@ import {
   IconTrendingUp,
   IconTarget,
   IconChartBar,
-  IconBulb
+  IconBulb,
+  IconDownload
 } from '@tabler/icons-react';
+
+// 生成报告内容
+const generateReportContent = (topic: string, result: any): string => {
+  const now = new Date();
+  const timestamp = now.toLocaleString('zh-CN');
+  
+  let content = `# ${topic} - AI深度分析报告\n\n`;
+  content += `**生成时间**: ${timestamp}\n`;
+  content += `**分析质量**: ${result.quality}\n`;
+  content += `**置信度**: ${Math.round(result.confidence * 100)}%\n`;
+  content += `**分析分数**: ${result.totalScore}/100\n\n`;
+  
+  // 综合分析
+  if (result.analysis) {
+    content += `## 综合分析\n\n${result.analysis}\n\n`;
+  }
+  
+  // 市场分析
+  if (result.marketAnalysis) {
+    content += `## 市场分析\n\n`;
+    if (result.marketAnalysis.marketSize) {
+      content += `**市场规模**: ${result.marketAnalysis.marketSize}\n\n`;
+    }
+    if (result.marketAnalysis.growthRate) {
+      content += `**增长率**: ${result.marketAnalysis.growthRate}\n\n`;
+    }
+    if (result.marketAnalysis.keyPlayers && result.marketAnalysis.keyPlayers.length > 0) {
+      content += `**主要参与者**:\n${result.marketAnalysis.keyPlayers.map((player: string) => `- ${player}`).join('\n')}\n\n`;
+    }
+  }
+  
+  // SWOT分析
+  if (result.swotAnalysis) {
+    content += `## SWOT分析\n\n`;
+    
+    if (result.swotAnalysis.strengths && result.swotAnalysis.strengths.length > 0) {
+      content += `### 优势 (Strengths)\n${result.swotAnalysis.strengths.map((s: string) => `- ${s}`).join('\n')}\n\n`;
+    }
+    
+    if (result.swotAnalysis.weaknesses && result.swotAnalysis.weaknesses.length > 0) {
+      content += `### 劣势 (Weaknesses)\n${result.swotAnalysis.weaknesses.map((w: string) => `- ${w}`).join('\n')}\n\n`;
+    }
+    
+    if (result.swotAnalysis.opportunities && result.swotAnalysis.opportunities.length > 0) {
+      content += `### 机会 (Opportunities)\n${result.swotAnalysis.opportunities.map((o: string) => `- ${o}`).join('\n')}\n\n`;
+    }
+    
+    if (result.swotAnalysis.threats && result.swotAnalysis.threats.length > 0) {
+      content += `### 威胁 (Threats)\n${result.swotAnalysis.threats.map((t: string) => `- ${t}`).join('\n')}\n\n`;
+    }
+  }
+  
+  // 关键洞察
+  if (result.insights) {
+    content += `## 关键洞察\n\n`;
+    
+    if (result.insights.keyOpportunities && result.insights.keyOpportunities.length > 0) {
+      content += `### 关键机会\n${result.insights.keyOpportunities.map((o: string) => `- ${o}`).join('\n')}\n\n`;
+    }
+    
+    if (result.insights.potentialRisks && result.insights.potentialRisks.length > 0) {
+      content += `### 潜在风险\n${result.insights.potentialRisks.map((r: string) => `- ${r}`).join('\n')}\n\n`;
+    }
+  }
+  
+  // 实施建议
+  if (result.recommendations) {
+    content += `## 实施建议\n\n`;
+    
+    if (result.recommendations.shortTerm && result.recommendations.shortTerm.length > 0) {
+      content += `### 短期 (1-3个月)\n${result.recommendations.shortTerm.map((r: string) => `- ${r}`).join('\n')}\n\n`;
+    }
+    
+    if (result.recommendations.mediumTerm && result.recommendations.mediumTerm.length > 0) {
+      content += `### 中期 (3-12个月)\n${result.recommendations.mediumTerm.map((r: string) => `- ${r}`).join('\n')}\n\n`;
+    }
+    
+    if (result.recommendations.longTerm && result.recommendations.longTerm.length > 0) {
+      content += `### 长期 (1-3年)\n${result.recommendations.longTerm.map((r: string) => `- ${r}`).join('\n')}\n\n`;
+    }
+  }
+  
+  content += `---\n\n*本报告由AI深度分析系统生成，仅供参考。*`;
+  
+  return content;
+};
 
 const DeepAnalysisPage: React.FC = memo(() => {
   const [searchParams] = useSearchParams();
@@ -78,6 +165,27 @@ const DeepAnalysisPage: React.FC = memo(() => {
       analyze(topic, { ...analysisContext, analysisType: analysisType as 'local' | 'api' });
     }
   }, [topic, analyze, analysisContext, analysisType]);
+
+  // 下载报告
+  const handleDownload = useCallback(() => {
+    const dualResult = results[0];
+    const currentResult = dualResult?.deepAnalysis;
+    if (!currentResult) return;
+    
+    // 生成报告内容
+    const reportContent = generateReportContent(topic, currentResult);
+    
+    // 创建并下载文件
+    const blob = new Blob([reportContent], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${topic}-深度分析报告.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [topic, results]);
 
   // 返回首页
   const handleGoBack = useCallback(() => {
@@ -174,6 +282,15 @@ const DeepAnalysisPage: React.FC = memo(() => {
                     保存到案例库
                   </>
                 )}
+              </Button>
+              
+              <Button 
+                onClick={handleDownload}
+                variant="outline" 
+                className="rounded-xl"
+              >
+                <IconDownload size={16} className="mr-2" />
+                下载报告
               </Button>
               
               <Button 
@@ -412,7 +529,7 @@ const DeepAnalysisPage: React.FC = memo(() => {
                   <div>
                     <h4 className="font-semibold text-blue-700 mb-2">短期 (1-3个月)</h4>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      {result.recommendations?.shortTerm?.map((rec, index) => (
+                      {result.recommendations?.shortTerm?.map((rec: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
                           {rec}
@@ -423,7 +540,7 @@ const DeepAnalysisPage: React.FC = memo(() => {
                   <div>
                     <h4 className="font-semibold text-purple-700 mb-2">中期 (3-12个月)</h4>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      {result.recommendations?.mediumTerm?.map((rec, index) => (
+                      {result.recommendations?.mediumTerm?.map((rec: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <span className="w-1.5 h-1.5 bg-purple-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
                           {rec}
@@ -434,7 +551,7 @@ const DeepAnalysisPage: React.FC = memo(() => {
                   <div>
                     <h4 className="font-semibold text-green-700 mb-2">长期 (1-3年)</h4>
                     <ul className="text-sm text-gray-700 space-y-1">
-                      {result.recommendations?.longTerm?.map((rec, index) => (
+                      {result.recommendations?.longTerm?.map((rec: string, index: number) => (
                         <li key={index} className="flex items-start">
                           <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2 mr-2 flex-shrink-0"></span>
                           {rec}
