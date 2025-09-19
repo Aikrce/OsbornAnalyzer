@@ -109,6 +109,19 @@ const CaseLibraryPage: React.FC = memo(() => {
     setIsDownloading(true);
     
     try {
+      // 调试：打印案例数据结构
+      console.log('=== 下载调试信息 ===');
+      console.log('案例标题:', selectedCase.title);
+      console.log('案例数据结构:', {
+        hasAnalysisData: !!selectedCase.analysisData,
+        hasAnalysisResult: !!selectedCase.analysisResult,
+        hasOsbornAnalysis: !!selectedCase.osbornAnalysis,
+        hasDeepAnalysis: !!selectedCase.deepAnalysis,
+        hasDetailedAnalysis: !!selectedCase.detailedAnalysis,
+        analysisDataKeys: selectedCase.analysisData ? Object.keys(selectedCase.analysisData) : [],
+        analysisResultLength: selectedCase.analysisResult ? selectedCase.analysisResult.length : 0
+      });
+      
       // 处理分析数据结构
       let osbornAnalysis = null;
       let deepAnalysis = null;
@@ -160,6 +173,29 @@ const CaseLibraryPage: React.FC = memo(() => {
         };
       }
       
+      // 检查是否有detailedAnalysis.osbornDimensions（智能分析格式）
+      if (selectedCase.detailedAnalysis?.osbornDimensions) {
+        const questions: Record<string, string[]> = {};
+        const allInsights: string[] = [];
+        const allRecommendations: string[] = [];
+        
+        selectedCase.detailedAnalysis.osbornDimensions.forEach((dimension: any) => {
+          if (dimension.dimension && dimension.questions) {
+            questions[dimension.dimension] = dimension.questions;
+            if (dimension.insights) allInsights.push(...dimension.insights);
+            if (dimension.recommendations) allRecommendations.push(...dimension.recommendations);
+          }
+        });
+        
+        osbornAnalysis = {
+          analysis: allInsights.join(' ') || '基于奥斯本九问的智能分析',
+          questions: questions,
+          suggestions: allRecommendations,
+          insights: allInsights,
+          examples: []
+        };
+      }
+      
       // 如果没有分析数据，创建一个基本的分析结构
       if (!osbornAnalysis && !deepAnalysis) {
         osbornAnalysis = {
@@ -168,6 +204,15 @@ const CaseLibraryPage: React.FC = memo(() => {
           suggestions: []
         };
       }
+      
+      // 调试：打印转换后的分析数据
+      console.log('转换后的分析数据:', {
+        hasOsbornAnalysis: !!osbornAnalysis,
+        hasDeepAnalysis: !!deepAnalysis,
+        osbornQuestionsCount: osbornAnalysis ? Object.keys(osbornAnalysis.questions || {}).length : 0,
+        osbornSuggestionsCount: osbornAnalysis ? (osbornAnalysis.suggestions || []).length : 0,
+        osbornInsightsCount: osbornAnalysis ? (osbornAnalysis.insights || []).length : 0
+      });
 
       const downloadOptions = {
         title: selectedCase.title,
