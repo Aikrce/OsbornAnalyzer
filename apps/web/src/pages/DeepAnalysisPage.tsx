@@ -1,5 +1,5 @@
 import React, { useState, useCallback, memo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useNavigation } from '../hooks/useNavigation';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -22,6 +22,7 @@ import {
 
 const DeepAnalysisPage: React.FC = memo(() => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { goHome } = useNavigation();
   const topic = searchParams.get('topic') || '';
   const analysisType = searchParams.get('type') || 'local';
@@ -78,6 +79,11 @@ const DeepAnalysisPage: React.FC = memo(() => {
       analyze(topic, { ...analysisContext, analysisType: analysisType as 'local' | 'api' });
     }
   }, [topic, analyze, analysisContext, analysisType]);
+
+  // 切换到奥斯本分析
+  const handleSwitchToOsborn = useCallback(() => {
+    navigate(`/osborn-analysis?topic=${encodeURIComponent(topic)}&type=${analysisType}`);
+  }, [navigate, topic, analysisType]);
 
   // 返回首页
   const handleGoBack = useCallback(() => {
@@ -183,6 +189,15 @@ const DeepAnalysisPage: React.FC = memo(() => {
               >
                 <IconSparkles size={16} className="mr-2" />
                 重新分析
+              </Button>
+              
+              <Button
+                onClick={handleSwitchToOsborn}
+                variant="outline"
+                className="rounded-xl bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100"
+              >
+                <IconTarget size={16} className="mr-2" />
+                奥斯本分析
               </Button>
             </div>
           </div>

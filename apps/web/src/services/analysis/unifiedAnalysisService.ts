@@ -306,19 +306,19 @@ class UnifiedAnalysisService {
     const context = this.buildAnalysisContext(request);
 
     try {
-      // 创建本地分析上下文（不使用AI）
-      const localContext = { ...context, useAI: false };
-      // 创建AI分析上下文（使用AI）
-      const aiContext = { ...context, useAI: true };
+      // 创建奥斯本分析上下文（使用AI）
+      const osbornContext = { ...context, useAI: true };
+      // 创建深度分析上下文（使用AI）
+      const deepContext = { ...context, useAI: true };
       
-      // 并行执行本地和AI分析
-      const [localPromise, aiPromise] = [
-        intelligentAnalysisEngine.generateEnhancedAnalysis(request.topic, localContext),
-        deepAnalysisEngine.generateDeepAnalysis(request.topic, aiContext)
+      // 并行执行奥斯本分析和深度分析，都使用AI
+      const [osbornPromise, deepPromise] = [
+        intelligentAnalysisEngine.generateEnhancedAnalysis(request.topic, osbornContext),
+        deepAnalysisEngine.generateDeepAnalysis(request.topic, deepContext)
       ];
 
       // 使用Promise.race处理取消信号
-      const racePromises = [localPromise, aiPromise].map(promise =>
+      const racePromises = [osbornPromise, deepPromise].map(promise =>
         Promise.race([
           promise,
           new Promise<never>((_, reject) => {
@@ -328,33 +328,33 @@ class UnifiedAnalysisService {
       );
 
       // 并行执行并记录时间
-      const localStart = Date.now();
-      const aiStart = Date.now();
+      const osbornStart = Date.now();
+      const deepStart = Date.now();
 
-      const [localResult, aiResult] = await Promise.allSettled(racePromises);
+      const [osbornResult, deepResult] = await Promise.allSettled(racePromises);
 
-      const localDuration = Date.now() - localStart;
-      const aiDuration = Date.now() - aiStart;
+      const osbornDuration = Date.now() - osbornStart;
+      const deepDuration = Date.now() - deepStart;
       const totalDuration = Date.now() - startTime;
 
       const results: UnifiedAnalysisResult['results'] = {};
       const errors: string[] = [];
       const warnings: string[] = [];
 
-      // 处理本地分析结果（奥斯本分析）
-      if (localResult && localResult.status === 'fulfilled') {
-        results.local = localResult.value as IntelligentAnalysisResult;
-      } else if (localResult) {
-        errors.push(`Local analysis failed: ${localResult.reason?.message || 'Unknown error'}`);
-        warnings.push('本地分析失败，结果可能不完整');
+      // 处理奥斯本分析结果
+      if (osbornResult && osbornResult.status === 'fulfilled') {
+        results.local = osbornResult.value as IntelligentAnalysisResult;
+      } else if (osbornResult) {
+        errors.push(`Osborn analysis failed: ${osbornResult.reason?.message || 'Unknown error'}`);
+        warnings.push('奥斯本分析失败，结果可能不完整');
       }
 
-      // 处理AI分析结果（深度分析）
-      if (aiResult && aiResult.status === 'fulfilled') {
-        results.ai = aiResult.value as DeepAnalysisResult;
-      } else if (aiResult) {
-        errors.push(`AI analysis failed: ${aiResult.reason?.message || 'Unknown error'}`);
-        warnings.push('AI分析失败，结果可能不完整');
+      // 处理深度分析结果
+      if (deepResult && deepResult.status === 'fulfilled') {
+        results.ai = deepResult.value as DeepAnalysisResult;
+      } else if (deepResult) {
+        errors.push(`Deep analysis failed: ${deepResult.reason?.message || 'Unknown error'}`);
+        warnings.push('深度分析失败，结果可能不完整');
       }
 
       // 合并分析结果
@@ -375,8 +375,8 @@ class UnifiedAnalysisService {
           errors: errors.length > 0 ? errors : [],
           warnings: warnings.length > 0 ? warnings : [],
           performance: {
-            localDuration,
-            aiDuration,
+            localDuration: osbornDuration,
+            aiDuration: deepDuration,
             totalDuration
           }
         }

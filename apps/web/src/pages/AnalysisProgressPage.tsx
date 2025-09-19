@@ -103,7 +103,12 @@ const AnalysisProgressPage: React.FC = memo(() => {
           }, 300);
 
           // 实际执行双重分析 - 确保同时生成奥斯本分析和深度分析结果
-          await analyze(topic, { analysisType: analysisType as 'local' | 'api' });
+          console.log('开始执行双分析:', { topic, analysisType });
+          await analyze(topic, { 
+            analysisType: analysisType as 'local' | 'api',
+            // 确保双分析模式
+            type: 'DUAL'
+          });
 
           // 等待所有进度完成
           setTimeout(() => {

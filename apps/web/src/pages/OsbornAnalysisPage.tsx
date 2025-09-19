@@ -73,6 +73,11 @@ const OsbornAnalysisPage: React.FC = () => {
     goHome();
   }, [goHome]);
 
+  // 切换到深度分析
+  const handleSwitchToDeep = useCallback(() => {
+    navigate(`/deep-analysis?topic=${encodeURIComponent(topic)}&type=${analysisType}`);
+  }, [navigate, topic, analysisType]);
+
   // 查看详情
   const handleViewDetails = useCallback(() => {
     setShowHistory(true);
@@ -168,6 +173,15 @@ const OsbornAnalysisPage: React.FC = () => {
               >
                 <IconBookmark size={16} className="mr-2" />
                 查看详情
+              </Button>
+              
+              <Button
+                onClick={handleSwitchToDeep}
+                variant="outline"
+                className="rounded-xl bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100"
+              >
+                <IconSparkles size={16} className="mr-2" />
+                深度分析
               </Button>
               
               <Button variant="outline" className="rounded-xl">

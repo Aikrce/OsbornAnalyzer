@@ -66,7 +66,13 @@ export const useDualAnalysis = (): UseDualAnalysisReturn => {
     }
 
     const analysisType = context.analysisType || 'local';
-    const cacheKey = analysisCache.generateKey(topic, analysisType === 'local' ? AnalysisType.LOCAL : AnalysisType.API, context);
+    const isDualMode = (context as any).type === 'DUAL';
+    
+    // 根据是否双分析模式决定分析类型
+    const unifiedAnalysisType = isDualMode ? AnalysisType.DUAL : 
+                               (analysisType === 'local' ? AnalysisType.LOCAL : AnalysisType.API);
+    
+    const cacheKey = analysisCache.generateKey(topic, unifiedAnalysisType, context);
 
     // 检查缓存
     const cachedResult = analysisCache.get<DualAnalysisResult>(cacheKey);
@@ -82,11 +88,11 @@ export const useDualAnalysis = (): UseDualAnalysisReturn => {
       setProgress({ osborn: 0, deep: 0, overall: 0 });
 
       // 使用统一分析服务执行分析
-      console.log('开始统一分析:', { topic, analysisType, context });
+      console.log('开始统一分析:', { topic, analysisType, isDualMode, unifiedAnalysisType, context });
       
       const unifiedResult = await unifiedAnalysisService.analyze({
         topic,
-        type: analysisType === 'local' ? AnalysisType.LOCAL : AnalysisType.API,
+        type: unifiedAnalysisType,
         mode: AnalysisMode.STANDARD,
         context: context,
         options: {
@@ -100,8 +106,25 @@ export const useDualAnalysis = (): UseDualAnalysisReturn => {
 
       // 转换为DualAnalysisResult格式
       // 确保奥斯本分析和深度分析都有结果
-      const osbornAnalysis = unifiedResult.results.local || unifiedResult.results.ai?.osbornAnalysis || {} as AnalysisResult;
-      const deepAnalysis = unifiedResult.results.ai || unifiedResult.results.local?.deepAnalysis || {} as DeepAnalysisResult;
+      let osbornAnalysis: AnalysisResult;
+      let deepAnalysis: DeepAnalysisResult;
+      
+      if (isDualMode) {
+        // 双分析模式：local是奥斯本分析，ai是深度分析
+        osbornAnalysis = unifiedResult.results.local || {} as AnalysisResult;
+        deepAnalysis = unifiedResult.results.ai || {} as DeepAnalysisResult;
+      } else {
+        // 单分析模式：根据分析类型决定
+        if (analysisType === 'api') {
+          // API分析：ai结果包含奥斯本和深度分析
+          osbornAnalysis = unifiedResult.results.local || {} as AnalysisResult;
+          deepAnalysis = unifiedResult.results.ai || {} as DeepAnalysisResult;
+        } else {
+          // 本地分析：local结果包含奥斯本分析
+          osbornAnalysis = unifiedResult.results.local || {} as AnalysisResult;
+          deepAnalysis = {} as DeepAnalysisResult;
+        }
+      }
       
       const dualResult: DualAnalysisResult = {
         osbornAnalysis,
