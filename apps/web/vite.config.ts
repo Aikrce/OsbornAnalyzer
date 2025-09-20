@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
+  // 设置 base 路径为 GitHub Pages 仓库名
+  base: process.env.NODE_ENV === 'production' ? '/OsbornAnalyzer/' : '/',
   plugins: [
     react({
       // 优化JSX运行时
