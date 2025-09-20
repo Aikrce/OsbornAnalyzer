@@ -1,8 +1,9 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
+  # 暂时禁用，使用 deploy-pages-simple.yml
+  # push:
+  #   branches: [ main ]
   workflow_dispatch:
 
 permissions:
