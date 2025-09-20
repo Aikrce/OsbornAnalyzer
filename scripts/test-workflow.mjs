@@ -40,7 +40,7 @@ if (fs.existsSync(mainWorkflow)) {
   const checks = [
     { name: 'Node.js 版本', pattern: /node-version.*20/, found: content.includes('node-version: \'20\'') },
     { name: 'pnpm 版本', pattern: /version.*9\.0\.0/, found: content.includes('version: \'9.0.0\'') },
-    { name: 'GitHub Pages 部署', pattern: /deploy-pages/, found: content.includes('deploy-pages') },
+    { name: 'GitHub Pages 部署', pattern: /actions-gh-pages/, found: content.includes('actions-gh-pages') },
     { name: '权限配置', pattern: /pages: write/, found: content.includes('pages: write') },
     { name: '构建脚本', pattern: /build:github/, found: content.includes('build:github') }
   ];
