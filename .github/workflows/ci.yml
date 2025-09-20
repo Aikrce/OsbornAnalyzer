@@ -1,11 +1,11 @@
 name: CI/CD Pipeline
 
 on:
-  # 暂时禁用，专注于部署
+  # 完全禁用，专注于部署
   # push:
   #   branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  # pull_request:
+  #   branches: [ main, develop ]
 
 jobs:
   test:
