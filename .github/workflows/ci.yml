@@ -1,8 +1,9 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ main, develop ]
+  # 暂时禁用，专注于部署
+  # push:
+  #   branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
 

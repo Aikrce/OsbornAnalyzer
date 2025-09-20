@@ -1,19 +1,23 @@
-name: Deploy to GitHub Pages (Simple)
+name: Deploy to GitHub Pages Only
 
 on:
-  # 暂时禁用，使用 deploy-pages-only.yml
-  # push:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
   workflow_dispatch:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,7 +39,7 @@ jobs:
         run: |
           cd apps/web
           pnpm build:github
-          echo "Build completed successfully"
+          echo "✅ Build completed successfully"
           ls -la dist/
 
       - name: Deploy to GitHub Pages
@@ -44,3 +48,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./apps/web/dist
           cname: aikrce.github.io
+          force_orphan: true
