@@ -32,7 +32,7 @@ export class ConfigDebugger {
       multiConfig: { exists: false, activeApiKeyLength: 0 },
       effectiveConfig: { source: 'none', apiKeyLength: 0 },
       isConfiguredResult: false,
-      contradictions: []
+      contradictions: [],
     };
 
     console.log('🔍 开始配置调试...');
@@ -45,10 +45,13 @@ export class ConfigDebugger {
         const basicConfig = JSON.parse(basicConfigStr);
         debugInfo.basicConfig.content = basicConfig;
         debugInfo.basicConfig.apiKeyLength = basicConfig.apiKey?.length || 0;
-        debugInfo.basicConfig.apiKeyPrefix = basicConfig.apiKey?.substring(0, 10);
+        debugInfo.basicConfig.apiKeyPrefix = basicConfig.apiKey?.substring(
+          0,
+          10
+        );
         console.log('✅ 基础配置存在:', {
           apiKeyLength: debugInfo.basicConfig.apiKeyLength,
-          prefix: debugInfo.basicConfig.apiKeyPrefix
+          prefix: debugInfo.basicConfig.apiKeyPrefix,
         });
       } catch (e) {
         console.error('❌ 基础配置解析失败:', e);
@@ -64,17 +67,19 @@ export class ConfigDebugger {
       try {
         const multiConfigs = JSON.parse(multiConfigStr);
         debugInfo.multiConfig.content = multiConfigs;
-        
+
         if (Array.isArray(multiConfigs)) {
           const activeConfig = multiConfigs.find((c: any) => c.isActive);
           if (activeConfig) {
             debugInfo.multiConfig.activeConfig = activeConfig;
-            debugInfo.multiConfig.activeApiKeyLength = activeConfig.apiKey?.length || 0;
-            debugInfo.multiConfig.activeApiKeyPrefix = activeConfig.apiKey?.substring(0, 10);
+            debugInfo.multiConfig.activeApiKeyLength =
+              activeConfig.apiKey?.length || 0;
+            debugInfo.multiConfig.activeApiKeyPrefix =
+              activeConfig.apiKey?.substring(0, 10);
             console.log('✅ 活跃配置存在:', {
               name: activeConfig.name,
               apiKeyLength: debugInfo.multiConfig.activeApiKeyLength,
-              prefix: debugInfo.multiConfig.activeApiKeyPrefix
+              prefix: debugInfo.multiConfig.activeApiKeyPrefix,
             });
           } else {
             console.log('⚠️ 多API配置存在但无活跃配置');
@@ -88,16 +93,30 @@ export class ConfigDebugger {
     }
 
     // 3. 模拟 getEffectiveConfig 逻辑
-    if (debugInfo.multiConfig.activeConfig && debugInfo.multiConfig.activeApiKeyLength > 0) {
+    if (
+      debugInfo.multiConfig.activeConfig &&
+      debugInfo.multiConfig.activeApiKeyLength > 0
+    ) {
       debugInfo.effectiveConfig.source = 'multi';
-      debugInfo.effectiveConfig.apiKeyLength = debugInfo.multiConfig.activeApiKeyLength;
-      debugInfo.effectiveConfig.apiKeyPrefix = debugInfo.multiConfig.activeApiKeyPrefix;
-      debugInfo.effectiveConfig.model = debugInfo.multiConfig.activeConfig.model;
+      debugInfo.effectiveConfig.apiKeyLength =
+        debugInfo.multiConfig.activeApiKeyLength;
+      if (debugInfo.multiConfig.activeApiKeyPrefix) {
+        debugInfo.effectiveConfig.apiKeyPrefix =
+          debugInfo.multiConfig.activeApiKeyPrefix;
+      }
+      if (debugInfo.multiConfig.activeConfig.model) {
+        debugInfo.effectiveConfig.model =
+          debugInfo.multiConfig.activeConfig.model;
+      }
       console.log('✅ 有效配置来源: 多API配置');
     } else if (debugInfo.basicConfig.apiKeyLength > 0) {
       debugInfo.effectiveConfig.source = 'basic';
-      debugInfo.effectiveConfig.apiKeyLength = debugInfo.basicConfig.apiKeyLength;
-      debugInfo.effectiveConfig.apiKeyPrefix = debugInfo.basicConfig.apiKeyPrefix;
+      debugInfo.effectiveConfig.apiKeyLength =
+        debugInfo.basicConfig.apiKeyLength;
+      if (debugInfo.basicConfig.apiKeyPrefix) {
+        debugInfo.effectiveConfig.apiKeyPrefix =
+          debugInfo.basicConfig.apiKeyPrefix;
+      }
       console.log('✅ 有效配置来源: 基础配置');
     } else {
       debugInfo.effectiveConfig.source = 'none';
@@ -105,28 +124,41 @@ export class ConfigDebugger {
     }
 
     // 4. 模拟 isConfigured 逻辑
-    debugInfo.isConfiguredResult = debugInfo.basicConfig.apiKeyLength > 0 || 
-                                   debugInfo.multiConfig.activeApiKeyLength > 0;
+    debugInfo.isConfiguredResult =
+      debugInfo.basicConfig.apiKeyLength > 0 ||
+      debugInfo.multiConfig.activeApiKeyLength > 0;
 
     // 5. 检查矛盾
-    if (debugInfo.basicConfig.apiKeyLength > 0 && debugInfo.effectiveConfig.apiKeyLength === 0) {
+    if (
+      debugInfo.basicConfig.apiKeyLength > 0 &&
+      debugInfo.effectiveConfig.apiKeyLength === 0
+    ) {
       debugInfo.contradictions.push('基础配置有API密钥但有效配置为空');
     }
-    
-    if (debugInfo.multiConfig.activeApiKeyLength > 0 && debugInfo.effectiveConfig.apiKeyLength === 0) {
+
+    if (
+      debugInfo.multiConfig.activeApiKeyLength > 0 &&
+      debugInfo.effectiveConfig.apiKeyLength === 0
+    ) {
       debugInfo.contradictions.push('多API配置有活跃密钥但有效配置为空');
     }
 
-    if (debugInfo.isConfiguredResult && debugInfo.effectiveConfig.apiKeyLength === 0) {
+    if (
+      debugInfo.isConfiguredResult &&
+      debugInfo.effectiveConfig.apiKeyLength === 0
+    ) {
       debugInfo.contradictions.push('isConfigured返回true但有效配置为空');
     }
 
-    if (debugInfo.effectiveConfig.source === 'multi' && debugInfo.basicConfig.apiKeyLength > 0) {
+    if (
+      debugInfo.effectiveConfig.source === 'multi' &&
+      debugInfo.basicConfig.apiKeyLength > 0
+    ) {
       debugInfo.contradictions.push('有效配置来自多API但基础配置也有密钥');
     }
 
     console.log('📊 配置调试结果:', debugInfo);
-    
+
     if (debugInfo.contradictions.length > 0) {
       console.log('🚨 发现矛盾:', debugInfo.contradictions);
     } else {
@@ -156,7 +188,10 @@ export class ConfigDebugger {
       suggestions.push('同时存在基础配置和多API配置，建议统一使用一种配置方式');
     }
 
-    if (debugInfo.effectiveConfig.apiKeyLength > 0 && debugInfo.effectiveConfig.apiKeyLength < 20) {
+    if (
+      debugInfo.effectiveConfig.apiKeyLength > 0 &&
+      debugInfo.effectiveConfig.apiKeyLength < 20
+    ) {
       suggestions.push('API密钥长度异常，请检查密钥格式');
     }
 
@@ -177,7 +212,8 @@ export class ConfigDebugger {
     if (basicConfigStr) {
       try {
         const basicConfig = JSON.parse(basicConfigStr);
-        hasBasicKey = basicConfig.apiKey && basicConfig.apiKey.trim().length > 0;
+        hasBasicKey =
+          basicConfig.apiKey && basicConfig.apiKey.trim().length > 0;
       } catch (e) {
         console.error('基础配置解析失败:', e);
       }
@@ -189,7 +225,10 @@ export class ConfigDebugger {
         const multiConfigs = JSON.parse(multiConfigStr);
         if (Array.isArray(multiConfigs)) {
           const activeConfig = multiConfigs.find((c: any) => c.isActive);
-          hasActiveMultiKey = activeConfig && activeConfig.apiKey && activeConfig.apiKey.trim().length > 0;
+          hasActiveMultiKey =
+            activeConfig &&
+            activeConfig.apiKey &&
+            activeConfig.apiKey.trim().length > 0;
         }
       } catch (e) {
         console.error('多API配置解析失败:', e);
@@ -207,19 +246,24 @@ export class ConfigDebugger {
       console.log('🔧 只有基础配置，转换为多API配置');
       try {
         const basicConfig = JSON.parse(basicConfigStr!);
-        const multiConfig = [{
-          id: `api-config-${Date.now()}`,
-          name: '默认配置',
-          provider: 'deepseek',
-          model: basicConfig.model || 'deepseek-chat',
-          apiKey: basicConfig.apiKey,
-          temperature: basicConfig.temperature || 0.7,
-          maxTokens: basicConfig.maxTokens || 2000,
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }];
-        localStorage.setItem('huitu-multi-api-configs', JSON.stringify(multiConfig));
+        const multiConfig = [
+          {
+            id: `api-config-${Date.now()}`,
+            name: '默认配置',
+            provider: 'deepseek',
+            model: basicConfig.model || 'deepseek-chat',
+            apiKey: basicConfig.apiKey,
+            temperature: basicConfig.temperature || 0.7,
+            maxTokens: basicConfig.maxTokens || 2000,
+            isActive: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+        localStorage.setItem(
+          'huitu-multi-api-configs',
+          JSON.stringify(multiConfig)
+        );
         localStorage.removeItem('huitu-ai-config');
         console.log('✅ 配置转换完成');
       } catch (e) {

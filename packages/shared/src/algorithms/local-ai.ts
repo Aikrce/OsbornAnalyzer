@@ -19,15 +19,17 @@ export interface LocalAIModelConfig {
 export class LocalAIAnalyzer implements IAIAnalyzer {
   private isModelLoaded: boolean = false;
   private config: LocalAIModelConfig;
-  
+  private cloudAnalyzer: IAIAnalyzer;
+
   constructor(config?: Partial<LocalAIModelConfig>) {
     this.config = {
       modelPath: './models/llama-2-7b-q4.bin',
       maxTokens: 1024,
       temperature: 0.7,
       contextWindow: 4096,
-      ...config
+      ...config,
     };
+    this.cloudAnalyzer = new CloudAIAnalyzer();
   }
 
   /**
@@ -37,7 +39,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
     try {
       // 检查模型文件是否存在
       const modelExists = await this.checkModelExists(this.config.modelPath);
-      
+
       if (!modelExists) {
         console.info('本地AI模型未配置，将使用云端AI分析（这是正常的）');
         this.isModelLoaded = false;
@@ -47,10 +49,10 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
       // 实际项目中这里会加载本地LLM模型
       // 例如使用WebLLM、Transformers.js或其他本地推理引擎
       console.log('本地AI模型加载中...');
-      
+
       // 模拟加载过程
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       this.isModelLoaded = true;
       console.log('本地AI模型加载完成');
       return true;
@@ -73,9 +75,9 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
           return localResult;
         }
       }
-      
+
       // 回退到云端AI
-      return await aiAnalyzer.analyze(result);
+      return await this.cloudAnalyzer.analyze(result);
     } catch (error) {
       console.error('AI分析失败:', error);
       throw new Error('AI分析服务暂时不可用');
@@ -93,8 +95,8 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
           return enhanced;
         }
       }
-      
-      return await aiAnalyzer.enhanceQuestions(questions);
+
+      return await this.cloudAnalyzer.enhanceQuestions(questions);
     } catch (error) {
       console.error('问题增强失败:', error);
       return questions;
@@ -112,8 +114,8 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
           return alternatives;
         }
       }
-      
-      return await aiAnalyzer.suggestAlternatives(text);
+
+      return await this.cloudAnalyzer.suggestAlternatives(text);
     } catch (error) {
       console.error('替代方案生成失败:', error);
       return [];
@@ -123,21 +125,25 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
   /**
    * 本地模型分析实现
    */
-  private async localAnalyze(result: AnalysisResult): Promise<AIAnalysisResult> {
+  private async localAnalyze(
+    result: AnalysisResult
+  ): Promise<AIAnalysisResult> {
     // 基于规则的分析（不依赖本地模型）
-    await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
-    
+    await new Promise(resolve =>
+      setTimeout(resolve, 300 + Math.random() * 500)
+    );
+
     // 基于奥斯本九问的智能分析
     const suggestions = this.generateIntelligentSuggestions(result);
     const keywords = this.extractKeywords(result);
     const alternatives = this.generateAlternatives(result);
-    
+
     return {
       suggestions,
       keywords,
       confidence: 0.75,
       alternatives,
-      reasoning: '基于奥斯本九问框架的智能分析完成，提供了针对性的创新建议。'
+      reasoning: '基于奥斯本九问框架的智能分析完成，提供了针对性的创新建议。',
     };
   }
 
@@ -146,10 +152,8 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
    */
   private async localEnhanceQuestions(questions: string[]): Promise<string[]> {
     await new Promise(resolve => setTimeout(resolve, 300));
-    
-    return questions.map(question => 
-      question + '（请结合具体场景举例说明）'
-    );
+
+    return questions.map(question => question + '（请结合具体场景举例说明）');
   }
 
   /**
@@ -157,13 +161,13 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
    */
   private async localSuggestAlternatives(text: string): Promise<string[]> {
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     return [
       '本地建议：重新定义问题边界',
       '采用逆向思维方法',
       '整合现有资源创造新价值',
       '构建最小可行产品快速验证',
-      '建立用户共创机制'
+      '建立用户共创机制',
     ];
   }
 
@@ -175,14 +179,14 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
       '基于奥斯本九问框架，建议深入挖掘替代可能性',
       '考虑跨领域技术整合和模式创新',
       '关注用户体验优化和个性化需求',
-      '探索可持续发展和环保创新方向'
+      '探索可持续发展和环保创新方向',
     ];
-    
+
     // 根据分析结果动态调整建议
     if (result.questions && Object.keys(result.questions).length > 0) {
       suggestions.unshift('基于奥斯本九问分析，发现多个创新机会点');
     }
-    
+
     return suggestions;
   }
 
@@ -191,12 +195,12 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
    */
   private extractKeywords(result: AnalysisResult): string[] {
     const baseKeywords = ['创新', '优化', '替代', '奥斯本九问'];
-    
+
     // 从分析结果中提取关键词
-    if (result.topic) {
-      baseKeywords.unshift(result.topic);
+    if (result.title) {
+      baseKeywords.unshift(result.title);
     }
-    
+
     return baseKeywords;
   }
 
@@ -208,7 +212,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
       '采用模块化设计提高灵活性和可扩展性',
       '探索开源技术解决方案降低成本',
       '构建用户反馈循环机制持续改进',
-      '整合新兴技术提升竞争力'
+      '整合新兴技术提升竞争力',
     ];
   }
 
@@ -226,11 +230,11 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
    */
   async downloadModel(): Promise<boolean> {
     console.log('开始下载本地AI模型...');
-    
+
     try {
       // 模拟下载过程
       await new Promise(resolve => setTimeout(resolve, 5000));
-      
+
       // 在实际项目中，这里会下载模型文件
       console.log('模型下载完成');
       return await this.loadModel();
@@ -246,7 +250,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
   getModelStatus(): { loaded: boolean; config: LocalAIModelConfig } {
     return {
       loaded: this.isModelLoaded,
-      config: this.config
+      config: this.config,
     };
   }
 }
@@ -259,10 +263,11 @@ class CloudAIAnalyzer implements IAIAnalyzer {
   async analyze(result: AnalysisResult): Promise<AIAnalysisResult> {
     // 模拟云端AI分析
     return {
-      summary: '云端AI分析结果',
-      insights: ['云端分析洞察1', '云端分析洞察2'],
-      recommendations: ['云端建议1', '云端建议2'],
-      confidence: 0.8
+      suggestions: ['云端分析洞察1', '云端分析洞察2'],
+      keywords: ['云端关键词1', '云端关键词2'],
+      alternatives: ['云端建议1', '云端建议2'],
+      confidence: 0.8,
+      reasoning: '云端AI分析完成',
     };
   }
 
@@ -281,7 +286,7 @@ class CloudAIAnalyzer implements IAIAnalyzer {
 export class HybridAIAnalyzer implements IAIAnalyzer {
   private localAnalyzer: LocalAIAnalyzer;
   private cloudAnalyzer: IAIAnalyzer;
-  
+
   constructor() {
     this.localAnalyzer = new LocalAIAnalyzer();
     this.cloudAnalyzer = new CloudAIAnalyzer();
@@ -297,7 +302,7 @@ export class HybridAIAnalyzer implements IAIAnalyzer {
     } catch (error) {
       console.warn('本地分析失败，回退到云端:', error);
     }
-    
+
     // 回退到云端分析
     return await this.cloudAnalyzer.analyze(result);
   }
@@ -311,7 +316,7 @@ export class HybridAIAnalyzer implements IAIAnalyzer {
     } catch (error) {
       console.warn('本地增强失败，回退到云端:', error);
     }
-    
+
     return await this.cloudAnalyzer.enhanceQuestions(questions);
   }
 
@@ -324,7 +329,7 @@ export class HybridAIAnalyzer implements IAIAnalyzer {
     } catch (error) {
       console.warn('本地建议失败，回退到云端:', error);
     }
-    
+
     return await this.cloudAnalyzer.suggestAlternatives(text);
   }
 }
