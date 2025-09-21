@@ -29,7 +29,18 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
       contextWindow: 4096,
       ...config,
     };
-    this.cloudAnalyzer = new CloudAIAnalyzer();
+    // 延迟初始化cloudAnalyzer，避免循环依赖
+    this.cloudAnalyzer = null as any;
+  }
+
+  /**
+   * 获取云端分析器实例（延迟初始化）
+   */
+  private getCloudAnalyzer(): IAIAnalyzer {
+    if (!this.cloudAnalyzer) {
+      this.cloudAnalyzer = new CloudAIAnalyzer();
+    }
+    return this.cloudAnalyzer;
   }
 
   /**
@@ -77,7 +88,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
       }
 
       // 回退到云端AI
-      return await this.cloudAnalyzer.analyze(result);
+      return await this.getCloudAnalyzer().analyze(result);
     } catch (error) {
       console.error('AI分析失败:', error);
       throw new Error('AI分析服务暂时不可用');
@@ -96,7 +107,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
         }
       }
 
-      return await this.cloudAnalyzer.enhanceQuestions(questions);
+      return await this.getCloudAnalyzer().enhanceQuestions(questions);
     } catch (error) {
       console.error('问题增强失败:', error);
       return questions;
@@ -115,7 +126,7 @@ export class LocalAIAnalyzer implements IAIAnalyzer {
         }
       }
 
-      return await this.cloudAnalyzer.suggestAlternatives(text);
+      return await this.getCloudAnalyzer().suggestAlternatives(text);
     } catch (error) {
       console.error('替代方案生成失败:', error);
       return [];
