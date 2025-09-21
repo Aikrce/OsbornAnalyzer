@@ -3,6 +3,7 @@
   "version": "2.0.0",
   "description": "奥斯本检核表法创新思维分析工具 - Monorepo架构",
   "private": true,
+  "type": "module",
   "workspaces": [
     "packages/*",
     "apps/*",
