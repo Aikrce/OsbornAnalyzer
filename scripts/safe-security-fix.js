@@ -174,7 +174,7 @@ function generateReport() {
     ]
   };
   
-  const reportPath = path.join(__dirname, '../SECURITY_FIX_REPORT.json');
+  const reportPath = path.join(__dirname, '../temp-files/SECURITY_FIX_REPORT.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
   log(`✅ 修复报告已生成: ${reportPath}`, 'green');
 }

@@ -22,16 +22,10 @@ export default tseslint.config(
       'apps/*/dist/',
       'packages/*/dist/',
       'tools/*/dist/',
-      'debug_cases.js',
+      'temp-files/',
       'test_*.js',
       'test_*.html',
       'scripts/test-*.js',
-      'browser_diagnostic.js',
-      'diagnostic_script.js',
-      'final_solution.js',
-      'fix_config_contradiction.js',
-      'root_cause_analysis.js',
-      'verify_api_config.js',
     ],
   }
 );

@@ -10,6 +10,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@osborn-analyzer/shared-utils": "workspace:*",
     "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
@@ -54,13 +55,13 @@
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
     "sonner": "^1.7.1",
-    "tailwind-merge": "^2.5.5",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6"
   },
   "devDependencies": {
     "@types/node": "^22",
-    "@types/react": "^19.1.13",
+    "@types/react": "^18.3.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
     "debug": "^4.4.3",
@@ -70,6 +71,6 @@
     "rollup": "^4.50.2",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
-    "vite": "^5.4.10"
+    "vite": "^5.4.20"
   }
 }

@@ -18,7 +18,6 @@ const CaseLibraryPage = lazy(() => import('../pages/CaseLibraryPage'));
 const CollaborationPage = lazy(() => import('../pages/CollaborationPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
 const AIDiagnosticsPage = lazy(() => import('../pages/AIDiagnosticsPage'));
-const TestPage = lazy(() => import('../pages/TestPage'));
 
 // 优化的加载中组件
 const PageLoader = ({ message = '加载中...' }: { message?: string }) => (
@@ -145,16 +144,6 @@ const AppRoutes: React.FC = () => {
             <ErrorBoundary>
               <Suspense fallback={<PageLoader message='加载用户中心...' />}>
                 <UserPage />
-              </Suspense>
-            </ErrorBoundary>
-          }
-        />
-        <Route
-          path='/test'
-          element={
-            <ErrorBoundary>
-              <Suspense fallback={<PageLoader message='加载测试页面...' />}>
-                <TestPage />
               </Suspense>
             </ErrorBoundary>
           }
