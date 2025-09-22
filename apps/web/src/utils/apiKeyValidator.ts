@@ -38,12 +38,12 @@ export class APIKeyValidator {
   static validateFormat(apiKey: string, provider: string = 'deepseek'): APIKeyValidationResult {
     const result: APIKeyValidationResult = {
       isValid: false,
-      keyLength: apiKey.length,
-      keyPrefix: apiKey.substring(0, 5) + '...',
+      keyLength: apiKey?.length || 0,
+      keyPrefix: apiKey ? apiKey.substring(0, 5) + '...' : '...',
       provider
     };
 
-    // 基本检查
+    // 基本检查 - 增强验证
     if (!apiKey || typeof apiKey !== 'string') {
       result.error = 'API密钥不能为空';
       return result;
@@ -51,6 +51,22 @@ export class APIKeyValidator {
 
     if (apiKey.trim().length === 0) {
       result.error = 'API密钥不能只包含空格';
+      return result;
+    }
+
+    // 增强安全检查
+    if (apiKey.includes(' ')) {
+      result.error = 'API密钥不能包含空格';
+      return result;
+    }
+
+    if (apiKey.length < 10) {
+      result.error = 'API密钥太短，至少需要10个字符';
+      return result;
+    }
+
+    if (apiKey.length > 200) {
+      result.error = 'API密钥太长，最多200个字符';
       return result;
     }
 
