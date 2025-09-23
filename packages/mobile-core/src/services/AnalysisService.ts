@@ -5,7 +5,7 @@ import {
   CaseStudy,
   filterCasesByKeyword,
   filterCasesByTopic
-} from '@huitu/shared';
+} from '@osborn/shared';
 
 class AnalysisService {
   /**

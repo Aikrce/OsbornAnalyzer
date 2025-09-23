@@ -37,7 +37,7 @@ describe("Test Module", () => {
     runTests();
     
     expect(mockExecSync).toHaveBeenCalledWith(
-      'pnpm --filter "@huitu/shared" run test',
+      'pnpm --filter "@osborn/shared" run test',
       { stdio: 'inherit' }
     );
   });

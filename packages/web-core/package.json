@@ -1,7 +1,8 @@
 {
-  "name": "@osborn-analyzer/web-core",
+  "name": "@osborn/web-core",
   "version": "1.0.0",
   "description": "OsbornAnalyzer网页端核心组件库",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -46,7 +47,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@osborn-analyzer/shared": "workspace:*",
+    "@osborn/shared": "workspace:*",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-select": "^2.2.6",

@@ -1,4 +1,4 @@
-import { AnalysisResult } from '@huitu/shared';
+import { AnalysisResult } from '@osborn/shared';
 
 export interface AIConfig {
   apiKey: string;

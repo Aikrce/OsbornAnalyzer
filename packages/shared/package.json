@@ -1,7 +1,8 @@
 {
-  "name": "@osborn-analyzer/shared",
+  "name": "@osborn/shared",
   "version": "1.0.0",
   "description": "OsbornAnalyzer共享库 - 核心数据、算法和工具函数",
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",

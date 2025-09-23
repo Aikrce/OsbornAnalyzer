@@ -58,7 +58,7 @@ pnpm install
 pnpm dev
 
 # 启动特定应用
-pnpm --filter @osborn-analyzer/web dev
+pnpm --filter @osborn/web dev
 ```
 
 4. **运行测试**
@@ -231,7 +231,7 @@ Closes #123
 pnpm test
 
 # 运行特定包的测试
-pnpm --filter @osborn-analyzer/shared test
+pnpm --filter @osborn/shared test
 
 # 运行测试并生成覆盖率报告
 pnpm test:coverage

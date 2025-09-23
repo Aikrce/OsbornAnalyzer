@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { AnalysisResult } from '@huitu/shared';
+import type { AnalysisResult } from '@osborn/shared';
 
 interface AnalysisState {
   // 当前分析结果

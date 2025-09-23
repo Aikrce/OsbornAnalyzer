@@ -1,15 +1,13 @@
 import js from '@eslint/js';
-import tseslint from '@typescript-eslint/eslint-plugin';
-import tsparser from '@typescript-eslint/parser';
+import tseslint from 'typescript-eslint';
 
-export default [
+export default tseslint.config(
   js.configs.recommended,
+  ...tseslint.configs.recommended,
   {
-    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
-      parser: tsparser,
       globals: {
         window: 'readonly',
         document: 'readonly',
@@ -24,17 +22,11 @@ export default [
         exports: 'readonly',
       },
     },
-    plugins: {
-      '@typescript-eslint': tseslint,
-    },
     rules: {
-      ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'warn',
     },
-  },
-  {
     ignores: ['dist/', 'node_modules/', '*.config.js', '*.config.ts'],
-  },
-];
+  }
+);

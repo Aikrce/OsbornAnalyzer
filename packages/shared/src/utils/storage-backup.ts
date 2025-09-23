@@ -65,19 +65,13 @@ export class StorageManager {
 
   // 与AI配置系统交互的方法
   private saveToAIConfig(apiKey: string): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过API密钥保存');
-      return;
-    }
-
     try {
       // 检查是否存在AI配置
-      const existingConfig = storage.getItem('huitu-ai-config');
+      const existingConfig = localStorage.getItem('huitu-ai-config');
       if (existingConfig) {
         const config = JSON.parse(existingConfig);
         config.apiKey = apiKey;
-        storage.setItem('huitu-ai-config', JSON.stringify(config));
+        localStorage.setItem('huitu-ai-config', JSON.stringify(config));
         this.addAccessLog('API密钥保存到AI配置', '单API配置');
       } else {
         // 创建新的AI配置
@@ -87,63 +81,53 @@ export class StorageManager {
           temperature: 0.7,
           maxTokens: 2000
         };
-        storage.setItem('huitu-ai-config', JSON.stringify(newConfig));
+        localStorage.setItem('huitu-ai-config', JSON.stringify(newConfig));
         this.addAccessLog('API密钥保存到AI配置', '新建单API配置');
       }
     } catch (error) {
-      console.error('保存API密钥到AI配置失败:', error);
-      throw new Error('保存失败');
+      this.addAccessLog('保存到AI配置失败', (error as Error).message);
+      throw error;
     }
   }
 
   private getFromAIConfig(): string | null {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，无法获取API密钥');
-      return null;
-    }
-
     try {
       // 优先从多API配置获取
-      const multiConfig = storage.getItem('huitu-multi-api-configs');
+      const multiConfig = localStorage.getItem('huitu-multi-api-configs');
       if (multiConfig) {
         const configs = JSON.parse(multiConfig);
         const activeConfig = configs.find((c: any) => c.isActive);
-        if (activeConfig && activeConfig.apiKey) {
-          this.addAccessLog('从多API配置获取密钥', '活跃配置');
+        if (activeConfig && activeConfig.apiKey && activeConfig.apiKey.trim().length > 0) {
+          this.addAccessLog('从AI配置获取API密钥', '多API配置');
           return activeConfig.apiKey;
         }
       }
 
       // 然后从单API配置获取
-      const singleConfig = storage.getItem('huitu-ai-config');
+      const singleConfig = localStorage.getItem('huitu-ai-config');
       if (singleConfig) {
         const config = JSON.parse(singleConfig);
         if (config.apiKey && config.apiKey.trim().length > 0) {
-          this.addAccessLog('从单API配置获取密钥', '单配置');
+          this.addAccessLog('从AI配置获取API密钥', '单API配置');
           return config.apiKey;
         }
       }
 
       return null;
     } catch (error) {
-      console.error('从AI配置获取API密钥失败:', error);
+      this.addAccessLog('从AI配置获取失败', (error as Error).message);
       return null;
     }
   }
 
+  // 注意：加密功能已移除，API密钥现在使用AI配置系统的存储方式
+  
   // 分析结果存储
   saveAnalysisResult(result: AnalysisResult): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过分析结果保存');
-      return;
-    }
-
     try {
       const results = this.getAnalysisResults();
       results.push(result);
-      storage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(results));
+      localStorage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(results));
     } catch (error) {
       console.error('保存分析结果失败:', error);
       throw new Error('保存失败，请检查存储空间');
@@ -151,14 +135,8 @@ export class StorageManager {
   }
   
   getAnalysisResults(): AnalysisResult[] {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，返回空数组');
-      return [];
-    }
-
     try {
-      const data = storage.getItem(STORAGE_KEYS.ANALYSIS_RESULTS);
+      const data = localStorage.getItem(STORAGE_KEYS.ANALYSIS_RESULTS);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       console.error('读取分析结果失败:', error);
@@ -167,32 +145,20 @@ export class StorageManager {
   }
   
   deleteAnalysisResult(id: string): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过删除操作');
-      return;
-    }
-
     try {
       const results = this.getAnalysisResults();
       const filtered = results.filter(result => result.id !== id);
-      storage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(filtered));
+      localStorage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(filtered));
     } catch (error) {
       console.error('删除分析结果失败:', error);
       throw new Error('删除失败');
     }
   }
-
+  
   // 用户偏好存储
   saveUserPreferences(preferences: UserPreferences): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过用户偏好保存');
-      return;
-    }
-
     try {
-      storage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(preferences));
+      localStorage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(preferences));
     } catch (error) {
       console.error('保存用户偏好失败:', error);
       throw new Error('保存失败');
@@ -200,24 +166,16 @@ export class StorageManager {
   }
   
   getUserPreferences(): UserPreferences {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，返回默认偏好');
-      return {
-        language: 'zh',
-        theme: 'auto',
-        notifications: true,
-        autoSave: true
-      };
-    }
-
     try {
-      const data = storage.getItem(STORAGE_KEYS.USER_PREFERENCES);
+      const data = localStorage.getItem(STORAGE_KEYS.USER_PREFERENCES);
       const defaultPreferences: UserPreferences = {
         language: 'zh',
         theme: 'auto',
         notifications: true,
-        autoSave: true
+        autoSave: true,
+        aiSuggestions: true,
+        aiEnabled: false,
+        defaultAnalysisMode: 'local',
       };
       return data ? { ...defaultPreferences, ...JSON.parse(data) } : defaultPreferences;
     } catch (error) {
@@ -226,102 +184,141 @@ export class StorageManager {
         language: 'zh',
         theme: 'auto',
         notifications: true,
-        autoSave: true
+        autoSave: true,
+        aiSuggestions: true,
+        aiEnabled: false,
+        defaultAnalysisMode: 'local',
       };
     }
   }
-
-  // API密钥管理（委托给AI配置系统）
+  
+  // API密钥存储（兼容模式 - 委托给AI配置系统）
   saveApiKey(apiKey: string): void {
-    this.saveToAIConfig(apiKey);
-    this.addAccessLog('API密钥保存', '委托给AI配置系统');
+    try {
+      this.addAccessLog('保存API密钥', `长度: ${apiKey.length}`);
+      
+      // 委托给AI配置系统保存
+      this.saveToAIConfig(apiKey);
+      
+      this.addAccessLog('API密钥保存成功', '委托给AI配置系统');
+    } catch (error) {
+      this.addAccessLog('API密钥保存失败', (error as Error).message);
+      console.error('保存API密钥失败:', error);
+      throw new Error('保存失败');
+    }
   }
   
   getApiKey(): string | null {
-    const apiKey = this.getFromAIConfig();
-    this.addAccessLog('API密钥获取', apiKey ? '成功' : '未找到');
-    return apiKey;
+    try {
+      this.addAccessLog('读取API密钥');
+      
+      // 从AI配置系统获取API密钥
+      const apiKey = this.getFromAIConfig();
+      
+      if (apiKey) {
+        this.addAccessLog('API密钥读取完成', `长度: ${apiKey.length}, AI配置系统`);
+        return apiKey;
+      }
+      
+      this.addAccessLog('API密钥读取完成', '无密钥');
+      return null;
+      
+    } catch (error) {
+      this.addAccessLog('API密钥读取失败', (error as Error).message);
+      console.error('读取API密钥失败:', error);
+      return null;
+    }
   }
   
   clearApiKey(): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过API密钥清除');
-      return;
-    }
-
+    this.addAccessLog('清除API密钥');
+    
     // 清理AI配置系统中的API密钥
     try {
       // 清理单API配置
-      const singleConfig = storage.getItem('huitu-ai-config');
+      const singleConfig = localStorage.getItem('huitu-ai-config');
       if (singleConfig) {
         const config = JSON.parse(singleConfig);
         config.apiKey = '';
-        storage.setItem('huitu-ai-config', JSON.stringify(config));
+        localStorage.setItem('huitu-ai-config', JSON.stringify(config));
       }
 
       // 清理多API配置中的活跃配置
-      const multiConfig = storage.getItem('huitu-multi-api-configs');
+      const multiConfig = localStorage.getItem('huitu-multi-api-configs');
       if (multiConfig) {
         const configs = JSON.parse(multiConfig);
         const updatedConfigs = configs.map((config: any) => ({
           ...config,
           apiKey: config.isActive ? '' : config.apiKey
         }));
-        storage.setItem('huitu-multi-api-configs', JSON.stringify(updatedConfigs));
+        localStorage.setItem('huitu-multi-api-configs', JSON.stringify(updatedConfigs));
       }
 
       this.addAccessLog('API密钥清除完成', 'AI配置系统已清理');
     } catch (error) {
+      this.addAccessLog('API密钥清除失败', (error as Error).message);
       console.error('清除API密钥失败:', error);
-      throw new Error('清除失败');
     }
   }
 
-  // 检查API密钥是否存在
-  hasApiKey(): boolean {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      return false;
-    }
-
+  // 检查API密钥状态
+  getApiKeyStatus(): {
+    hasKey: boolean;
+    source: 'ai-config-single' | 'ai-config-multi' | 'none';
+    expiresAt: number | null;
+    isExpired: boolean;
+  } {
     try {
       // 检查多API配置
-      const multiConfig = storage.getItem('huitu-multi-api-configs');
+      const multiConfig = localStorage.getItem('huitu-multi-api-configs');
       if (multiConfig) {
         const configs = JSON.parse(multiConfig);
         const activeConfig = configs.find((c: any) => c.isActive);
         if (activeConfig && activeConfig.apiKey && activeConfig.apiKey.trim().length > 0) {
-          return true;
+          return {
+            hasKey: true,
+            source: 'ai-config-multi',
+            expiresAt: null,
+            isExpired: false
+          };
         }
       }
 
       // 检查单API配置
-      const singleConfig = storage.getItem('huitu-ai-config');
+      const singleConfig = localStorage.getItem('huitu-ai-config');
       if (singleConfig) {
         const config = JSON.parse(singleConfig);
         if (config.apiKey && config.apiKey.trim().length > 0) {
-          return true;
+          return {
+            hasKey: true,
+            source: 'ai-config-single',
+            expiresAt: null,
+            isExpired: false
+          };
         }
       }
 
-      return false;
+      return {
+        hasKey: false,
+        source: 'none',
+        expiresAt: null,
+        isExpired: false
+      };
     } catch (error) {
-      console.error('检查API密钥失败:', error);
-      return false;
+      this.addAccessLog('检查API密钥状态失败', (error as Error).message);
+      return {
+        hasKey: false,
+        source: 'none',
+        expiresAt: null,
+        isExpired: false
+      };
     }
   }
-
+  
   // 清除所有数据
   clearAll(): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过清除操作');
-      return;
-    }
-
     Object.values(STORAGE_KEYS).forEach(key => {
-      storage.removeItem(key);
+      localStorage.removeItem(key);
     });
   }
   
@@ -330,35 +327,27 @@ export class StorageManager {
     const data = {
       results: this.getAnalysisResults(),
       preferences: this.getUserPreferences(),
-      timestamp: new Date().toISOString()
+      exportTime: new Date().toISOString(),
     };
     return JSON.stringify(data, null, 2);
   }
   
   // 导入数据
   importData(jsonString: string): void {
-    const storage = this.safeLocalStorage();
-    if (!storage) {
-      console.warn('localStorage不可用，跳过数据导入');
-      return;
-    }
-
     try {
       const data = JSON.parse(jsonString);
       if (data.results) {
-        storage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(data.results));
+        localStorage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(data.results));
       }
       if (data.preferences) {
         this.saveUserPreferences(data.preferences);
       }
     } catch (error) {
       console.error('导入数据失败:', error);
-      throw new Error('导入失败，数据格式错误');
+      throw new Error('导入失败，请检查文件格式');
     }
   }
 }
 
 // 导出单例实例
-export const storageManager = StorageManager.getInstance();
-
 export const storage = StorageManager.getInstance();

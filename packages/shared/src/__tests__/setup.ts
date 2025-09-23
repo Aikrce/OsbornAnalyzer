@@ -1,5 +1,5 @@
 /**
- * Vitest setup file for @huitu/shared package
+ * Vitest setup file for @osborn/shared package
  * This file is executed before all tests
  */
 

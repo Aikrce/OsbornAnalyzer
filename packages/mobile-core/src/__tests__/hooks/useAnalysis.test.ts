@@ -3,7 +3,7 @@ import { renderHook, act } from "@testing-library/react";
 import useAnalysis from "../../hooks/useAnalysis";
 
 // Mock the shared analysis function
-vi.mock("@huitu/shared", () => ({
+vi.mock("@osborn/shared", () => ({
   performOsbornAnalysis: vi.fn().mockResolvedValue({
     id: "test-id",
     title: "Test Topic",
@@ -56,7 +56,7 @@ describe("useAnalysis Hook", () => {
     const { result } = renderHook(() => useAnalysis());
     
     // Mock error
-    vi.mocked(require("@huitu/shared").performOsbornAnalysis).mockRejectedValueOnce(
+    vi.mocked(require("@osborn/shared").performOsbornAnalysis).mockRejectedValueOnce(
       new Error("Analysis failed")
     );
     

@@ -182,8 +182,8 @@ pnpm install
 pnpm dev
 
 # 启动特定应用
-pnpm --filter @osborn-analyzer/web dev          # Web应用
-pnpm --filter @osborn-analyzer/mobile-core dev  # 移动端核心
+pnpm --filter @osborn/web dev          # Web应用
+pnpm --filter @osborn/mobile-core dev  # 移动端核心
 pnpm --filter osborn-tool dev                   # 奥斯本工具
 pnpm --filter project-diagnosis-tool dev        # 项目诊断工具
 ```
@@ -195,8 +195,8 @@ pnpm --filter project-diagnosis-tool dev        # 项目诊断工具
 pnpm build
 
 # 构建特定包
-pnpm --filter @osborn-analyzer/web build
-pnpm --filter @osborn-analyzer/shared-utils build
+pnpm --filter @osborn/web build
+pnpm --filter @osborn/shared-utils build
 ```
 
 ---
@@ -288,7 +288,7 @@ chore: 构建过程或辅助工具变动
 ### **Web应用部署**
 ```bash
 # 构建生产版本
-pnpm --filter @osborn-analyzer/web build
+pnpm --filter @osborn/web build
 
 # 部署到Vercel
 vercel --prod

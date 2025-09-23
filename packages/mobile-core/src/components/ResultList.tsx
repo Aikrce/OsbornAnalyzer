@@ -1,6 +1,6 @@
 import React from 'react';
 import {FlatList, StyleSheet} from 'react-native';
-import {AnalysisResult} from '@huitu/shared';
+import {AnalysisResult} from '@osborn/shared';
 import AnalysisCard from './AnalysisCard';
 
 interface ResultListProps {

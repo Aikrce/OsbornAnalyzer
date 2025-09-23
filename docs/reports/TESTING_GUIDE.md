@@ -159,9 +159,9 @@ pnpm test:performance
 #### 运行特定包测试
 ```bash
 # 运行特定包的测试
-pnpm --filter @osborn-analyzer/shared test
-pnpm --filter @osborn-analyzer/web-core test
-pnpm --filter @osborn-analyzer/mobile-core test
+pnpm --filter @osborn/shared test
+pnpm --filter @osborn/web-core test
+pnpm --filter @osborn/mobile-core test
 ```
 
 #### 运行特定文件测试

@@ -12,19 +12,19 @@ export function runTests() {
   // 运行测试
   try {
     console.log('📦 测试共享包...')
-    execSync('pnpm --filter "@huitu/shared" run test', { stdio: 'inherit' })
+    execSync('pnpm --filter "@osborn/shared" run test', { stdio: 'inherit' })
     
     console.log('🌐 测试Web核心包...')
-    execSync('pnpm --filter "@huitu/web-core" run test', { stdio: 'inherit' })
+    execSync('pnpm --filter "@osborn/web-core" run test', { stdio: 'inherit' })
     
     console.log('📱 测试移动端核心包...')
-    execSync('pnpm --filter "@huitu/mobile-core" run test', { stdio: 'inherit' })
+    execSync('pnpm --filter "@osborn/mobile-core" run test', { stdio: 'inherit' })
     
     console.log('🛠️ 测试CLI工具包...')
-    execSync('pnpm --filter "@huitu/cli-tools" run test', { stdio: 'inherit' })
+    execSync('pnpm --filter "@osborn/cli-tools" run test', { stdio: 'inherit' })
     
     console.log('🎯 测试Web应用...')
-    execSync('pnpm --filter "@huitu/web" run test', { stdio: 'inherit' })
+    execSync('pnpm --filter "@osborn/web" run test', { stdio: 'inherit' })
     
     console.log('✅ 所有测试通过！')
   } catch (error) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {AnalysisResult} from '@huitu/shared';
+import {AnalysisResult} from '@osborn/shared';
 
 interface AnalysisCardProps {
   result: AnalysisResult;

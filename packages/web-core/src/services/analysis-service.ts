@@ -1,5 +1,5 @@
-import { AnalysisEngine } from '@huitu/shared';
-import type { AnalysisResult } from '@huitu/shared';
+import { AnalysisEngine } from '@osborn/shared';
+import type { AnalysisResult } from '@osborn/shared';
 
 class AnalysisService {
   private static instance: AnalysisService;

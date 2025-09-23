@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { AnalysisResult } from '@huitu/shared';
-import { performOsbornAnalysis } from '@huitu/shared';
+import { AnalysisResult } from '@osborn/shared';
+import { performOsbornAnalysis } from '@osborn/shared';
 
 export interface UseAnalysisReturn {
   results: AnalysisResult[];

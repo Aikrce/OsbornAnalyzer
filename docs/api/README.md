@@ -140,7 +140,7 @@ interface CaseStudy {
 ### 基本分析流程
 
 ```typescript
-import { AnalysisEngine } from '@osborn-analyzer/shared';
+import { AnalysisEngine } from '@osborn/shared';
 
 const engine = AnalysisEngine.getInstance();
 
@@ -164,7 +164,7 @@ console.log('相似案例:', result.similarCases);
 ### 案例管理
 
 ```typescript
-import { CaseManager } from '@osborn-analyzer/shared';
+import { CaseManager } from '@osborn/shared';
 
 const caseManager = new CaseManager();
 
@@ -181,7 +181,7 @@ const similarCases = await caseManager.findSimilarCases('人工智能', 5);
 ### 数据导出
 
 ```typescript
-import { ExportService } from '@osborn-analyzer/shared';
+import { ExportService } from '@osborn/shared';
 
 const exportService = new ExportService();
 

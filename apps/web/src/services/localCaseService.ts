@@ -1,4 +1,4 @@
-import { AnalysisResult } from '@huitu/shared';
+import { AnalysisResult } from '@osborn/shared';
 import { OSBORN_BASE_CASES, OsbornCase } from '../data/baseCases';
 
 export interface LocalCase {

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { AnalysisResult } from '@huitu/shared';
+import { AnalysisResult } from '@osborn/shared';
 import { intelligentAnalysisEngine, AnalysisContext } from '../services/analysis/intelligentAnalysisEngine';
 
 export interface UseAnalysisReturn {

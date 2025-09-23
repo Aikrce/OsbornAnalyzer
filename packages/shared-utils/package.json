@@ -1,5 +1,5 @@
 {
-  "name": "@osborn-analyzer/shared-utils",
+  "name": "@osborn/shared-utils",
   "version": "1.0.0",
   "description": "共享UI工具函数和Hooks",
   "main": "dist/index.js",

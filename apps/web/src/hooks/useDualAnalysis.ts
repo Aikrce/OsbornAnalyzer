@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { AnalysisResult } from '@huitu/shared';
+import { AnalysisResult } from '@osborn/shared';
 import { DeepAnalysisResult } from '../services/analysis/deepAnalysisEngine';
 import { useLocalCases } from './useLocalCases';
 import { AnalysisTypeString, AnalysisContext as UnifiedAnalysisContext, AnalysisType, AnalysisMode } from '../types/analysis';

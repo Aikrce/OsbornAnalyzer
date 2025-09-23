@@ -20,8 +20,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["../../packages/shared/src/*"],
-      "@web-core/*": ["../../packages/web-core/src/*"]
+      "@osborn/shared": ["../../packages/shared/src"],
+      "@osborn/shared/*": ["../../packages/shared/src/*"],
+      "@osborn/web-core": ["../../packages/web-core/src"],
+      "@osborn/web-core/*": ["../../packages/web-core/src/*"]
     }
   },
   "include": ["src"],

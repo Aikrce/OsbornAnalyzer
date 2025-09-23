@@ -38,7 +38,7 @@ describe("Deploy Module", () => {
     deployProject();
     
     expect(mockExecSync).toHaveBeenCalledWith(
-      'pnpm --filter "@huitu/web" run dev',
+      'pnpm --filter "@osborn/web" run dev',
       { stdio: 'inherit' }
     );
   });

@@ -13,19 +13,19 @@ console.log('---')
 // 构建所有包
 try {
   console.log('📦 构建共享包...')
-  execSync('pnpm --filter "@huitu/shared" run build', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/shared" run build', { stdio: 'inherit' })
   
   console.log('🌐 构建Web核心包...')
-  execSync('pnpm --filter "@huitu/web-core" run build', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/web-core" run build', { stdio: 'inherit' })
   
   console.log('📱 构建移动端核心包...')
-  execSync('pnpm --filter "@huitu/mobile-core" run build', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/mobile-core" run build', { stdio: 'inherit' })
   
   console.log('🛠️ 构建CLI工具包...')
-  execSync('pnpm --filter "@huitu/cli-tools" run build', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/cli-tools" run build', { stdio: 'inherit' })
   
   console.log('🎯 构建Web应用...')
-  execSync('pnpm --filter "@huitu/web" run build', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/web" run build', { stdio: 'inherit' })
   
   console.log('✅ 所有包构建完成！')
 } catch (error) {

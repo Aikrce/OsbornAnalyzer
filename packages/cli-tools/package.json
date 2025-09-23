@@ -1,5 +1,5 @@
 {
-  "name": "@huitu/cli-tools",
+  "name": "@osborn/cli-tools",
   "version": "1.0.0",
   "description": "HuiTu开发工具包 - 构建、部署和测试工具",
   "type": "module",
@@ -16,7 +16,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@osborn-analyzer/shared": "workspace:*",
+    "@osborn/shared": "workspace:*",
     "commander": "^14.0.1",
     "chalk": "^5.6.2",
     "inquirer": "^12.9.4",

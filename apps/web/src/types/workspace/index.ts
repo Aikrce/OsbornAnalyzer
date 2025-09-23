@@ -1,5 +1,5 @@
 // 工作台核心类型定义
-import { AnalysisResult, CaseStudy } from '@huitu/shared';
+import { AnalysisResult, CaseStudy } from '@osborn/shared';
 
 // 工作台模式
 export type WorkspaceMode = 'analysis' | 'collaboration' | 'library' | 'settings';
@@ -149,4 +149,4 @@ export interface WorkspaceConfig {
 }
 
 // 重新导出共享类型
-export type { AnalysisResult, CaseStudy } from '@huitu/shared';
+export type { AnalysisResult, CaseStudy } from '@osborn/shared';

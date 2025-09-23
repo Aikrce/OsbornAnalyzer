@@ -5,7 +5,7 @@ import type {
   AnalysisConfig, 
   CaseStudy,
   // AnalysisMode 
-} from '@huitu/shared';
+} from '@osborn/shared';
 
 interface UseAnalysisReturn {
   deepAnalysis: DeepAnalysisResult | null;

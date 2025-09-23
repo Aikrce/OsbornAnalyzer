@@ -10,7 +10,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@osborn-analyzer/shared-utils": "workspace:*",
+    "@osborn/shared-utils": "workspace:*",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
@@ -67,7 +67,7 @@
     "@vitejs/plugin-react": "^5.0.2",
     "eslint": "^9.35.0",
     "postcss": "^8.5",
-    "typescript": "^5",
+    "typescript": "^5.9.2",
     "vite": "^5.4.20"
   }
 }

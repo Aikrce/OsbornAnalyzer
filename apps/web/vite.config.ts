@@ -4,7 +4,7 @@ import path from 'path'
 
 export default defineConfig({
   // 设置 base 路径为 GitHub Pages 仓库名
-  base: process.env.NODE_ENV === 'production' ? '/OsbornAnalyzer/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/HuiTu/' : '/',
   plugins: [
     react({
       // 优化JSX运行时
@@ -14,8 +14,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@huitu/shared': path.resolve(__dirname, '../../packages/shared/src'),
-      '@huitu/web-core': path.resolve(__dirname, '../../packages/web-core/src')
+      '@osborn/shared': path.resolve(__dirname, '../../packages/shared/src'),
+      '@osborn/web-core': path.resolve(__dirname, '../../packages/web-core/src')
     }
   },
   server: {
@@ -53,8 +53,8 @@ export default defineConfig({
           'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot'],
           'query-vendor': ['@tanstack/react-query'],
           'utils': ['clsx', 'tailwind-merge', 'lucide-react'],
-          'ai-services': ['@huitu/shared'],
-          'collaboration-services': ['@huitu/web-core'],
+          'ai-services': ['@osborn/shared'],
+          'collaboration-services': ['@osborn/web-core'],
         },
         // 优化chunk命名
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -75,7 +75,7 @@ export default defineConfig({
       'tailwind-merge',
       'lucide-react',
     ],
-    exclude: ['@huitu/shared', '@huitu/web-core'],
+    exclude: ['@osborn/shared', '@osborn/web-core'],
   },
   // 启用构建缓存
   cacheDir: 'node_modules/.vite'

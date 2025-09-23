@@ -11,7 +11,7 @@ console.log('---')
 // 启动开发服务器
 try {
   console.log('🌐 启动Web应用开发服务器...')
-  execSync('pnpm --filter "@huitu/web" run dev', { stdio: 'inherit' })
+  execSync('pnpm --filter "@osborn/web" run dev', { stdio: 'inherit' })
 } catch (error) {
   console.error('❌ 开发服务器启动失败:', error.message)
   process.exit(1)

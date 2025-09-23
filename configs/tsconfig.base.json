@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     /* 语言和环境 */
-    "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowJs": true,
@@ -22,14 +22,14 @@
     /* 模块解析 */
     "baseUrl": ".",
     "paths": {
-      "@huitu/shared": ["packages/shared/src"],
-      "@huitu/shared/*": ["packages/shared/src/*"],
-      "@huitu/web-core": ["packages/web-core/src"],
-      "@huitu/web-core/*": ["packages/web-core/src/*"],
-      "@huitu/mobile-core": ["packages/mobile-core/src"],
-      "@huitu/mobile-core/*": ["packages/mobile-core/src/*"],
-      "@huitu/cli-tools": ["packages/cli-tools/src"],
-      "@huitu/cli-tools/*": ["packages/cli-tools/src/*"]
+      "@osborn/shared": ["packages/shared/src"],
+      "@osborn/shared/*": ["packages/shared/src/*"],
+      "@osborn/web-core": ["packages/web-core/src"],
+      "@osborn/web-core/*": ["packages/web-core/src/*"],
+      "@osborn/mobile-core": ["packages/mobile-core/src"],
+      "@osborn/mobile-core/*": ["packages/mobile-core/src/*"],
+      "@osborn/cli-tools": ["packages/cli-tools/src"],
+      "@osborn/cli-tools/*": ["packages/cli-tools/src/*"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

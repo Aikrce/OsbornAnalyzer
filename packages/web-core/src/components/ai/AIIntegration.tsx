@@ -5,7 +5,7 @@ import {
   aiConfigManager, 
   type AIServiceConfig, 
   type AIServiceStatus 
-} from '@huitu/shared';
+} from '@osborn/shared';
 import { Button } from '../ui/button';
 
 // 简单的UI组件定义

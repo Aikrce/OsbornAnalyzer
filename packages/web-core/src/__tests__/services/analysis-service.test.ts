@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { analyzeTopic } from "../../services/analysis-service";
 
 // Mock the shared package
-vi.mock("@huitu/shared", () => ({
+vi.mock("@osborn/shared", () => ({
   osbornAnalyzer: {
     analyze: vi.fn().mockResolvedValue({
       id: "test-id",
@@ -30,7 +30,7 @@ describe("Analysis Service", () => {
 
   it("should handle analysis errors", async () => {
     // Mock error
-    vi.mocked(require("@huitu/shared").osbornAnalyzer.analyze).mockRejectedValueOnce(
+    vi.mocked(require("@osborn/shared").osbornAnalyzer.analyze).mockRejectedValueOnce(
       new Error("Analysis failed")
     );
     

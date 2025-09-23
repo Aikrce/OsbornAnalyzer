@@ -1,5 +1,5 @@
 import { localCaseService, LocalCase } from '../localCaseService';
-import { osbornAnalyzer } from '@huitu/shared';
+import { osbornAnalyzer } from '@osborn/shared';
 
 // 分析上下文
 export interface AnalysisContext {
