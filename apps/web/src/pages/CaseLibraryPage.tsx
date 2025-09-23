@@ -20,7 +20,8 @@ import {
   IconDownload,
   IconTrendingUp,
   IconSparkles,
-  IconBooks
+  IconBooks,
+  IconClock
 } from '@tabler/icons-react';
 
 const CaseLibraryPage: React.FC = memo(() => {
@@ -43,8 +44,8 @@ const CaseLibraryPage: React.FC = memo(() => {
   const [selectedCase, setSelectedCase] = useState<any>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   
-  // 视图切换状态管理
-  const [viewMode, setViewMode] = useState<'category' | 'list'>('category');
+  // 三种视图模式状态管理
+  const [viewMode, setViewMode] = useState<'overview' | 'category' | 'list'>('overview');
 
   // 搜索和筛选逻辑
   const applyFilters = useCallback(() => {
@@ -380,28 +381,30 @@ const CaseLibraryPage: React.FC = memo(() => {
             管理您的创新分析案例，随时回顾和分享您的分析成果
           </p>
 
-          {/* 统计信息 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto mb-8">
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="text-2xl font-bold text-green-600 mb-1">{statistics.totalCases}</div>
-              <div className="text-sm text-gray-600">总案例数</div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="text-2xl font-bold text-blue-600 mb-1">{statistics.recentCases}</div>
-              <div className="text-sm text-gray-600">本周新增</div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-              <div className="text-2xl font-bold text-purple-600 mb-1">{allTags.length}</div>
-              <div className="text-sm text-gray-600">标签数量</div>
-            </div>
+          {/* 快速操作按钮 */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Button 
+              onClick={handleStartAnalysis}
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl px-6 py-3"
+            >
+              <IconSparkles size={16} className="mr-2" />
+              开始新分析
+            </Button>
+            <Button 
+              variant="outline"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl px-6 py-3"
+            >
+              <IconDownload size={16} className="mr-2" />
+              导入案例
+            </Button>
           </div>
         </div>
 
-        {/* 搜索和筛选 */}
+        {/* 智能搜索栏 */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 shadow-xl shadow-gray-200/20 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
             {/* 搜索框 */}
-            <div className="md:col-span-2">
+            <div className="flex-1 w-full">
               <div className="relative">
                 <IconSearch size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <Input
@@ -409,46 +412,56 @@ const CaseLibraryPage: React.FC = memo(() => {
                   placeholder="搜索案例标题、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  className="pl-10 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500 h-12"
                 />
               </div>
             </div>
 
-            {/* 标签筛选 */}
-            <div>
+            {/* 快速筛选 */}
+            <div className="flex flex-wrap gap-2">
               <Select value={selectedTag} onValueChange={setSelectedTag}>
-                <SelectTrigger className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                  <SelectValue placeholder="选择标签" />
+                <SelectTrigger className="w-32 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="标签" />
                 </SelectTrigger>
                 <SelectContent className="z-[9999]">
                   <SelectItem value="all">所有标签</SelectItem>
-                  {allTags.map(tag => (
+                  {allTags.slice(0, 10).map(tag => (
                     <SelectItem key={tag} value={tag}>{tag}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            {/* 排序 */}
-            <div>
+              
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                  <SelectValue placeholder="排序方式" />
+                <SelectTrigger className="w-32 rounded-xl border-gray-200 focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="排序" />
                 </SelectTrigger>
                 <SelectContent className="z-[9999]">
-                  <SelectItem value="newest">最新创建</SelectItem>
-                  <SelectItem value="oldest">最早创建</SelectItem>
-                  <SelectItem value="title">按标题</SelectItem>
+                  <SelectItem value="newest">最新</SelectItem>
+                  <SelectItem value="oldest">最早</SelectItem>
+                  <SelectItem value="title">标题</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
         </div>
 
-        {/* 视图切换 */}
+        {/* 三种视图模式切换 */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-4 border border-gray-200/50 shadow-xl shadow-gray-200/20 mb-8">
           <div className="flex items-center justify-center">
             <div className="flex bg-gray-100 rounded-xl p-1">
+              <Button
+                variant={viewMode === 'overview' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('overview')}
+                className={`flex items-center gap-2 rounded-lg transition-all duration-200 ${
+                  viewMode === 'overview' 
+                    ? 'bg-white shadow-sm text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <IconTrendingUp size={16} />
+                {isMobile ? '概览' : '概览视图'}
+              </Button>
               <Button
                 variant={viewMode === 'category' ? 'default' : 'ghost'}
                 size="sm"
@@ -479,7 +492,7 @@ const CaseLibraryPage: React.FC = memo(() => {
           </div>
         </div>
 
-        {/* 案例列表 */}
+        {/* 三种视图模式内容 */}
         {filteredCases.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
@@ -504,26 +517,125 @@ const CaseLibraryPage: React.FC = memo(() => {
           </div>
         ) : (
           <>
-            {viewMode === 'category' ? (
-              /* 分类视图 - 暂时显示占位内容 */
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 shadow-xl shadow-gray-200/20">
-                <div className="text-center py-12">
-                  <IconTag size={48} className="text-green-500 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">分类视图</h3>
-                  <p className="text-gray-600 mb-6">按行业领域和标签智能分类展示案例</p>
+            {viewMode === 'overview' ? (
+              /* 概览视图 - 统计信息 + 最近案例 + 标签云 */
+              <div className="space-y-6">
+                {/* 统计信息卡片 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-blue-600 mb-1">{statistics.totalCases}</div>
+                        <div className="text-sm text-blue-700">总案例数</div>
+                      </div>
+                      <IconBooks size={24} className="text-blue-500" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-green-600 mb-1">{statistics.recentCases}</div>
+                        <div className="text-sm text-green-700">本周新增</div>
+                      </div>
+                      <IconTrendingUp size={24} className="text-green-500" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-purple-600 mb-1">{allTags.length}</div>
+                        <div className="text-sm text-purple-700">标签数量</div>
+                      </div>
+                      <IconTag size={24} className="text-purple-500" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 最近案例 */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 shadow-xl shadow-gray-200/20">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <IconClock size={20} className="text-blue-500" />
+                    最近案例
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                      <div className="text-blue-600 font-semibold mb-2">教育行业</div>
-                      <div className="text-sm text-blue-700">0 个案例</div>
+                    {filteredCases.slice(0, 3).map((caseItem) => (
+                      <Card 
+                        key={caseItem.id} 
+                        className="cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-0 bg-gray-50/50"
+                        onClick={() => handleViewCase(caseItem.id)}
+                      >
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-sm font-medium text-gray-900 line-clamp-2">
+                            {caseItem.title}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>{new Date(caseItem.createdAt).toLocaleDateString()}</span>
+                            <span>{caseItem.tags.length} 个标签</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 标签云 */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border border-gray-200/50 shadow-xl shadow-gray-200/20">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <IconTag size={20} className="text-green-500" />
+                    热门标签
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {statistics.topTags.slice(0, 10).map((tag, index) => (
+                      <span
+                        key={index}
+                        className="cursor-pointer"
+                        onClick={() => setSelectedTag(tag)}
+                      >
+                        <Badge 
+                          variant="secondary"
+                          className="hover:bg-blue-100 transition-colors duration-200"
+                        >
+                          {tag} ({statistics.byTag[tag] || 0})
+                        </Badge>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : viewMode === 'category' ? (
+              /* 分类视图 - 动态分类展示 */
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 shadow-xl shadow-gray-200/20">
+                <div className="text-center mb-8">
+                  <IconTag size={48} className="text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">智能分类</h3>
+                  <p className="text-gray-600">按行业领域和标签智能分类展示案例</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200 cursor-pointer hover:shadow-lg transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-blue-600 font-semibold">教育行业</div>
+                      <IconBooks size={20} className="text-blue-500" />
                     </div>
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                      <div className="text-green-600 font-semibold mb-2">医疗健康</div>
-                      <div className="text-sm text-green-700">0 个案例</div>
+                    <div className="text-sm text-blue-700 mb-2">0 个案例</div>
+                    <div className="text-xs text-blue-600">点击查看详情</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200 cursor-pointer hover:shadow-lg transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-green-600 font-semibold">医疗健康</div>
+                      <IconTag size={20} className="text-green-500" />
                     </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                      <div className="text-purple-600 font-semibold mb-2">金融服务</div>
-                      <div className="text-sm text-purple-700">0 个案例</div>
+                    <div className="text-sm text-green-700 mb-2">0 个案例</div>
+                    <div className="text-xs text-green-600">点击查看详情</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200 cursor-pointer hover:shadow-lg transition-all duration-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-purple-600 font-semibold">金融服务</div>
+                      <IconTrendingUp size={20} className="text-purple-500" />
                     </div>
+                    <div className="text-sm text-purple-700 mb-2">0 个案例</div>
+                    <div className="text-xs text-purple-600">点击查看详情</div>
                   </div>
                 </div>
               </div>
