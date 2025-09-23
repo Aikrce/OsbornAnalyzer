@@ -362,3 +362,4 @@ export class StorageManager {
 export const storageManager = StorageManager.getInstance();
 
 export const storage = StorageManager.getInstance();
+export const storage = StorageManager.getInstance();
