@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+/* eslint-env node */
+/* eslint-disable no-console */
+
 /**
  * GitHub Pages 部署测试脚本
  * 用于验证本地构建是否适合 GitHub Pages 部署
@@ -56,7 +59,7 @@ async function main() {
 
   // 1. 检查工作流文件
   log('\n📋 检查 GitHub Actions 工作流...', 'blue');
-  const workflowPath = '.github/workflows/github-pages.yml';
+  const workflowPath = '.github/workflows/deploy-web.yml';
   if (!checkFile(workflowPath, 'GitHub Pages 工作流文件')) {
     allChecksPassed = false;
   }
@@ -85,7 +88,7 @@ async function main() {
     log('正在构建项目...', 'yellow');
     execSync('cd apps/web && pnpm build:github', { stdio: 'inherit' });
     log('✅ 构建成功', 'green');
-  } catch (error) {
+  } catch {
     log('❌ 构建失败', 'red');
     allChecksPassed = false;
   }
@@ -136,4 +139,6 @@ async function main() {
   log('\n📚 更多信息请查看：docs/guides/GITHUB_PAGES_DEPLOYMENT.md', 'yellow');
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(error);
+});
