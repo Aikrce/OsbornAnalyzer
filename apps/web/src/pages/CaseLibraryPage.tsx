@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useLocalCases } from '../hooks/useLocalCases';
+import { useResponsive } from '../hooks/useResponsive';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import DownloadModal, { DownloadOption } from '../components/DownloadModal';
 import { pdfGenerator } from '../services/pdfGenerator';
 import { pngGenerator } from '../services/pngGenerator';
@@ -31,6 +33,7 @@ const CaseLibraryPage: React.FC = memo(() => {
     deleteCase,
     refreshCases 
   } = useLocalCases();
+  const { isMobile, isTablet } = useResponsive();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string>('all');
@@ -39,6 +42,9 @@ const CaseLibraryPage: React.FC = memo(() => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [selectedCase, setSelectedCase] = useState<any>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // 视图切换状态管理
+  const [viewMode, setViewMode] = useState<'category' | 'list'>('category');
 
   // 搜索和筛选逻辑
   const applyFilters = useCallback(() => {
@@ -320,6 +326,26 @@ const CaseLibraryPage: React.FC = memo(() => {
     navigate('/osborn-analysis');
   }, [navigate]);
 
+  // 新增事件处理器
+  const handleCaseClick = useCallback((caseId: string) => {
+    navigate(`/analysis-detail/${caseId}`);
+  }, [navigate]);
+
+  const handleCaseEdit = useCallback((caseId: string) => {
+    // 编辑案例逻辑
+    console.log('编辑案例:', caseId);
+  }, []);
+
+  const handleCaseFavorite = useCallback((caseId: string) => {
+    // 收藏案例逻辑
+    console.log('收藏案例:', caseId);
+  }, []);
+
+  const handleCaseDownload = useCallback((caseId: string) => {
+    // 下载案例逻辑
+    console.log('下载案例:', caseId);
+  }, []);
+
   // 获取所有标签 - 使用useMemo优化性能
   const allTags = useMemo(() => 
     Array.from(new Set(cases.flatMap(c => c.tags))), 
@@ -419,6 +445,40 @@ const CaseLibraryPage: React.FC = memo(() => {
           </div>
         </div>
 
+        {/* 视图切换 */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-4 border border-gray-200/50 shadow-xl shadow-gray-200/20 mb-8">
+          <div className="flex items-center justify-center">
+            <div className="flex bg-gray-100 rounded-xl p-1">
+              <Button
+                variant={viewMode === 'category' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('category')}
+                className={`flex items-center gap-2 rounded-lg transition-all duration-200 ${
+                  viewMode === 'category' 
+                    ? 'bg-white shadow-sm text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <IconTag size={16} />
+                {isMobile ? '分类' : '分类视图'}
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className={`flex items-center gap-2 rounded-lg transition-all duration-200 ${
+                  viewMode === 'list' 
+                    ? 'bg-white shadow-sm text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <IconBooks size={16} />
+                {isMobile ? '列表' : '列表视图'}
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* 案例列表 */}
         {filteredCases.length === 0 ? (
           <div className="text-center py-16">
@@ -443,7 +503,33 @@ const CaseLibraryPage: React.FC = memo(() => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <>
+            {viewMode === 'category' ? (
+              /* 分类视图 - 暂时显示占位内容 */
+              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-gray-200/50 shadow-xl shadow-gray-200/20">
+                <div className="text-center py-12">
+                  <IconTag size={48} className="text-green-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">分类视图</h3>
+                  <p className="text-gray-600 mb-6">按行业领域和标签智能分类展示案例</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                      <div className="text-blue-600 font-semibold mb-2">教育行业</div>
+                      <div className="text-sm text-blue-700">0 个案例</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                      <div className="text-green-600 font-semibold mb-2">医疗健康</div>
+                      <div className="text-sm text-green-700">0 个案例</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                      <div className="text-purple-600 font-semibold mb-2">金融服务</div>
+                      <div className="text-sm text-purple-700">0 个案例</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* 列表视图 - 原有的网格布局 */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredCases.map((caseItem) => (
               <Card 
                 key={caseItem.id} 
@@ -575,6 +661,8 @@ const CaseLibraryPage: React.FC = memo(() => {
               </CardContent>
             </Card>
           </div>
+            )}
+          </>
         )}
       </div>
 
