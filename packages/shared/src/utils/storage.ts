@@ -360,6 +360,4 @@ export class StorageManager {
 
 // 导出单例实例
 export const storageManager = StorageManager.getInstance();
-
-export const storage = StorageManager.getInstance();
 export const storage = StorageManager.getInstance();
