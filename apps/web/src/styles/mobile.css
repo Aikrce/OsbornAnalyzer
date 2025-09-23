@@ -1,0 +1,305 @@
+/* 移动端专用优化样式 */
+
+/* 基础移动端优化 */
+@media (max-width: 768px) {
+  /* 触摸目标优化 - 确保所有可点击元素至少44px */
+  button, 
+  .clickable, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+  }
+
+  /* 字体大小优化 */
+  body {
+    font-size: 16px; /* 防止iOS自动缩放 */
+    line-height: 1.5;
+  }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+
+  /* 间距优化 */
+  .container {
+    padding: 16px;
+  }
+
+  .card {
+    margin-bottom: 16px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  /* 表单优化 */
+  input, textarea, select {
+    font-size: 16px; /* 防止iOS自动缩放 */
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid #e5e7eb;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* 按钮优化 */
+  .btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-primary {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+  }
+
+  .btn-secondary:hover {
+    background: #e5e7eb;
+  }
+
+  /* 导航优化 */
+  .nav-item {
+    padding: 12px 16px;
+    margin: 4px 0;
+    border-radius: 8px;
+    display: block;
+    text-decoration: none;
+    color: #374151;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-item:hover {
+    background: #f3f4f6;
+  }
+
+  .nav-item.active {
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  /* 卡片布局优化 */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card-item {
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  /* 模态框优化 */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  /* 滚动优化 */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* 防止水平滚动 */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* 图片优化 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 表格优化 */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* 工具提示优化 */
+  .tooltip {
+    position: relative;
+  }
+
+  .tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1f2937;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    white-space: nowrap;
+    z-index: 1000;
+  }
+}
+
+/* 小屏幕优化 (320px - 480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.25rem; }
+  h3 { font-size: 1.125rem; }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+
+  .nav-item {
+    padding: 10px 12px;
+  }
+}
+
+/* 横屏优化 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .modal-content {
+    max-height: 90vh;
+    padding: 16px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+  }
+}
+
+/* 高DPI屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* 暗色模式优化 */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: #1f2937;
+    border-color: #374151;
+    color: #f9fafb;
+  }
+
+  .btn-secondary {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+  }
+
+  .nav-item {
+    color: #f9fafb;
+  }
+
+  .nav-item:hover {
+    background: #374151;
+  }
+
+  .nav-item.active {
+    background: #1e40af;
+    color: #dbeafe;
+  }
+}
+
+/* 减少动画（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .hover-effect:hover {
+    transform: none;
+  }
+
+  .hover-effect:active {
+    transform: scale(0.98);
+  }
+}
+
+/* 安全区域适配（iPhone X及以上） */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(16px, env(safe-area-inset-top));
+  }
+
+  .safe-area-bottom {
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-left {
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+
+  .safe-area-right {
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}

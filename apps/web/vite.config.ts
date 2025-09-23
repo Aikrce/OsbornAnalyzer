@@ -42,6 +42,8 @@ export default defineConfig({
         drop_debugger: true,
       },
     },
+    // 移动端优化
+    cssCodeSplit: true,
     // 优化chunk大小
     chunkSizeWarningLimit: 1000,
     rollupOptions: {

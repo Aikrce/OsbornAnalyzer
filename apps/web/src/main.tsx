@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './styles/mobile.css';
 import App from './App.tsx';
+import { initMobileOptimizations } from './utils/mobileOptimization';
 
 // 添加全局错误处理
 window.addEventListener('error', event => {
@@ -27,6 +29,9 @@ window.addEventListener('unhandledrejection', event => {
     </div>
   `;
 });
+
+// 初始化移动端优化
+initMobileOptimizations();
 
 // AI服务将在需要时延迟初始化
 
