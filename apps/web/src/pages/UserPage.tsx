@@ -42,7 +42,7 @@ const UserPage: React.FC = memo(() => {
       try {
         return JSON.parse(saved);
       } catch (error) {
-        console.error('Failed to parse user profile:', error);
+        // Failed to parse user profile
       }
     }
     // 默认数据

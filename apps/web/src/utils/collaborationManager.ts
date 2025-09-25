@@ -16,7 +16,7 @@ export class CaseCollaborationManager implements CollaborationManager {
   private cases: Map<string, UnifiedCase> = new Map();
   private users: Map<string, User> = new Map();
   private activeEditors: Map<string, Set<string>> = new Map(); // caseId -> Set of userIds
-  private collaborationCallbacks: Map<string, Function[]> = new Map();
+  private collaborationCallbacks: Map<string, ((data: any) => void)[]> = new Map();
 
   constructor(cases: UnifiedCase[] = [], users: User[] = []) {
     cases.forEach(case_ => this.cases.set(case_.id, case_));
@@ -230,7 +230,7 @@ export class CaseCollaborationManager implements CollaborationManager {
   /**
    * 订阅协作变化
    */
-  subscribeToCollaboration(caseId: string, callback: Function): () => void {
+  subscribeToCollaboration(caseId: string, callback: (data: any) => void): () => void {
     if (!this.collaborationCallbacks.has(caseId)) {
       this.collaborationCallbacks.set(caseId, []);
     }
