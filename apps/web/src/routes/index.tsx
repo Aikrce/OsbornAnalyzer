@@ -15,6 +15,7 @@ const AnalysisProgressPage = lazy(
   () => import('../pages/AnalysisProgressPage')
 );
 const CaseLibraryPage = lazy(() => import('../pages/CaseLibraryPage'));
+const UnifiedCaseLibraryPage = lazy(() => import('../pages/UnifiedCaseLibraryPage'));
 const CollaborationPage = lazy(() => import('../pages/CollaborationPage'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage'));
 const AIDiagnosticsPage = lazy(() => import('../pages/AIDiagnosticsPage'));
@@ -104,6 +105,16 @@ const AppRoutes: React.FC = () => {
             <ErrorBoundary>
               <Suspense fallback={<PageLoader message='加载案例库...' />}>
                 <CaseLibraryPage />
+              </Suspense>
+            </ErrorBoundary>
+          }
+        />
+        <Route
+          path='/unified-case-library'
+          element={
+            <ErrorBoundary>
+              <Suspense fallback={<PageLoader message='加载统一案例库...' />}>
+                <UnifiedCaseLibraryPage />
               </Suspense>
             </ErrorBoundary>
           }

@@ -42,7 +42,7 @@ interface AppPreferences {
 }
 
 const SettingsPage: React.FC = memo(() => {
-  const [activeTab, setActiveTab] = useState<'ai' | 'preferences' | 'security' | 'data'>('ai');
+  const [activeTab, setActiveTab] = useState<'ai' | 'preferences' | 'notifications' | 'security' | 'data'>('ai');
 
   // AI配置相关
   const { 
@@ -83,19 +83,31 @@ const SettingsPage: React.FC = memo(() => {
   });
 
   // 应用偏好设置
-  const [appPreferences, setAppPreferences] = useState<AppPreferences>({
-    theme: 'light',
-    language: 'zh',
-    notifications: {
-      email: true,
-      push: true,
-      sms: false
-    },
-    privacy: {
-      profileVisible: true,
-      analysisPublic: false,
-      dataSharing: false
+  const [appPreferences, setAppPreferences] = useState<AppPreferences>(() => {
+    // 从localStorage加载设置
+    const saved = localStorage.getItem('appPreferences');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error('Failed to parse app preferences:', error);
+      }
     }
+    // 默认设置
+    return {
+      theme: 'light',
+      language: 'zh',
+      notifications: {
+        email: true,
+        push: true,
+        sms: false
+      },
+      privacy: {
+        profileVisible: true,
+        analysisPublic: false,
+        dataSharing: false
+      }
+    };
   });
 
   // 保存AI配置
@@ -145,33 +157,43 @@ const SettingsPage: React.FC = memo(() => {
 
   // 更新偏好设置
   const updatePreference = useCallback((key: string, value: any) => {
-    setAppPreferences(prev => ({
-      ...prev,
+    const newPreferences = {
+      ...appPreferences,
       [key]: value
-    }));
-  }, []);
+    };
+    setAppPreferences(newPreferences);
+    // 保存到localStorage
+    localStorage.setItem('appPreferences', JSON.stringify(newPreferences));
+    showNotification('偏好设置已保存', 'success');
+  }, [appPreferences, showNotification]);
 
   // 更新通知设置
   const updateNotification = useCallback((key: string, value: boolean) => {
-    setAppPreferences(prev => ({
-      ...prev,
+    const newPreferences = {
+      ...appPreferences,
       notifications: {
-        ...prev.notifications,
+        ...appPreferences.notifications,
         [key]: value
       }
-    }));
-  }, []);
+    };
+    setAppPreferences(newPreferences);
+    localStorage.setItem('appPreferences', JSON.stringify(newPreferences));
+    showNotification('通知设置已保存', 'success');
+  }, [appPreferences, showNotification]);
 
   // 更新隐私设置
   const updatePrivacy = useCallback((key: string, value: boolean) => {
-    setAppPreferences(prev => ({
-      ...prev,
+    const newPreferences = {
+      ...appPreferences,
       privacy: {
-        ...prev.privacy,
+        ...appPreferences.privacy,
         [key]: value
       }
-    }));
-  }, []);
+    };
+    setAppPreferences(newPreferences);
+    localStorage.setItem('appPreferences', JSON.stringify(newPreferences));
+    showNotification('隐私设置已保存', 'success');
+  }, [appPreferences, showNotification]);
 
   // 导出数据
   const handleExportData = useCallback(() => {
@@ -225,6 +247,7 @@ const SettingsPage: React.FC = memo(() => {
               {[
                 { key: 'ai', label: 'AI配置', icon: IconBrain },
                 { key: 'preferences', label: '偏好设置', icon: IconPalette },
+                { key: 'notifications', label: '通知设置', icon: IconBell },
                 { key: 'security', label: '安全隐私', icon: IconShield },
                 { key: 'data', label: '数据管理', icon: IconDatabase }
               ].map(({ key, label, icon: Icon }) => (
@@ -615,6 +638,96 @@ const SettingsPage: React.FC = memo(() => {
           </div>
         )}
 
+        {/* 通知设置页面 */}
+        {activeTab === 'notifications' && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20">
+              <CardHeader>
+                <CardTitle className="text-xl font-bold text-gray-900 flex items-center">
+                  <IconBell size={20} className="mr-3 text-blue-600" />
+                  通知设置
+                </CardTitle>
+                <p className="text-gray-600">管理您接收通知的方式和频率</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900">通知类型</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">邮件通知</p>
+                          <p className="text-sm text-gray-600">接收邮件通知</p>
+                        </div>
+                        <Switch
+                          checked={appPreferences.notifications.email}
+                          onCheckedChange={(checked) => updateNotification('email', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">推送通知</p>
+                          <p className="text-sm text-gray-600">接收浏览器推送通知</p>
+                        </div>
+                        <Switch
+                          checked={appPreferences.notifications.push}
+                          onCheckedChange={(checked) => updateNotification('push', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">短信通知</p>
+                          <p className="text-sm text-gray-600">接收短信通知</p>
+                        </div>
+                        <Switch
+                          checked={appPreferences.notifications.sms}
+                          onCheckedChange={(checked) => updateNotification('sms', checked)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-900">通知频率</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">分析完成通知</p>
+                          <p className="text-sm text-gray-600">分析任务完成时通知</p>
+                        </div>
+                        <Switch
+                          checked={true}
+                          onCheckedChange={() => {}}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">协作邀请通知</p>
+                          <p className="text-sm text-gray-600">收到协作邀请时通知</p>
+                        </div>
+                        <Switch
+                          checked={true}
+                          onCheckedChange={() => {}}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900">系统更新通知</p>
+                          <p className="text-sm text-gray-600">系统功能更新时通知</p>
+                        </div>
+                        <Switch
+                          checked={false}
+                          onCheckedChange={() => {}}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* 安全隐私页面 */}
         {activeTab === 'security' && (
           <div className="max-w-2xl mx-auto space-y-6">
@@ -670,18 +783,32 @@ const SettingsPage: React.FC = memo(() => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Button variant="outline" className="w-full rounded-xl">
-                    <IconKey size={16} className="mr-2" />
-                    修改密码
-                  </Button>
-                  <Button variant="outline" className="w-full rounded-xl">
-                    <IconMail size={16} className="mr-2" />
-                    绑定邮箱
-                  </Button>
-                  <Button variant="outline" className="w-full rounded-xl">
-                    <IconPhone size={16} className="mr-2" />
-                    绑定手机
-                  </Button>
+                  <div className="p-4 bg-blue-50 rounded-xl">
+                    <h4 className="font-medium text-blue-900 mb-2">修改密码</h4>
+                    <p className="text-sm text-blue-700 mb-3">定期更新密码以保护账户安全</p>
+                    <Button variant="outline" className="w-full rounded-xl border-blue-200 text-blue-700 hover:bg-blue-100">
+                      <IconKey size={16} className="mr-2" />
+                      修改密码
+                    </Button>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 rounded-xl">
+                    <h4 className="font-medium text-green-900 mb-2">绑定邮箱</h4>
+                    <p className="text-sm text-green-700 mb-3">绑定邮箱用于接收重要通知和找回密码</p>
+                    <Button variant="outline" className="w-full rounded-xl border-green-200 text-green-700 hover:bg-green-100">
+                      <IconMail size={16} className="mr-2" />
+                      绑定邮箱
+                    </Button>
+                  </div>
+                  
+                  <div className="p-4 bg-purple-50 rounded-xl">
+                    <h4 className="font-medium text-purple-900 mb-2">绑定手机</h4>
+                    <p className="text-sm text-purple-700 mb-3">绑定手机号码用于双重验证</p>
+                    <Button variant="outline" className="w-full rounded-xl border-purple-200 text-purple-700 hover:bg-purple-100">
+                      <IconPhone size={16} className="mr-2" />
+                      绑定手机
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -723,6 +850,34 @@ const SettingsPage: React.FC = memo(() => {
                     <Button 
                       variant="outline"
                       className="rounded-xl border-green-200 text-green-700 hover:bg-green-100"
+                      onClick={() => {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = '.json';
+                        input.onchange = (e) => {
+                          const file = (e.target as HTMLInputElement).files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                              try {
+                                const data = JSON.parse(e.target?.result as string);
+                                if (data.preferences) {
+                                  setAppPreferences(data.preferences);
+                                  localStorage.setItem('appPreferences', JSON.stringify(data.preferences));
+                                }
+                                if (data.aiConfig) {
+                                  updateConfig(data.aiConfig);
+                                }
+                                showNotification('数据导入成功', 'success');
+                              } catch (error) {
+                                showNotification('数据格式错误', 'error');
+                              }
+                            };
+                            reader.readAsText(file);
+                          }
+                        };
+                        input.click();
+                      }}
                     >
                       <IconUpload size={16} className="mr-2" />
                       导入

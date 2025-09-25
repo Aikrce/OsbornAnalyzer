@@ -1,11 +1,14 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 import {
   IconUser,
   IconHistory,
   IconTrendingUp, IconAward, IconTarget, IconClock, IconCheck,
-  IconEdit
+  IconEdit, IconDeviceFloppy, IconX
 } from '@tabler/icons-react';
 
 // 用户活动记录接口
@@ -28,26 +31,94 @@ interface UserStats {
 }
 
 const UserPage: React.FC = memo(() => {
-  // 用户信息状态（只读）
-  const userInfo = {
-    name: '当前用户',
-    email: 'user@example.com',
-    phone: '+86 138 0000 0000',
-    bio: '一位热爱创新的思考者，专注于奥斯本创新方法的研究与应用。',
-    location: '中国',
-    website: 'https://example.com',
-    joinDate: '2024-01-01',
-    lastLogin: '2024-12-19'
+  // 编辑状态管理
+  const [isEditing, setIsEditing] = useState(false);
+  
+  // 用户信息状态（可编辑）
+  const [userInfo, setUserInfo] = useState(() => {
+    // 从localStorage加载用户信息，如果没有则使用默认数据
+    const saved = localStorage.getItem('userProfile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error('Failed to parse user profile:', error);
+      }
+    }
+    // 默认数据
+    return {
+      name: '当前用户',
+      email: 'user@example.com',
+      phone: '+86 138 0000 0000',
+      bio: '一位热爱创新的思考者，专注于奥斯本创新方法的研究与应用。',
+      location: '中国',
+      website: 'https://example.com',
+      joinDate: '2024-01-01',
+      lastLogin: '2024-12-19',
+      avatar: null
+    };
+  });
+
+  // 表单数据状态
+  const [formData, setFormData] = useState(userInfo);
+
+  // 同步formData与userInfo
+  useEffect(() => {
+    if (!isEditing) {
+      setFormData(userInfo);
+    }
+  }, [userInfo, isEditing]);
+
+  // 保存用户信息到localStorage
+  const saveUserInfo = (newUserInfo: typeof userInfo) => {
+    setUserInfo(newUserInfo);
+    localStorage.setItem('userProfile', JSON.stringify(newUserInfo));
   };
 
-  // 用户偏好设置（只读）
-  const preferences = {
-    emailNotifications: true,
-    pushNotifications: false,
-    weeklyReport: true,
-    language: 'zh',
-    timezone: 'Asia/Shanghai',
-    theme: 'light'
+  // 开始编辑
+  const handleStartEdit = () => {
+    // 确保formData是最新的userInfo数据
+    const currentUserInfo = { ...userInfo };
+    setFormData(currentUserInfo);
+    setIsEditing(true);
+  };
+
+  // 取消编辑
+  const handleCancelEdit = () => {
+    setFormData(userInfo);
+    setIsEditing(false);
+  };
+
+  // 保存编辑
+  const handleSaveEdit = () => {
+    saveUserInfo(formData);
+    setIsEditing(false);
+  };
+
+  // 表单字段更新
+  const handleFormChange = (field: keyof typeof formData, value: string) => {
+    setFormData((prev: typeof formData) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // 头像上传处理
+  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const avatarUrl = e.target?.result as string;
+        setFormData((prev: typeof formData) => ({ ...prev, avatar: avatarUrl }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // 移除头像
+  const handleRemoveAvatar = () => {
+    setFormData((prev: typeof formData) => ({ ...prev, avatar: null }));
   };
 
   // 用户统计
@@ -140,12 +211,9 @@ const UserPage: React.FC = memo(() => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <IconUser size={18} /> 个人资料
-          </TabsTrigger>
-          <TabsTrigger value="preferences" className="flex items-center gap-2">
-            <IconEdit size={18} /> 偏好设置
           </TabsTrigger>
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <IconTrendingUp size={18} /> 统计数据
@@ -159,88 +227,195 @@ const UserPage: React.FC = memo(() => {
         <TabsContent value="profile" className="mt-6">
           <Card className="shadow-lg rounded-xl">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <IconUser size={24} /> 个人资料
+              <CardTitle className="text-2xl font-bold flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <IconUser size={24} /> 个人资料
+                </div>
+                {!isEditing ? (
+                  <Button onClick={handleStartEdit} variant="outline" size="sm">
+                    <IconEdit size={16} className="mr-2" />
+                    编辑
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button onClick={handleCancelEdit} variant="outline" size="sm">
+                      <IconX size={16} className="mr-2" />
+                      取消
+                    </Button>
+                    <Button onClick={handleSaveEdit} size="sm">
+                      <IconDeviceFloppy size={16} className="mr-2" />
+                      保存
+                    </Button>
+                  </div>
+                )}
               </CardTitle>
-              <CardDescription>查看您的个人信息</CardDescription>
+              <CardDescription>
+                {isEditing ? '编辑您的个人信息' : '查看您的个人信息'}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* 头像区域 */}
+              <div className="flex items-center space-x-6">
+                <div className="relative">
+                  {isEditing ? (
+                    <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                      {formData.avatar ? (
+                        <img 
+                          src={formData.avatar} 
+                          alt="头像" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl font-semibold text-gray-500">
+                          {formData.name.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+                      {userInfo.avatar ? (
+                        <img 
+                          src={userInfo.avatar} 
+                          alt="头像" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-2xl font-semibold text-gray-500">
+                          {userInfo.name.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {isEditing && (
+                    <div className="absolute -bottom-2 -right-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        id="avatar-upload"
+                      />
+                      <label
+                        htmlFor="avatar-upload"
+                        className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
+                        title="上传头像"
+                      >
+                        <IconEdit size={16} />
+                      </label>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    {isEditing ? formData.name : userInfo.name}
+                  </h3>
+                  <p className="text-gray-600">
+                    {isEditing ? formData.email : userInfo.email}
+                  </p>
+                  {isEditing && formData.avatar && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveAvatar}
+                      className="mt-2 text-red-600 hover:text-red-700"
+                    >
+                      移除头像
+                    </Button>
+                  )}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">用户名</p>
-                  <p className="text-gray-900 font-medium">{userInfo.name}</p>
+                  <Label htmlFor="name">用户名</Label>
+                  {isEditing ? (
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => handleFormChange('name', e.target.value)}
+                      placeholder="请输入用户名"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{userInfo.name}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">邮箱</p>
-                  <p className="text-gray-900 font-medium">{userInfo.email}</p>
+                  <Label htmlFor="email">邮箱</Label>
+                  {isEditing ? (
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => handleFormChange('email', e.target.value)}
+                      placeholder="请输入邮箱"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{userInfo.email}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">电话</p>
-                  <p className="text-gray-900 font-medium">{userInfo.phone}</p>
+                  <Label htmlFor="phone">电话</Label>
+                  {isEditing ? (
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) => handleFormChange('phone', e.target.value)}
+                      placeholder="请输入电话"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{userInfo.phone}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">所在地</p>
-                  <p className="text-gray-900 font-medium">{userInfo.location}</p>
+                  <Label htmlFor="location">所在地</Label>
+                  {isEditing ? (
+                    <Input
+                      id="location"
+                      value={formData.location}
+                      onChange={(e) => handleFormChange('location', e.target.value)}
+                      placeholder="请输入所在地"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{userInfo.location}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">个人网站</p>
-                  <p className="text-gray-900 font-medium">{userInfo.website}</p>
+                  <Label htmlFor="website">个人网站</Label>
+                  {isEditing ? (
+                    <Input
+                      id="website"
+                      value={formData.website}
+                      onChange={(e) => handleFormChange('website', e.target.value)}
+                      placeholder="请输入个人网站"
+                    />
+                  ) : (
+                    <p className="text-gray-900 font-medium">{userInfo.website}</p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <p className="text-sm font-medium text-gray-600">注册时间</p>
+                  <Label>注册时间</Label>
                   <p className="text-gray-900 font-medium">{userInfo.joinDate}</p>
                 </div>
               </div>
               <div className="grid gap-2">
-                <p className="text-sm font-medium text-gray-600">个人简介</p>
-                <p className="text-gray-900">{userInfo.bio}</p>
+                <Label htmlFor="bio">个人简介</Label>
+                {isEditing ? (
+                  <Input
+                    id="bio"
+                    value={formData.bio}
+                    onChange={(e) => handleFormChange('bio', e.target.value)}
+                    placeholder="请输入个人简介"
+                  />
+                ) : (
+                  <p className="text-gray-900">{userInfo.bio}</p>
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* 偏好设置 */}
-        <TabsContent value="preferences" className="mt-6">
-          <Card className="shadow-lg rounded-xl">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                <IconUser size={24} /> 偏好设置
-              </CardTitle>
-              <CardDescription>查看您的当前设置</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">通知设置</h3>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-600">邮件通知</p>
-                  <p className="text-gray-900 font-medium">{preferences.emailNotifications ? '开启' : '关闭'}</p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-600">推送通知</p>
-                  <p className="text-gray-900 font-medium">{preferences.pushNotifications ? '开启' : '关闭'}</p>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-600">周报提醒</p>
-                  <p className="text-gray-900 font-medium">{preferences.weeklyReport ? '开启' : '关闭'}</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">界面设置</h3>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="grid gap-2">
-                    <p className="text-sm font-medium text-gray-600">语言</p>
-                    <p className="text-gray-900 font-medium">{preferences.language === 'zh' ? '简体中文' : 'English'}</p>
-                  </div>
-                  <div className="grid gap-2">
-                    <p className="text-sm font-medium text-gray-600">时区</p>
-                    <p className="text-gray-900 font-medium">{preferences.timezone === 'Asia/Shanghai' ? '北京时间' : preferences.timezone}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* 统计数据 */}
         <TabsContent value="stats" className="mt-6">

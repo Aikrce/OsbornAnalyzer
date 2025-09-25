@@ -1,10 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { unifiedDataManager } from '../services/data/unifiedDataManager';
+import { 
+  EnhancedLocalCase, 
+  CaseClassificationStats, 
+  CaseFilterOptions,
+  CaseSortOption,
+  IndustryCategory 
+} from '../types/case';
+import { 
+  filterCases, 
+  sortCases, 
+  calculateCaseClassificationStats,
+  updateIndustryCategoryStats,
+  getAllIndustryCategories 
+} from '../utils/caseClassification';
 
-// 本地案例接口
+// 本地案例接口 - 保持向后兼容
 export interface LocalCase {
   id: string;
-  title: string; // 添加title属性
+  title: string;
   topic: string;
   description: string;
   industry: string;
@@ -13,6 +27,10 @@ export interface LocalCase {
   createdAt: Date;
   updatedAt: Date;
   analysisData?: Record<string, unknown>;
+  // 新增字段，可选以保持向后兼容
+  subcategory?: string;
+  customTags?: string[];
+  isFavorite?: boolean;
 }
 
 // 案例统计接口
@@ -28,7 +46,7 @@ export interface CaseStatistics {
 
 export const useLocalCases = () => {
   const [cases, setCases] = useState<LocalCase[]>([]);
-  const [isLoading, setIsLoading] = useState(false); // 添加isLoading状态
+  const [isLoading, setIsLoading] = useState(false);
   const [statistics, setStatistics] = useState<CaseStatistics>({
     totalCases: 0,
     byIndustry: {},
@@ -36,6 +54,22 @@ export const useLocalCases = () => {
     recentCases: 0,
     topTags: []
   });
+  
+  // 新增：分类统计状态
+  const [classificationStats, setClassificationStats] = useState<CaseClassificationStats>({
+    totalCases: 0,
+    byIndustry: {},
+    bySubcategory: {},
+    byTag: {},
+    byCustomTag: {},
+    recentCases: 0,
+    topTags: [],
+    topCustomTags: [],
+    favoriteCases: 0
+  });
+  
+  // 新增：行业分类状态
+  const [industryCategories, setIndustryCategories] = useState<IndustryCategory[]>([]);
 
   // 从统一数据管理器加载案例
   const loadCases = useCallback(() => {
@@ -71,6 +105,7 @@ export const useLocalCases = () => {
 
   // 更新统计信息
   const updateStatistics = useCallback((caseList: LocalCase[]) => {
+    // 更新原有统计信息
     const stats: CaseStatistics = {
       totalCases: caseList.length,
       byIndustry: {},
@@ -105,6 +140,21 @@ export const useLocalCases = () => {
     stats.topTags = sortedTags;
 
     setStatistics(stats);
+    
+    // 更新新的分类统计信息
+    const enhancedCases: EnhancedLocalCase[] = caseList.map(caseItem => ({
+      ...caseItem,
+      subcategory: caseItem.subcategory || '',
+      customTags: caseItem.customTags || [],
+      isFavorite: caseItem.isFavorite || false
+    }));
+    
+    const newClassificationStats = calculateCaseClassificationStats(enhancedCases);
+    setClassificationStats(newClassificationStats);
+    
+    // 更新行业分类统计
+    const updatedCategories = updateIndustryCategoryStats(getAllIndustryCategories(), enhancedCases);
+    setIndustryCategories(updatedCategories);
   }, []);
 
   // 刷新案例
@@ -203,12 +253,67 @@ export const useLocalCases = () => {
     return cases.filter(caseItem => caseItem.tags.includes(tag));
   }, [cases]);
 
+  // 新增：高级筛选功能
+  const getFilteredCases = useCallback((options: CaseFilterOptions) => {
+    const enhancedCases: EnhancedLocalCase[] = cases.map(caseItem => ({
+      ...caseItem,
+      subcategory: caseItem.subcategory || '',
+      customTags: caseItem.customTags || [],
+      isFavorite: caseItem.isFavorite || false
+    }));
+    
+    return filterCases(enhancedCases, options);
+  }, [cases]);
+
+  // 新增：排序功能
+  const getSortedCases = useCallback((sortBy: CaseSortOption) => {
+    const enhancedCases: EnhancedLocalCase[] = cases.map(caseItem => ({
+      ...caseItem,
+      subcategory: caseItem.subcategory || '',
+      customTags: caseItem.customTags || [],
+      isFavorite: caseItem.isFavorite || false
+    }));
+    
+    return sortCases(enhancedCases, sortBy);
+  }, [cases]);
+
+  // 新增：切换收藏状态
+  const toggleFavorite = useCallback((caseId: string) => {
+    const updatedCases = cases.map(caseItem => 
+      caseItem.id === caseId 
+        ? { ...caseItem, isFavorite: !caseItem.isFavorite, updatedAt: new Date() }
+        : caseItem
+    );
+    saveCases(updatedCases);
+  }, [cases, saveCases]);
+
+  // 新增：更新案例标签
+  const updateCaseTags = useCallback((caseId: string, tags: string[], customTags: string[]) => {
+    const updatedCases = cases.map(caseItem => 
+      caseItem.id === caseId 
+        ? { ...caseItem, tags, customTags, updatedAt: new Date() }
+        : caseItem
+    );
+    saveCases(updatedCases);
+  }, [cases, saveCases]);
+
+  // 新增：更新案例子分类
+  const updateCaseSubcategory = useCallback((caseId: string, subcategory: string) => {
+    const updatedCases = cases.map(caseItem => 
+      caseItem.id === caseId 
+        ? { ...caseItem, subcategory, updatedAt: new Date() }
+        : caseItem
+    );
+    saveCases(updatedCases);
+  }, [cases, saveCases]);
+
   // 初始化加载
   useEffect(() => {
     loadCases();
   }, [loadCases]);
 
   return {
+    // 原有接口
     cases,
     isLoading,
     statistics,
@@ -221,6 +326,15 @@ export const useLocalCases = () => {
     getCaseById,
     searchCases,
     getCasesByIndustry,
-    getCasesByTag
+    getCasesByTag,
+    
+    // 新增接口
+    classificationStats,
+    industryCategories,
+    getFilteredCases,
+    getSortedCases,
+    toggleFavorite,
+    updateCaseTags,
+    updateCaseSubcategory
   };
 };
