@@ -49,14 +49,47 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // 更精细的代码分割
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'router-vendor': ['react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-select', '@radix-ui/react-slot'],
-          'query-vendor': ['@tanstack/react-query'],
-          'utils': ['clsx', 'tailwind-merge', 'lucide-react'],
-          'ai-services': ['@osborn/shared'],
-          'collaboration-services': ['@osborn/web-core'],
+        manualChunks: (id) => {
+          // 将React相关库分组
+          if (id.includes('react') || id.includes('react-dom')) {
+            return 'react-vendor';
+          }
+          // 将路由相关库分组
+          if (id.includes('react-router')) {
+            return 'router-vendor';
+          }
+          // 将UI组件库分组
+          if (id.includes('@radix-ui') || id.includes('lucide-react')) {
+            return 'ui-vendor';
+          }
+          // 将查询相关库分组
+          if (id.includes('@tanstack/react-query')) {
+            return 'query-vendor';
+          }
+          // 将工具库分组
+          if (id.includes('clsx') || id.includes('tailwind-merge')) {
+            return 'utils';
+          }
+          // 将AI服务分组
+          if (id.includes('@osborn/shared')) {
+            return 'ai-services';
+          }
+          // 将协作服务分组
+          if (id.includes('@osborn/web-core')) {
+            return 'collaboration-services';
+          }
+          // 将页面组件按路由分组
+          if (id.includes('/pages/')) {
+            return 'pages';
+          }
+          // 将hooks分组
+          if (id.includes('/hooks/')) {
+            return 'hooks';
+          }
+          // 将组件分组
+          if (id.includes('/components/')) {
+            return 'components';
+          }
         },
         // 优化chunk命名
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -80,5 +113,17 @@ export default defineConfig({
     exclude: ['@osborn/shared', '@osborn/web-core'],
   },
   // 启用构建缓存
-  cacheDir: 'node_modules/.vite'
+  cacheDir: 'node_modules/.vite',
+  // 预加载优化
+  experimental: {
+    renderBuiltUrl(filename, { hostType }) {
+      if (hostType === 'html') {
+        // 只预加载关键资源
+        if (filename.includes('react-vendor') || filename.includes('router-vendor')) {
+          return { runtime: `window.__preloadUrl('${filename}')` };
+        }
+      }
+      return { relative: true };
+    },
+  },
 })
