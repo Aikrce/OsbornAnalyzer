@@ -1,4 +1,4 @@
-import type { AnalysisResult, UserPreferences } from '../types';
+import type { AnalysisResult, UserPreferences, AnalysisMode } from '../types';
 
 // 本地存储键名
 const STORAGE_KEYS = {
@@ -14,11 +14,11 @@ export class StorageManager {
   private static instance: StorageManager;
   private accessLog: string[] = [];
   private readonly MAX_LOG_SIZE = 100;
-  
+
   // 注意：API密钥现在委托给AI配置系统管理
-  
+
   private constructor() {}
-  
+
   static getInstance(): StorageManager {
     if (!StorageManager.instance) {
       StorageManager.instance = new StorageManager();
@@ -39,14 +39,14 @@ export class StorageManager {
   private addAccessLog(operation: string, details?: string): void {
     const timestamp = new Date().toISOString();
     const logEntry = `${timestamp}: ${operation}${details ? ` - ${details}` : ''}`;
-    
+
     this.accessLog.push(logEntry);
-    
+
     // 保持日志大小在限制内
     if (this.accessLog.length > this.MAX_LOG_SIZE) {
       this.accessLog.shift();
     }
-    
+
     // 在开发环境下输出日志
     if (process.env.NODE_ENV === 'development') {
       console.log(`🔍 StorageManager: ${logEntry}`);
@@ -85,7 +85,7 @@ export class StorageManager {
           apiKey: apiKey,
           model: 'deepseek-chat',
           temperature: 0.7,
-          maxTokens: 2000
+          maxTokens: 2000,
         };
         storage.setItem('huitu-ai-config', JSON.stringify(newConfig));
         this.addAccessLog('API密钥保存到AI配置', '新建单API配置');
@@ -149,7 +149,7 @@ export class StorageManager {
       throw new Error('保存失败，请检查存储空间');
     }
   }
-  
+
   getAnalysisResults(): AnalysisResult[] {
     const storage = this.safeLocalStorage();
     if (!storage) {
@@ -165,7 +165,7 @@ export class StorageManager {
       return [];
     }
   }
-  
+
   deleteAnalysisResult(id: string): void {
     const storage = this.safeLocalStorage();
     if (!storage) {
@@ -192,13 +192,16 @@ export class StorageManager {
     }
 
     try {
-      storage.setItem(STORAGE_KEYS.USER_PREFERENCES, JSON.stringify(preferences));
+      storage.setItem(
+        STORAGE_KEYS.USER_PREFERENCES,
+        JSON.stringify(preferences)
+      );
     } catch (error) {
       console.error('保存用户偏好失败:', error);
       throw new Error('保存失败');
     }
   }
-  
+
   getUserPreferences(): UserPreferences {
     const storage = this.safeLocalStorage();
     if (!storage) {
@@ -207,7 +210,10 @@ export class StorageManager {
         language: 'zh',
         theme: 'auto',
         notifications: true,
-        autoSave: true
+        autoSave: true,
+        aiSuggestions: true,
+        aiEnabled: true,
+        defaultAnalysisMode: 'osborn' as AnalysisMode,
       };
     }
 
@@ -217,16 +223,24 @@ export class StorageManager {
         language: 'zh',
         theme: 'auto',
         notifications: true,
-        autoSave: true
+        autoSave: true,
+        aiSuggestions: true,
+        aiEnabled: true,
+        defaultAnalysisMode: 'osborn' as AnalysisMode,
       };
-      return data ? { ...defaultPreferences, ...JSON.parse(data) } : defaultPreferences;
+      return data
+        ? { ...defaultPreferences, ...JSON.parse(data) }
+        : defaultPreferences;
     } catch (error) {
       console.error('读取用户偏好失败:', error);
       return {
         language: 'zh',
         theme: 'auto',
         notifications: true,
-        autoSave: true
+        autoSave: true,
+        aiSuggestions: true,
+        aiEnabled: true,
+        defaultAnalysisMode: 'osborn' as AnalysisMode,
       };
     }
   }
@@ -236,13 +250,13 @@ export class StorageManager {
     this.saveToAIConfig(apiKey);
     this.addAccessLog('API密钥保存', '委托给AI配置系统');
   }
-  
+
   getApiKey(): string | null {
     const apiKey = this.getFromAIConfig();
     this.addAccessLog('API密钥获取', apiKey ? '成功' : '未找到');
     return apiKey;
   }
-  
+
   clearApiKey(): void {
     const storage = this.safeLocalStorage();
     if (!storage) {
@@ -266,9 +280,12 @@ export class StorageManager {
         const configs = JSON.parse(multiConfig);
         const updatedConfigs = configs.map((config: any) => ({
           ...config,
-          apiKey: config.isActive ? '' : config.apiKey
+          apiKey: config.isActive ? '' : config.apiKey,
         }));
-        storage.setItem('huitu-multi-api-configs', JSON.stringify(updatedConfigs));
+        storage.setItem(
+          'huitu-multi-api-configs',
+          JSON.stringify(updatedConfigs)
+        );
       }
 
       this.addAccessLog('API密钥清除完成', 'AI配置系统已清理');
@@ -291,7 +308,11 @@ export class StorageManager {
       if (multiConfig) {
         const configs = JSON.parse(multiConfig);
         const activeConfig = configs.find((c: any) => c.isActive);
-        if (activeConfig && activeConfig.apiKey && activeConfig.apiKey.trim().length > 0) {
+        if (
+          activeConfig &&
+          activeConfig.apiKey &&
+          activeConfig.apiKey.trim().length > 0
+        ) {
           return true;
         }
       }
@@ -324,17 +345,17 @@ export class StorageManager {
       storage.removeItem(key);
     });
   }
-  
+
   // 导出数据
   exportData(): string {
     const data = {
       results: this.getAnalysisResults(),
       preferences: this.getUserPreferences(),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     return JSON.stringify(data, null, 2);
   }
-  
+
   // 导入数据
   importData(jsonString: string): void {
     const storage = this.safeLocalStorage();
@@ -346,7 +367,10 @@ export class StorageManager {
     try {
       const data = JSON.parse(jsonString);
       if (data.results) {
-        storage.setItem(STORAGE_KEYS.ANALYSIS_RESULTS, JSON.stringify(data.results));
+        storage.setItem(
+          STORAGE_KEYS.ANALYSIS_RESULTS,
+          JSON.stringify(data.results)
+        );
       }
       if (data.preferences) {
         this.saveUserPreferences(data.preferences);

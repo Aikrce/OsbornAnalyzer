@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   // 设置 base 路径为 GitHub Pages 仓库名
@@ -15,8 +15,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@osborn/shared': path.resolve(__dirname, '../../packages/shared/src'),
-      '@osborn/web-core': path.resolve(__dirname, '../../packages/web-core/src')
-    }
+      '@osborn/web-core': path.resolve(
+        __dirname,
+        '../../packages/web-core/src'
+      ),
+    },
   },
   server: {
     port: 5371,
@@ -49,7 +52,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // 更精细的代码分割
-        manualChunks: (id) => {
+        manualChunks: id => {
           // 将React相关库分组
           if (id.includes('react') || id.includes('react-dom')) {
             return 'react-vendor';
@@ -119,11 +122,14 @@ export default defineConfig({
     renderBuiltUrl(filename, { hostType }) {
       if (hostType === 'html') {
         // 只预加载关键资源
-        if (filename.includes('react-vendor') || filename.includes('router-vendor')) {
-          return { runtime: `window.__preloadUrl('${filename}')` };
+        if (
+          filename.includes('react-vendor') ||
+          filename.includes('router-vendor')
+        ) {
+          return filename;
         }
       }
       return { relative: true };
     },
   },
-})
+});
