@@ -27,9 +27,11 @@ function App() {
           }}
         >
           <ThemeProvider>
-            <NotificationProvider>
-              <AppRoutes />
-            </NotificationProvider>
+            <div className='min-h-screen bg-background text-foreground'>
+              <NotificationProvider>
+                <AppRoutes />
+              </NotificationProvider>
+            </div>
           </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>

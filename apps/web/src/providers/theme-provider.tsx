@@ -60,17 +60,61 @@ export function ThemeProvider({
       root.className
     );
 
-    // 移除内联样式，让CSS类生效
-    root.style.removeProperty('--background');
-    root.style.removeProperty('--foreground');
-    root.style.removeProperty('--card');
-    root.style.removeProperty('--card-foreground');
-    console.log('Removed inline CSS variables to let CSS classes work');
+    // 强制应用CSS变量到根元素 - 这是关键修复
+    const applyThemeVariables = () => {
+      if (appliedTheme === 'dark') {
+        // 深色模式变量
+        root.style.setProperty('--background', '222.2 84% 4.9%');
+        root.style.setProperty('--foreground', '210 40% 98%');
+        root.style.setProperty('--card', '222.2 84% 4.9%');
+        root.style.setProperty('--card-foreground', '210 40% 98%');
+        root.style.setProperty('--popover', '222.2 84% 4.9%');
+        root.style.setProperty('--popover-foreground', '210 40% 98%');
+        root.style.setProperty('--primary', '217.2 91.2% 59.8%');
+        root.style.setProperty('--primary-foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--secondary', '217.2 32.6% 17.5%');
+        root.style.setProperty('--secondary-foreground', '210 40% 98%');
+        root.style.setProperty('--muted', '217.2 32.6% 17.5%');
+        root.style.setProperty('--muted-foreground', '215 20.2% 65.1%');
+        root.style.setProperty('--accent', '217.2 32.6% 17.5%');
+        root.style.setProperty('--accent-foreground', '210 40% 98%');
+        root.style.setProperty('--destructive', '0 62.8% 30.6%');
+        root.style.setProperty('--destructive-foreground', '210 40% 98%');
+        root.style.setProperty('--border', '217.2 32.6% 17.5%');
+        root.style.setProperty('--input', '217.2 32.6% 17.5%');
+        root.style.setProperty('--ring', '224.3 76.3% 94.1%');
+        console.log('Applied dark theme variables directly');
+      } else {
+        // 浅色模式变量
+        root.style.setProperty('--background', '0 0% 100%');
+        root.style.setProperty('--foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--card', '0 0% 100%');
+        root.style.setProperty('--card-foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--popover', '0 0% 100%');
+        root.style.setProperty('--popover-foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--primary', '221.2 83.2% 53.3%');
+        root.style.setProperty('--primary-foreground', '0 0% 100%');
+        root.style.setProperty('--secondary', '210 40% 96%');
+        root.style.setProperty('--secondary-foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--muted', '210 40% 96%');
+        root.style.setProperty('--muted-foreground', '215.4 16.3% 46.9%');
+        root.style.setProperty('--accent', '210 40% 96%');
+        root.style.setProperty('--accent-foreground', '222.2 84% 4.9%');
+        root.style.setProperty('--destructive', '0 84.2% 60.2%');
+        root.style.setProperty('--destructive-foreground', '0 0% 100%');
+        root.style.setProperty('--border', '214.3 31.8% 91.4%');
+        root.style.setProperty('--input', '214.3 31.8% 91.4%');
+        root.style.setProperty('--ring', '221.2 83.2% 53.3%');
+        console.log('Applied light theme variables directly');
+      }
+    };
 
-    // 强制应用样式到body - 使用计算后的样式
+    // 立即应用CSS变量
+    applyThemeVariables();
+
+    // 强制应用样式到body
     const body = document.body;
     if (body) {
-      // 等待CSS类应用后再获取计算后的样式
       setTimeout(() => {
         const computedStyle = getComputedStyle(root);
         const bgColor = computedStyle.getPropertyValue('--background');
@@ -105,9 +149,7 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
-      <div className='min-h-screen bg-background text-foreground'>
-        {children}
-      </div>
+      {children}
     </ThemeProviderContext.Provider>
   );
 }

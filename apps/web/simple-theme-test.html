@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深色模式直接测试</title>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+        }
+        
+        .dark {
+            --background: 222.2 84% 4.9%;
+            --foreground: 210 40% 98%;
+        }
+        
+        body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            font-family: system-ui, sans-serif;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        .test-card {
+            background-color: hsl(var(--background));
+            border: 2px solid hsl(var(--foreground));
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: hsl(var(--foreground));
+            color: hsl(var(--background));
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        button:hover {
+            opacity: 0.8;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        
+        .light-status {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .dark-status {
+            background-color: #424242;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 深色模式直接测试</h1>
+    
+    <div class="test-card">
+        <h2>测试卡片</h2>
+        <p>这是一个测试卡片，应该根据主题显示不同的颜色。</p>
+        <p>如果深色模式工作正常，背景应该是深色，文字应该是浅色。</p>
+    </div>
+    
+    <div id="status" class="status light-status">
+        当前模式：浅色模式
+    </div>
+    
+    <button onclick="toggleTheme()">🔄 切换主题</button>
+    <button onclick="forceDark()">🌙 强制深色</button>
+    <button onclick="forceLight()">☀️ 强制浅色</button>
+    <button onclick="checkStatus()">🔍 检查状态</button>
+    
+    <div id="debug" style="margin-top: 20px; padding: 10px; background-color: #f5f5f5; border-radius: 5px;">
+        <h3>调试信息：</h3>
+        <div id="debug-info"></div>
+    </div>
+    
+    <script>
+        function updateStatus() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const status = document.getElementById('status');
+            const debugInfo = document.getElementById('debug-info');
+            
+            if (isDark) {
+                status.textContent = '当前模式：深色模式';
+                status.className = 'status dark-status';
+            } else {
+                status.textContent = '当前模式：浅色模式';
+                status.className = 'status light-status';
+            }
+            
+            // 调试信息
+            const computedStyle = getComputedStyle(document.documentElement);
+            const bodyStyle = getComputedStyle(document.body);
+            
+            debugInfo.innerHTML = `
+                <p><strong>HTML类名：</strong> ${document.documentElement.className}</p>
+                <p><strong>CSS变量 --background：</strong> ${computedStyle.getPropertyValue('--background')}</p>
+                <p><strong>CSS变量 --foreground：</strong> ${computedStyle.getPropertyValue('--foreground')}</p>
+                <p><strong>Body背景色：</strong> ${bodyStyle.backgroundColor}</p>
+                <p><strong>Body文字色：</strong> ${bodyStyle.color}</p>
+            `;
+        }
+        
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+            } else {
+                html.classList.add('dark');
+            }
+            updateStatus();
+        }
+        
+        function forceDark() {
+            document.documentElement.classList.add('dark');
+            updateStatus();
+        }
+        
+        function forceLight() {
+            document.documentElement.classList.remove('dark');
+            updateStatus();
+        }
+        
+        function checkStatus() {
+            updateStatus();
+        }
+        
+        // 初始化
+        updateStatus();
+        
+        // 每秒更新一次状态
+        setInterval(updateStatus, 1000);
+    </script>
+</body>
+</html>
