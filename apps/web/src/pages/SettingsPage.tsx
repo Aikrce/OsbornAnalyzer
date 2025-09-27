@@ -137,11 +137,12 @@ const SettingsPage: React.FC = memo(() => {
       );
       setTheme(appPreferences.theme);
     }
-  }, [appPreferences.theme, theme, setTheme]);
+  }, [appPreferences.theme]); // 移除theme和setTheme依赖，避免循环
 
   // 初始化语言设置
   useEffect(() => {
     document.documentElement.lang = appPreferences.language;
+    console.log('Language set to:', appPreferences.language);
   }, [appPreferences.language]);
 
   // 保存AI配置
@@ -315,7 +316,7 @@ const SettingsPage: React.FC = memo(() => {
             <IconSettings size={28} className='text-white' />
           </div>
 
-          <h1 className='text-4xl font-bold text-gray-900 mb-4'>设置</h1>
+          <h1 className='text-4xl font-bold text-foreground mb-4'>设置</h1>
 
           <p className='text-xl text-gray-600 max-w-3xl mx-auto mb-8'>
             管理您的个人信息、AI配置、偏好设置、安全选项和数据
@@ -324,7 +325,7 @@ const SettingsPage: React.FC = memo(() => {
 
         {/* 标签页导航 */}
         <div className='flex justify-center mb-8'>
-          <div className='bg-white/80 backdrop-blur-sm rounded-2xl p-2 border border-gray-200/50 shadow-lg'>
+          <div className='bg-card/80 backdrop-blur-sm rounded-2xl p-2 border border-border/50 shadow-lg'>
             <div className='flex space-x-2'>
               {[
                 { key: 'ai', label: 'AI配置', icon: IconBrain },
@@ -340,7 +341,7 @@ const SettingsPage: React.FC = memo(() => {
                   className={`rounded-xl ${
                     activeTab === key
                       ? 'bg-gray-500 text-white'
-                      : 'text-gray-600 hover:text-gray-900'
+                      : 'text-gray-600 hover:text-foreground'
                   }`}
                 >
                   <Icon size={16} className='mr-2' />
@@ -355,9 +356,9 @@ const SettingsPage: React.FC = memo(() => {
         {activeTab === 'ai' && (
           <div className='max-w-4xl mx-auto'>
             {/* 多API配置管理 */}
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20 mb-6'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20 mb-6'>
               <CardHeader>
-                <CardTitle className='text-2xl font-bold text-gray-900 flex items-center justify-between'>
+                <CardTitle className='text-2xl font-bold text-foreground flex items-center justify-between'>
                   <div className='flex items-center'>
                     <IconBrain size={24} className='mr-3 text-purple-600' />
                     多API配置管理
@@ -378,7 +379,7 @@ const SettingsPage: React.FC = memo(() => {
                 {/* 已保存的API配置列表 */}
                 {apiConfigs.length > 0 ? (
                   <div className='space-y-4'>
-                    <h3 className='text-lg font-semibold text-gray-900'>
+                    <h3 className='text-lg font-semibold text-foreground'>
                       已保存的API配置
                     </h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -388,12 +389,12 @@ const SettingsPage: React.FC = memo(() => {
                           className={`p-4 rounded-lg border-2 transition-all duration-200 ${
                             apiConfig.isActive
                               ? 'border-green-500 bg-green-50'
-                              : 'border-gray-200 bg-white hover:border-gray-300'
+                              : 'border-gray-200 bg-card hover:border-gray-300'
                           }`}
                         >
                           <div className='flex items-start justify-between mb-3'>
                             <div>
-                              <h4 className='font-semibold text-gray-900'>
+                              <h4 className='font-semibold text-foreground'>
                                 {apiConfig.name}
                               </h4>
                               <p className='text-sm text-gray-600 capitalize'>
@@ -474,7 +475,7 @@ const SettingsPage: React.FC = memo(() => {
                 {/* 添加新API配置表单 */}
                 {showAddApiForm && (
                   <div className='mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50'>
-                    <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                    <h3 className='text-lg font-semibold text-foreground mb-4'>
                       添加新的API配置
                     </h3>
                     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
@@ -573,9 +574,9 @@ const SettingsPage: React.FC = memo(() => {
             </Card>
 
             {/* 传统AI配置（保持向后兼容） */}
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-2xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-2xl font-bold text-foreground flex items-center'>
                   <IconBrain size={24} className='mr-3 text-purple-600' />
                   默认AI配置
                 </CardTitle>
@@ -688,9 +689,9 @@ const SettingsPage: React.FC = memo(() => {
         {activeTab === 'preferences' && (
           <div className='max-w-2xl mx-auto space-y-6'>
             {/* 主题设置 */}
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconPalette size={20} className='mr-3 text-purple-600' />
                   主题设置
                 </CardTitle>
@@ -745,9 +746,9 @@ const SettingsPage: React.FC = memo(() => {
             </Card>
 
             {/* 通知设置 */}
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconBell size={20} className='mr-3 text-blue-600' />
                   通知设置
                 </CardTitle>
@@ -756,7 +757,7 @@ const SettingsPage: React.FC = memo(() => {
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>邮件通知</p>
+                      <p className='font-medium text-foreground'>邮件通知</p>
                       <p className='text-sm text-gray-600'>接收邮件通知</p>
                     </div>
                     <Switch
@@ -768,7 +769,7 @@ const SettingsPage: React.FC = memo(() => {
                   </div>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>推送通知</p>
+                      <p className='font-medium text-foreground'>推送通知</p>
                       <p className='text-sm text-gray-600'>
                         接收浏览器推送通知
                       </p>
@@ -782,7 +783,7 @@ const SettingsPage: React.FC = memo(() => {
                   </div>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>短信通知</p>
+                      <p className='font-medium text-foreground'>短信通知</p>
                       <p className='text-sm text-gray-600'>接收短信通知</p>
                     </div>
                     <Switch
@@ -801,9 +802,9 @@ const SettingsPage: React.FC = memo(() => {
         {/* 通知设置页面 */}
         {activeTab === 'notifications' && (
           <div className='max-w-2xl mx-auto space-y-6'>
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconBell size={20} className='mr-3 text-blue-600' />
                   通知设置
                 </CardTitle>
@@ -812,13 +813,15 @@ const SettingsPage: React.FC = memo(() => {
               <CardContent>
                 <div className='space-y-6'>
                   <div className='space-y-4'>
-                    <h3 className='text-lg font-semibold text-gray-900'>
+                    <h3 className='text-lg font-semibold text-foreground'>
                       通知类型
                     </h3>
                     <div className='space-y-4'>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>邮件通知</p>
+                          <p className='font-medium text-foreground'>
+                            邮件通知
+                          </p>
                           <p className='text-sm text-gray-600'>接收邮件通知</p>
                         </div>
                         <Switch
@@ -830,7 +833,9 @@ const SettingsPage: React.FC = memo(() => {
                       </div>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>推送通知</p>
+                          <p className='font-medium text-foreground'>
+                            推送通知
+                          </p>
                           <p className='text-sm text-gray-600'>
                             接收浏览器推送通知
                           </p>
@@ -844,7 +849,9 @@ const SettingsPage: React.FC = memo(() => {
                       </div>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>短信通知</p>
+                          <p className='font-medium text-foreground'>
+                            短信通知
+                          </p>
                           <p className='text-sm text-gray-600'>接收短信通知</p>
                         </div>
                         <Switch
@@ -858,13 +865,13 @@ const SettingsPage: React.FC = memo(() => {
                   </div>
 
                   <div className='space-y-4'>
-                    <h3 className='text-lg font-semibold text-gray-900'>
+                    <h3 className='text-lg font-semibold text-foreground'>
                       通知频率
                     </h3>
                     <div className='space-y-4'>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>
+                          <p className='font-medium text-foreground'>
                             分析完成通知
                           </p>
                           <p className='text-sm text-gray-600'>
@@ -875,7 +882,7 @@ const SettingsPage: React.FC = memo(() => {
                       </div>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>
+                          <p className='font-medium text-foreground'>
                             协作邀请通知
                           </p>
                           <p className='text-sm text-gray-600'>
@@ -886,7 +893,7 @@ const SettingsPage: React.FC = memo(() => {
                       </div>
                       <div className='flex items-center justify-between'>
                         <div>
-                          <p className='font-medium text-gray-900'>
+                          <p className='font-medium text-foreground'>
                             系统更新通知
                           </p>
                           <p className='text-sm text-gray-600'>
@@ -906,9 +913,9 @@ const SettingsPage: React.FC = memo(() => {
         {/* 安全隐私页面 */}
         {activeTab === 'security' && (
           <div className='max-w-2xl mx-auto space-y-6'>
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconShield size={20} className='mr-3 text-green-600' />
                   隐私设置
                 </CardTitle>
@@ -917,7 +924,9 @@ const SettingsPage: React.FC = memo(() => {
                 <div className='space-y-4'>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>公开个人资料</p>
+                      <p className='font-medium text-foreground'>
+                        公开个人资料
+                      </p>
                       <p className='text-sm text-gray-600'>
                         允许其他用户查看您的个人资料
                       </p>
@@ -931,7 +940,9 @@ const SettingsPage: React.FC = memo(() => {
                   </div>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>公开分析结果</p>
+                      <p className='font-medium text-foreground'>
+                        公开分析结果
+                      </p>
                       <p className='text-sm text-gray-600'>
                         允许其他用户查看您的分析结果
                       </p>
@@ -945,7 +956,7 @@ const SettingsPage: React.FC = memo(() => {
                   </div>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <p className='font-medium text-gray-900'>数据共享</p>
+                      <p className='font-medium text-foreground'>数据共享</p>
                       <p className='text-sm text-gray-600'>
                         允许匿名数据用于产品改进
                       </p>
@@ -961,9 +972,9 @@ const SettingsPage: React.FC = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconKey size={20} className='mr-3 text-red-600' />
                   安全设置
                 </CardTitle>
@@ -1024,9 +1035,9 @@ const SettingsPage: React.FC = memo(() => {
         {/* 数据管理页面 */}
         {activeTab === 'data' && (
           <div className='max-w-2xl mx-auto space-y-6'>
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900 flex items-center'>
+                <CardTitle className='text-xl font-bold text-foreground flex items-center'>
                   <IconDatabase size={20} className='mr-3 text-blue-600' />
                   数据管理
                 </CardTitle>
@@ -1127,9 +1138,9 @@ const SettingsPage: React.FC = memo(() => {
               </CardContent>
             </Card>
 
-            <Card className='bg-white/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
+            <Card className='bg-card/80 backdrop-blur-sm border-0 shadow-xl shadow-gray-200/20'>
               <CardHeader>
-                <CardTitle className='text-xl font-bold text-gray-900'>
+                <CardTitle className='text-xl font-bold text-foreground'>
                   存储使用情况
                 </CardTitle>
               </CardHeader>
