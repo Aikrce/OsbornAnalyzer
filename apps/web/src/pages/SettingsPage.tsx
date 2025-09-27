@@ -35,10 +35,11 @@ import {
 } from '@tabler/icons-react';
 import { useAIConfig } from '../hooks/useAIConfig';
 import { useNotification } from '../providers/notification-provider';
+import { useTheme } from '../providers/theme-provider';
 
 // 应用偏好设置接口
 interface AppPreferences {
-  theme: 'light' | 'dark' | 'auto';
+  theme: 'light' | 'dark' | 'system'; // 修复：与ThemeProvider类型一致
   language: 'zh' | 'en';
   notifications: {
     email: boolean;
@@ -108,7 +109,7 @@ const SettingsPage: React.FC = memo(() => {
     }
     // 默认设置
     return {
-      theme: 'light',
+      theme: 'system', // 修复：使用system作为默认值
       language: 'zh',
       notifications: {
         email: true,
@@ -123,12 +124,13 @@ const SettingsPage: React.FC = memo(() => {
     };
   });
 
-  // 同步主题设置
+  // 同步主题设置 - 修复无限循环问题
   useEffect(() => {
+    // 只在初始化时同步，避免循环更新
     if (appPreferences.theme !== theme) {
       setTheme(appPreferences.theme);
     }
-  }, [appPreferences.theme, theme, setTheme]);
+  }, [appPreferences.theme]); // 移除theme和setTheme依赖
 
   // 初始化语言设置
   useEffect(() => {
@@ -199,6 +201,8 @@ const SettingsPage: React.FC = memo(() => {
       // 如果是主题设置，同时更新ThemeProvider
       if (key === 'theme') {
         setTheme(value);
+        // 同时更新ThemeProvider的localStorage
+        localStorage.setItem('vite-ui-theme', value);
       }
 
       // 如果是语言设置，应用语言切换
@@ -272,10 +276,26 @@ const SettingsPage: React.FC = memo(() => {
   // 清除数据
   const handleClearData = useCallback(() => {
     if (window.confirm('确定要清除所有本地数据吗？此操作不可恢复。')) {
-      localStorage.clear();
-      window.location.reload();
+      // 只清除应用相关的数据，保留其他重要数据
+      const keysToRemove = [
+        'appPreferences',
+        'unifiedCasesData',
+        'huitu-ai-config',
+        'huitu-multi-api-configs',
+        'vite-ui-theme',
+      ];
+
+      keysToRemove.forEach(key => {
+        localStorage.removeItem(key);
+      });
+
+      showNotification('数据已清除', 'success');
+      // 延迟刷新，让用户看到通知
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
-  }, []);
+  }, [showNotification]);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-blue-50/20'>
@@ -690,7 +710,7 @@ const SettingsPage: React.FC = memo(() => {
                             深色模式
                           </div>
                         </SelectItem>
-                        <SelectItem value='auto'>跟随系统</SelectItem>
+                        <SelectItem value='system'>跟随系统</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1047,6 +1067,19 @@ const SettingsPage: React.FC = memo(() => {
                                     'appPreferences',
                                     JSON.stringify(data.preferences)
                                   );
+                                  // 同步主题设置到ThemeProvider
+                                  if (data.preferences.theme) {
+                                    setTheme(data.preferences.theme);
+                                    localStorage.setItem(
+                                      'vite-ui-theme',
+                                      data.preferences.theme
+                                    );
+                                  }
+                                  // 同步语言设置
+                                  if (data.preferences.language) {
+                                    document.documentElement.lang =
+                                      data.preferences.language;
+                                  }
                                 }
                                 if (data.aiConfig) {
                                   updateConfig(data.aiConfig);
