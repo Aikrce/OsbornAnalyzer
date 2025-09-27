@@ -60,29 +60,28 @@ export function ThemeProvider({
       root.className
     );
 
-    // 直接设置CSS变量到根元素 - 这是关键修复
-    if (appliedTheme === 'dark') {
-      root.style.setProperty('--background', '222.2 84% 4.9%');
-      root.style.setProperty('--foreground', '210 40% 98%');
-      root.style.setProperty('--card', '222.2 84% 4.9%');
-      root.style.setProperty('--card-foreground', '210 40% 98%');
-      console.log('Applied dark theme variables directly');
-    } else {
-      root.style.setProperty('--background', '0 0% 100%');
-      root.style.setProperty('--foreground', '222.2 84% 4.9%');
-      root.style.setProperty('--card', '0 0% 100%');
-      root.style.setProperty('--card-foreground', '222.2 84% 4.9%');
-      console.log('Applied light theme variables directly');
-    }
+    // 移除内联样式，让CSS类生效
+    root.style.removeProperty('--background');
+    root.style.removeProperty('--foreground');
+    root.style.removeProperty('--card');
+    root.style.removeProperty('--card-foreground');
+    console.log('Removed inline CSS variables to let CSS classes work');
 
-    // 强制应用样式到body
+    // 强制应用样式到body - 使用计算后的样式
     const body = document.body;
     if (body) {
-      const bgColor = root.style.getPropertyValue('--background');
-      const fgColor = root.style.getPropertyValue('--foreground');
-      body.style.backgroundColor = `hsl(${bgColor})`;
-      body.style.color = `hsl(${fgColor})`;
-      console.log('Force applied styles to body:', { bgColor, fgColor });
+      // 等待CSS类应用后再获取计算后的样式
+      setTimeout(() => {
+        const computedStyle = getComputedStyle(root);
+        const bgColor = computedStyle.getPropertyValue('--background');
+        const fgColor = computedStyle.getPropertyValue('--foreground');
+
+        if (bgColor && fgColor) {
+          body.style.backgroundColor = `hsl(${bgColor})`;
+          body.style.color = `hsl(${fgColor})`;
+          console.log('Force applied styles to body:', { bgColor, fgColor });
+        }
+      }, 10);
     }
 
     // 延迟验证
