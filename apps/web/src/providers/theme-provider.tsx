@@ -42,10 +42,12 @@ export function ThemeProvider({
         : 'light';
 
       root.classList.add(systemTheme);
+      console.log('Theme applied (system):', systemTheme);
       return;
     }
 
     root.classList.add(theme);
+    console.log('Theme applied:', theme);
   }, [theme]);
 
   const value = {
