@@ -61,9 +61,26 @@ export function ThemeProvider({
     root.classList.add(theme);
     console.log('Theme applied:', theme, 'HTML classes:', root.className);
 
+    // 测试CSS变量是否生效
+    const computedStyle = getComputedStyle(root);
+    const bgColor = computedStyle.getPropertyValue('--background');
+    console.log('CSS --background variable:', bgColor);
+
+    // 强制应用样式到body
+    const body = document.body;
+    if (body) {
+      body.style.backgroundColor = `hsl(${bgColor})`;
+      body.style.color = `hsl(${computedStyle.getPropertyValue('--foreground')})`;
+      console.log('Force applied styles to body');
+    }
+
     // 强制触发重新渲染
     setTimeout(() => {
       console.log('Final HTML classes after timeout:', root.className);
+      console.log(
+        'Final CSS --background:',
+        getComputedStyle(root).getPropertyValue('--background')
+      );
     }, 100);
   }, [theme]);
 
