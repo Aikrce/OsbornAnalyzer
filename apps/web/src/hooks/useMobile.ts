@@ -1,5 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { isMobile, isIOS, isAndroid, getScreenSize, getNetworkInfo, getPerformanceConfig } from '../utils/mobileOptimization';
+import {
+  isMobile,
+  isIOS,
+  isAndroid,
+  getScreenSize,
+  getNetworkInfo,
+  getPerformanceConfig,
+} from '../utils/mobileOptimization';
 
 /**
  * 移动端Hook
@@ -8,7 +15,9 @@ import { isMobile, isIOS, isAndroid, getScreenSize, getNetworkInfo, getPerforman
 export const useMobile = () => {
   const [screenSize, setScreenSize] = useState(getScreenSize());
   const [networkInfo, setNetworkInfo] = useState(getNetworkInfo());
-  const [performanceConfig, setPerformanceConfig] = useState(getPerformanceConfig());
+  const [performanceConfig, setPerformanceConfig] = useState(
+    getPerformanceConfig()
+  );
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
     window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
@@ -18,7 +27,9 @@ export const useMobile = () => {
   useEffect(() => {
     const handleResize = () => {
       setScreenSize(getScreenSize());
-      setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+      setOrientation(
+        window.innerHeight > window.innerWidth ? 'portrait' : 'landscape'
+      );
     };
 
     window.addEventListener('resize', handleResize);
@@ -35,8 +46,10 @@ export const useMobile = () => {
       };
 
       connection.addEventListener('change', handleConnectionChange);
-      return () => connection.removeEventListener('change', handleConnectionChange);
+      return () =>
+        connection.removeEventListener('change', handleConnectionChange);
     }
+    return undefined;
   }, []);
 
   // 监听键盘状态
@@ -66,42 +79,48 @@ export const useMobile = () => {
   }, []);
 
   // 复制到剪贴板
-  const copyToClipboard = useCallback(async (text: string) => {
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(text);
-        vibrate(25);
-        return true;
-      } else {
-        // 降级方案
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        vibrate(25);
-        return true;
-      }
-    } catch (error) {
-      console.error('复制失败:', error);
-      return false;
-    }
-  }, [vibrate]);
-
-  // 分享功能
-  const share = useCallback(async (data: { title?: string; text?: string; url?: string }) => {
-    if (navigator.share) {
+  const copyToClipboard = useCallback(
+    async (text: string) => {
       try {
-        await navigator.share(data);
-        return true;
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+          vibrate(25);
+          return true;
+        } else {
+          // 降级方案
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          vibrate(25);
+          return true;
+        }
       } catch (error) {
-        console.error('分享失败:', error);
+        console.error('复制失败:', error);
         return false;
       }
-    }
-    return false;
-  }, []);
+    },
+    [vibrate]
+  );
+
+  // 分享功能
+  const share = useCallback(
+    async (data: { title?: string; text?: string; url?: string }) => {
+      if (navigator.share) {
+        try {
+          await navigator.share(data);
+          return true;
+        } catch (error) {
+          console.error('分享失败:', error);
+          return false;
+        }
+      }
+      return false;
+    },
+    []
+  );
 
   return {
     // 设备信息
@@ -110,22 +129,24 @@ export const useMobile = () => {
     isAndroid: isAndroid(),
     screenSize,
     orientation,
-    
+
     // 网络信息
     networkInfo,
-    isSlowNetwork: networkInfo.effectiveType === 'slow-2g' || networkInfo.effectiveType === '2g',
+    isSlowNetwork:
+      networkInfo.effectiveType === 'slow-2g' ||
+      networkInfo.effectiveType === '2g',
     isFastNetwork: networkInfo.effectiveType === '4g',
-    
+
     // 性能配置
     performanceConfig,
-    
+
     // 状态
     isKeyboardOpen,
-    
+
     // 功能
     vibrate,
     copyToClipboard,
-    share
+    share,
   };
 };
 
@@ -163,7 +184,7 @@ export const useResponsive = () => {
     isSmall: breakpoint === 'sm',
     isMedium: breakpoint === 'md',
     isLarge: breakpoint === 'lg',
-    isXLarge: breakpoint === 'xl'
+    isXLarge: breakpoint === 'xl',
   };
 };
 
@@ -172,29 +193,37 @@ export const useResponsive = () => {
  * 提供触摸手势检测
  */
 export const useTouch = () => {
-  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
-  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
+    if (e.targetTouches[0]) {
+      setTouchStart({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY,
+      });
+    }
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
+    if (e.targetTouches[0]) {
+      setTouchEnd({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY,
+      });
+    }
   };
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distanceX = touchStart.x - touchEnd.x;
     const distanceY = touchStart.y - touchEnd.y;
     const isLeftSwipe = distanceX > minSwipeDistance;
@@ -208,14 +237,14 @@ export const useTouch = () => {
       isUpSwipe,
       isDownSwipe,
       distanceX,
-      distanceY
+      distanceY,
     };
   };
 
   return {
     onTouchStart,
     onTouchMove,
-    onTouchEnd
+    onTouchEnd,
   };
 };
 
