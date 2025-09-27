@@ -143,6 +143,13 @@ const SettingsPage: React.FC = memo(() => {
   useEffect(() => {
     document.documentElement.lang = appPreferences.language;
     console.log('Language set to:', appPreferences.language);
+
+    // 强制应用语言变化到页面标题等
+    if (appPreferences.language === 'en') {
+      document.title = 'Osborn Analyzer - Innovation Analysis Tool';
+    } else {
+      document.title = '奥斯本分析器 - 创新分析工具';
+    }
   }, [appPreferences.language]);
 
   // 保存AI配置
@@ -219,8 +226,12 @@ const SettingsPage: React.FC = memo(() => {
       if (key === 'language') {
         // 设置HTML lang属性
         document.documentElement.lang = value;
-        // 可以在这里添加更多语言切换逻辑
+        // 强制刷新页面以应用语言变化
         console.log('Language changed to:', value);
+        // 延迟刷新，让用户看到保存提示
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
 
       showNotification('偏好设置已保存', 'success');
