@@ -60,11 +60,17 @@ export function ThemeProvider({
 
     root.classList.add(theme);
     console.log('Theme applied:', theme, 'HTML classes:', root.className);
+
+    // 强制触发重新渲染
+    setTimeout(() => {
+      console.log('Final HTML classes after timeout:', root.className);
+    }, 100);
   }, [theme]);
 
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
+      console.log('ThemeProvider setTheme called with:', newTheme);
       localStorage.setItem(storageKey, newTheme);
       setTheme(newTheme);
     },
