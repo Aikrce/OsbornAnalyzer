@@ -50,15 +50,15 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      localStorage.setItem(storageKey, newTheme);
+      setTheme(newTheme);
     },
   };
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className='min-h-screen bg-background text-foreground'>
         {children}
       </div>
     </ThemeProviderContext.Provider>

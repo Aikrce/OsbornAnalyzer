@@ -130,7 +130,7 @@ const SettingsPage: React.FC = memo(() => {
     if (appPreferences.theme !== theme) {
       setTheme(appPreferences.theme);
     }
-  }, [appPreferences.theme]); // 移除theme和setTheme依赖
+  }, [appPreferences.theme, theme, setTheme]);
 
   // 初始化语言设置
   useEffect(() => {
