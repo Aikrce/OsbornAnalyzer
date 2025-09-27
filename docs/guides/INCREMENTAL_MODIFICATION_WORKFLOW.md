@@ -60,6 +60,23 @@ git rebase main
 - [ ] 运行Prettier代码格式化
 - [ ] 确保代码通过所有检查
 
+#### 2.4 错误处理策略
+- [ ] **Git操作错误处理**
+  - [ ] 检查Git配置和权限
+  - [ ] 处理分支冲突和合并错误
+  - [ ] 验证远程仓库连接
+  - [ ] 处理GitHub Actions中的Git错误
+- [ ] **构建错误处理**
+  - [ ] 检查依赖版本兼容性
+  - [ ] 处理TypeScript编译错误
+  - [ ] 解决ESLint规则冲突
+  - [ ] 修复构建配置问题
+- [ ] **部署错误处理**
+  - [ ] 验证GitHub Pages配置
+  - [ ] 检查构建产物完整性
+  - [ ] 处理环境变量和密钥问题
+  - [ ] 监控部署状态和日志
+
 ### 阶段3: 测试验证 (Testing)
 
 #### 3.1 单元测试
@@ -142,6 +159,23 @@ git branch -d feature/detail-adjustment-[功能名]
 - [ ] 验证用户反馈
 - [ ] 确保系统稳定
 
+#### 6.4 错误监控和诊断
+- [ ] **GitHub Actions错误处理**
+  - [ ] 监控工作流执行状态
+  - [ ] 分析构建和部署日志
+  - [ ] 处理Git操作错误 (exit code 128)
+  - [ ] 验证环境变量和权限配置
+- [ ] **部署错误诊断**
+  - [ ] 检查GitHub Pages设置
+  - [ ] 验证构建产物路径
+  - [ ] 测试网站可访问性
+  - [ ] 处理缓存和CDN问题
+- [ ] **运行时错误处理**
+  - [ ] 监控JavaScript控制台错误
+  - [ ] 检查网络请求失败
+  - [ ] 处理用户界面异常
+  - [ ] 验证功能完整性
+
 ## 🚨 回滚策略
 
 ### 快速回滚
@@ -160,6 +194,23 @@ git checkout v2.0.0-stable
 - [ ] 验证回滚后的功能
 - [ ] 更新相关文档
 - [ ] 通知相关人员
+
+### 错误回滚策略
+- [ ] **Git错误回滚**
+  - [ ] 处理合并冲突回滚
+  - [ ] 恢复被意外删除的文件
+  - [ ] 修复分支状态问题
+  - [ ] 清理无效的提交记录
+- [ ] **构建错误回滚**
+  - [ ] 回滚依赖版本变更
+  - [ ] 恢复构建配置
+  - [ ] 修复环境配置问题
+  - [ ] 清理构建缓存
+- [ ] **部署错误回滚**
+  - [ ] 回滚到上一个稳定版本
+  - [ ] 修复GitHub Pages配置
+  - [ ] 恢复正确的构建产物
+  - [ ] 清理部署缓存
 
 ## 📊 质量保证检查清单
 
@@ -313,6 +364,171 @@ iOS平台 (apps/ios):
 2. **代码审查**: 所有修改都要经过代码审查
 3. **知识分享**: 及时分享修改经验和最佳实践
 4. **持续学习**: 从每次修改中学习和改进
+
+## 🚨 常见错误处理指南
+
+### GitHub Actions错误处理
+
+#### Git操作错误 (Exit Code 128)
+**症状**: `The process '/usr/bin/git' failed with exit code 128`
+**原因分析**:
+- Git配置不完整或权限不足
+- 远程仓库连接问题
+- 分支操作冲突
+- 环境变量缺失
+
+**解决方案**:
+```bash
+# 1. 检查Git配置
+git config --list
+git config user.name
+git config user.email
+
+# 2. 验证远程仓库连接
+git remote -v
+git fetch origin
+
+# 3. 检查分支状态
+git branch -a
+git status
+
+# 4. 修复权限问题
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+#### 构建错误处理
+**症状**: 构建失败，依赖冲突
+**解决方案**:
+```bash
+# 1. 清理依赖缓存
+rm -rf node_modules
+rm -rf pnpm-lock.yaml
+pnpm install
+
+# 2. 检查依赖版本
+pnpm list
+pnpm outdated
+
+# 3. 修复版本冲突
+pnpm update
+```
+
+#### 部署错误处理
+**症状**: GitHub Pages部署失败
+**解决方案**:
+1. **检查GitHub Pages设置**
+   - 确认Source设置为"GitHub Actions"
+   - 验证仓库权限设置
+   - 检查Pages设置中的分支选择
+
+2. **验证构建产物**
+   ```bash
+   # 检查构建输出
+   ls -la apps/web/dist/
+   
+   # 验证文件完整性
+   find apps/web/dist -name "*.html" -o -name "*.js" -o -name "*.css"
+   ```
+
+3. **修复路径配置**
+   ```typescript
+   // vite.config.ts
+   export default defineConfig({
+     base: '/OsbornAnalyzer/', // 确保路径正确
+     // ...其他配置
+   })
+   ```
+
+### 运行时错误处理
+
+#### JavaScript控制台错误
+**监控方法**:
+```javascript
+// 添加全局错误处理
+window.addEventListener('error', (event) => {
+  console.error('Global error:', event.error);
+  // 发送错误报告到监控服务
+});
+
+// 添加未处理的Promise拒绝处理
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  // 发送错误报告
+});
+```
+
+#### 网络请求错误
+**处理策略**:
+```typescript
+// API请求错误处理
+const handleApiError = (error: any) => {
+  if (error.response) {
+    // 服务器响应错误
+    console.error('API Error:', error.response.status, error.response.data);
+  } else if (error.request) {
+    // 网络错误
+    console.error('Network Error:', error.message);
+  } else {
+    // 其他错误
+    console.error('Error:', error.message);
+  }
+};
+```
+
+### 错误预防策略
+
+#### 1. 预防性检查
+- [ ] 每次提交前运行完整测试套件
+- [ ] 使用pre-commit hooks进行代码检查
+- [ ] 定期更新依赖版本
+- [ ] 监控构建和部署状态
+
+#### 2. 监控和告警
+- [ ] 设置GitHub Actions失败通知
+- [ ] 监控网站可用性
+- [ ] 跟踪用户反馈和错误报告
+- [ ] 定期检查日志文件
+
+#### 3. 快速响应机制
+- [ ] 建立错误响应流程
+- [ ] 准备回滚方案
+- [ ] 维护紧急联系方式
+- [ ] 制定错误修复优先级
+
+### 错误记录模板
+
+```markdown
+## 错误记录 - [日期]
+
+### 错误信息
+- **错误类型**: [Git/构建/部署/运行时]
+- **错误级别**: [低/中/高/紧急]
+- **影响范围**: [具体描述]
+- **发现时间**: [时间戳]
+
+### 错误详情
+- **错误消息**: [具体错误信息]
+- **重现步骤**: [如何重现错误]
+- **环境信息**: [操作系统、浏览器、版本等]
+
+### 解决方案
+- [ ] 立即修复措施
+- [ ] 长期解决方案
+- [ ] 预防措施
+- [ ] 相关文档更新
+
+### 影响评估
+- **用户影响**: [影响程度和范围]
+- **业务影响**: [对业务的影响]
+- **技术债务**: [产生的技术债务]
+
+### 后续行动
+- [ ] 监控修复效果
+- [ ] 更新错误处理流程
+- [ ] 团队知识分享
+- [ ] 流程改进建议
+```
 
 ---
 
