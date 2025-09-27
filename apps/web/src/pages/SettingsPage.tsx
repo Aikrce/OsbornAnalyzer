@@ -127,12 +127,14 @@ const SettingsPage: React.FC = memo(() => {
   // 同步主题设置 - 修复无限循环问题
   useEffect(() => {
     // 只在初始化时同步，避免循环更新
-    console.log('Theme sync check:', {
+    console.log('SettingsPage theme sync check:', {
       appTheme: appPreferences.theme,
       currentTheme: theme,
     });
     if (appPreferences.theme !== theme) {
-      console.log('Syncing theme from appPreferences to ThemeProvider');
+      console.log(
+        'SettingsPage: Syncing theme from appPreferences to ThemeProvider'
+      );
       setTheme(appPreferences.theme);
     }
   }, [appPreferences.theme, theme, setTheme]);
