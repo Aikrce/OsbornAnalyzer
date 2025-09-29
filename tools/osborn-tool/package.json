@@ -60,7 +60,7 @@
     "vaul": "^0.9.6"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^24.5.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
